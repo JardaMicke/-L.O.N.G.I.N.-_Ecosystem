@@ -1,0 +1,27 @@
+{
+  "name": "Patched Map",
+  "tileSize": 32,
+  "width": 2,
+  "version": 1,
+  "author": "Tester",
+  "height": 2,
+  "layers": [
+    {
+      "visible": true,
+      "name": "default",
+      "data": [
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    }
+  ],
+  "id": "67703d65-6037-4a6a-9569-0d85b4eafb5e",
+  "updated_at": "2025-12-26T05:32:14.837Z",
+  "created_at": "2025-12-26T05:30:43.982Z"
+}

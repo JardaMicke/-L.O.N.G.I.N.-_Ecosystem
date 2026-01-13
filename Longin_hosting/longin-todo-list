@@ -1,0 +1,1176 @@
+# ✅ LONGIN HOSTING - STRUCTURED TODO LIST FOR AI AGENT
+
+**Verze:** 1.0  
+**Datum:** Březen 2025  
+**Status:** READY FOR IMPLEMENTATION  
+**Target:** AI Agent (Claude/Cursor) - Vibe Coding  
+**Chunk Strategy:** Optimized for 512+ token context (segmented tasks)  
+
+---
+
+## 📋 OBSAH
+
+1. [Úvod & Jak Číst Tento Dokument](#úvod--jak-číst-tento-dokument)
+2. [Phase 1: Foundation (2-3 týdny)](#phase-1-foundation)
+3. [Phase 2: Authentication & Core API (2-3 týdny)](#phase-2-authentication--core-api)
+4. [Phase 3: Docker Integration (2 týdny)](#phase-3-docker-integration)
+5. [Phase 4: Real-time & WebSocket (2 týdny)](#phase-4-real-time--websocket)
+6. [Phase 5: Frontend (3-4 týdny)](#phase-5-frontend)
+7. [Phase 6: Monitoring & Deployment (3 týdny)](#phase-6-monitoring--deployment)
+8. [Configuration & Testing](#configuration--testing)
+
+---
+
+## 🎯 ÚVOD & JAK ČÍST TENTO DOKUMENT
+
+### STRUKTURA KAŽDÉ ÚLOHY
+
+```
+## ✅ TASK ID: [PHASE]-[NUMBER]
+
+**Nástroje:** Tool 1, Tool 2, Tool 3
+**Vstup:** Co musí existovat před touto úlohou
+**Výstup:** Co bude vytvořeno
+**Doba:** Odhadovaný čas (hod/dny)
+**Priorita:** Critical | High | Medium
+**Závislosti:** Který task musí být hotov nejdříve
+**Chunk Size:** Velikost pro zpracování AI (malá = lépe)
+
+### 📝 DETAILNÍ INSTRUKCE
+
+[Přesný popis co dělat, včetně:
+- Soubory k vytvoření
+- Technologie
+- Konkrétní funkcionalita
+- Příklady kódu
+- Testing přístup]
+
+### ✨ TIPS & BEST PRACTICES
+
+- Tip 1
+- Tip 2
+```
+
+### ČTENÍ TOHOTO DOKUMENTU
+
+**Pokud jsi AI agent (Claude/Cursor):**
+1. Přečti si úvod phase
+2. Vezmi si ONE task (ne více!)
+3. Přečti si detailní instrukce
+4. Implementuj dle specifikace
+5. Testuj dle "Testing přístupu"
+6. Vrátit se k dokumentu, ber si DALŠÍ task
+7. Pokud task závisí na jiném → Dělej nejdříve ten
+
+**Pokud jsi developer:**
+1. Přečti si Phase Overview
+2. Děl tasks sekvenčně (1, 2, 3...)
+3. Nebo paralelně (ale dodržuj Dependencies!)
+4. Markuj tasks jako Done ✅
+5. Reportuj bugs & blockers
+
+### COLOR CODING
+
+- 🔴 **Red** = Musí být hotov nejdříve (Tier 0)
+- 🟠 **Orange** = Vysoká priorita (Tier 1)
+- 🟡 **Yellow** = Střední (Tier 2)
+- 🟢 **Green** = Low priority (Tier 3)
+
+---
+
+## 🏗️ PHASE 1: FOUNDATION (2-3 týdny)
+
+### PHASE OVERVIEW
+
+Vytvoření kompletní project struktury, konfigurace a setup toolů. Po skončení této fáze:
+- ✅ Project je na GitHub
+- ✅ Všechny tools (pnpm, TypeScript, ESLint) nakonfigurovaný
+- ✅ Dev prostředí funguje
+- ✅ CI/CD pipeline je nastavený
+- ✅ Docker & Docker Compose běží
+
+---
+
+## 🔴 TASK 1.1: Project Initialization & Monorepo Setup
+
+**Nástroje:** pnpm, TypeScript, Node.js 20  
+**Vstup:** Existuje GitHub repo (empty)  
+**Výstup:** Complete project structure s workspace konfigurací  
+**Doba:** 4-6 hodin  
+**Priorita:** 🔴 CRITICAL  
+**Závislosti:** None (starting task)  
+**Chunk Size:** LARGE (single comprehensive task)  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+**Co dělat:**
+
+1. **Vytvoř root package.json**
+   - Nastavit pnpm workspaces
+   - Add scripts: `"dev"`, `"build"`, `"test"`, `"lint"`, `"format"`
+   - Add devDependencies: TypeScript, ESLint, Prettier, tsconfig-paths
+   - Reference: longin-config-files.md (pnpm-workspace.yaml)
+
+2. **Vytvoř root tsconfig.json**
+   - Strict mode: true
+   - Path aliases: @core/*, @ui/*, @shared/*
+   - Reference: longin-config-files.md (tsconfig.json root)
+
+3. **Vytvoř ESLint & Prettier config**
+   - .eslintrc.json
+   - .prettierrc.json
+   - Reference: longin-config-files.md
+
+4. **Vytvoř directory struktura**
+   ```
+   longin-hosting-server/
+   ├── services/longin-core/
+   ├── services/longin-ui/
+   ├── services/database/
+   ├── config/
+   ├── scripts/
+   ├── docs/
+   └── tests/
+   ```
+
+5. **Setup .env.example**
+   - Copy z longin-config-files.md
+   - Vytvořit VŠECHNY environment variables
+   - Přidat detailní comments
+
+6. **Setup docker-compose.yml (basic)**
+   - Placeholder services (bez contentů)
+   - Will be expanded in later tasks
+
+7. **Setup GitHub Actions workflows**
+   - .github/workflows/build.yml
+   - .github/workflows/test.yml
+   - .github/workflows/lint.yml
+
+8. **Vytvoř README.md (root)**
+   - Project description
+   - Quick start guide
+   - System requirements
+   - Workspace structure explanation
+
+### ✨ TIPS & BEST PRACTICES
+
+- Použij `pnpm` (ne npm/yarn) - lepší monorepo support
+- TypeScript strict mode = lépe později
+- ESLint configuration = prevent bugs before code review
+- GitHub Actions = automation = time savings
+
+### 📋 TESTING PŘÍSTUP
+
+```bash
+# Verify structure
+ls -la services/
+ls -la config/
+
+# Verify config files
+cat .eslintrc.json  # Should parse as JSON
+cat .prettierrc.json  # Should parse as JSON
+
+# Verify package.json
+cat package.json  # Should have workspaces array
+
+# Verify tsconfig paths
+grep -A5 "paths" tsconfig.json  # Should show @core/*, @ui/*, @shared/*
+```
+
+### ✅ CHECKLIST
+
+- [ ] Root package.json created with workspaces
+- [ ] pnpm-workspace.yaml created
+- [ ] Root tsconfig.json with path aliases
+- [ ] .eslintrc.json created
+- [ ] .prettierrc.json created
+- [ ] .env.example created with ALL variables
+- [ ] docker-compose.yml skeleton created
+- [ ] GitHub Actions workflows created
+- [ ] .gitignore & .dockerignore created
+- [ ] README.md created
+- [ ] All config files validate (no syntax errors)
+
+---
+
+## 🟠 TASK 1.2: Backend Service Setup (longin-core)
+
+**Nástroje:** Express, TypeScript, TypeORM  
+**Vstup:** Project structure z Task 1.1  
+**Výstup:** Ready-to-code backend service folder  
+**Doba:** 3-4 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 1.1  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Vytvoř services/longin-core/package.json**
+   ```json
+   {
+     "name": "longin-core",
+     "version": "1.0.0",
+     "type": "module",
+     "scripts": {
+       "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+       "build": "tsc",
+       "start": "node dist/app.js",
+       "test": "jest",
+       "lint": "eslint src tests",
+       "format": "prettier --write \"src/**/*.ts\""
+     },
+     "dependencies": {
+       "express": "^4.18.2",
+       "typeorm": "^0.3.17",
+       "pg": "^8.11.0",
+       "ioredis": "^5.3.2",
+       "socket.io": "^4.7.0",
+       "jwt-simple": "^0.5.6",
+       "bcryptjs": "^2.4.3",
+       "class-validator": "^0.14.0",
+       "class-transformer": "^0.5.1",
+       "winston": "^3.11.0",
+       "dotenv": "^16.3.1",
+       "helmet": "^7.1.0",
+       "cors": "^2.8.5",
+       "dockerode": "^4.0.0",
+       "axios": "^1.6.2"
+     },
+     "devDependencies": {
+       "typescript": "^5.3.0",
+       "@types/node": "^20.10.0",
+       "@types/express": "^4.17.21",
+       "@typescript-eslint/eslint-plugin": "^6.13.0",
+       "@typescript-eslint/parser": "^6.13.0",
+       "eslint": "^8.54.0",
+       "prettier": "^3.1.0",
+       "ts-node": "^10.9.0",
+       "ts-node-dev": "^2.0.0",
+       "jest": "^29.7.0",
+       "@types/jest": "^29.5.8",
+       "ts-jest": "^29.1.1",
+       "supertest": "^6.3.3",
+       "@types/supertest": "^6.0.2",
+       "nodemon": "^3.0.2"
+     }
+   }
+   ```
+
+2. **Vytvoř services/longin-core/tsconfig.json**
+   ```json
+   {
+     "extends": "../../tsconfig.json",
+     "compilerOptions": {
+       "outDir": "./dist",
+       "rootDir": "./src"
+     },
+     "include": ["src"],
+     "exclude": ["node_modules", "tests"]
+   }
+   ```
+
+3. **Vytvoř folder struktura**
+   ```
+   services/longin-core/
+   ├── src/
+   │   ├── config/
+   │   ├── middleware/
+   │   ├── routes/
+   │   ├── services/
+   │   ├── websocket/
+   │   ├── utils/
+   │   ├── entities/
+   │   ├── dtos/
+   │   └── app.ts
+   ├── tests/
+   ├── Dockerfile
+   ├── .dockerignore
+   ├── jest.config.js
+   └── README.md
+   ```
+
+4. **Vytvoř basic src/app.ts**
+   ```typescript
+   import express from 'express';
+   import helmet from 'helmet';
+   import cors from 'cors';
+   
+   const app = express();
+   const PORT = process.env.LONGIN_CORE_API_PORT || 3001;
+   
+   // Middleware
+   app.use(helmet());
+   app.use(cors());
+   app.use(express.json());
+   
+   // Health check
+   app.get('/health', (req, res) => {
+     res.json({ status: 'ok', timestamp: new Date() });
+   });
+   
+   // Error handler (placeholder)
+   app.use((err, req, res, next) => {
+     console.error(err);
+     res.status(500).json({ error: 'Internal server error' });
+   });
+   
+   app.listen(PORT, () => {
+     console.log(`✅ API Server running on port ${PORT}`);
+   });
+   ```
+
+5. **Vytvoř Dockerfile**
+   ```dockerfile
+   FROM node:20-alpine AS base
+   RUN npm install -g pnpm
+   WORKDIR /app
+   
+   FROM base AS dependencies
+   COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+   COPY services/longin-core/package.json services/longin-core/
+   RUN pnpm install --frozen-lockfile
+   
+   FROM base AS development
+   COPY --from=dependencies /app/node_modules ./node_modules
+   COPY . .
+   EXPOSE 3001 3002
+   CMD ["pnpm", "--filter", "longin-core", "dev"]
+   
+   FROM base AS production
+   COPY --from=dependencies /app/node_modules ./node_modules
+   COPY . .
+   RUN pnpm --filter longin-core build
+   EXPOSE 3001 3002
+   CMD ["node", "services/longin-core/dist/app.js"]
+   ```
+
+6. **Vytvoř jest.config.js**
+   ```javascript
+   module.exports = {
+     preset: 'ts-jest',
+     testEnvironment: 'node',
+     roots: ['<rootDir>/src', '<rootDir>/tests'],
+     testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
+     moduleFileExtensions: ['ts', 'js', 'json'],
+   };
+   ```
+
+### ✅ CHECKLIST
+
+- [ ] services/longin-core/package.json created
+- [ ] services/longin-core/tsconfig.json created
+- [ ] Folder struktura vytvořena
+- [ ] src/app.ts basic server exists
+- [ ] Dockerfile created
+- [ ] jest.config.js created
+- [ ] README.md created
+- [ ] All dependencies listed in package.json
+
+---
+
+## 🟠 TASK 1.3: Frontend Service Setup (longin-ui)
+
+**Nástroje:** React 18, Vite, TypeScript, Tailwind CSS  
+**Vstup:** Project structure z Task 1.1  
+**Výstup:** Ready-to-code React service folder  
+**Doba:** 3-4 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 1.1  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Vytvoř services/longin-ui/package.json**
+   ```json
+   {
+     "name": "longin-ui",
+     "version": "1.0.0",
+     "type": "module",
+     "scripts": {
+       "dev": "vite",
+       "build": "tsc && vite build",
+       "preview": "vite preview",
+       "test": "vitest",
+       "lint": "eslint src",
+       "format": "prettier --write \"src/**/*.{ts,tsx}\""
+     },
+     "dependencies": {
+       "react": "^18.2.0",
+       "react-dom": "^18.2.0",
+       "react-router-dom": "^6.20.0",
+       "axios": "^1.6.2",
+       "socket.io-client": "^4.7.0",
+       "@reduxjs/toolkit": "^1.9.7",
+       "react-redux": "^8.1.3",
+       "@tanstack/react-query": "^5.25.0",
+       "tailwindcss": "^3.3.6",
+       "recharts": "^2.10.3",
+       "classnames": "^2.3.2"
+     },
+     "devDependencies": {
+       "typescript": "^5.3.0",
+       "@types/react": "^18.2.37",
+       "@types/react-dom": "^18.2.15",
+       "@vitejs/plugin-react": "^4.2.0",
+       "vite": "^5.0.7",
+       "@tailwindcss/typography": "^0.5.10",
+       "autoprefixer": "^10.4.16",
+       "postcss": "^8.4.31",
+       "vitest": "^1.0.4",
+       "@testing-library/react": "^14.1.2",
+       "@testing-library/jest-dom": "^6.1.5",
+       "prettier": "^3.1.0",
+       "eslint": "^8.54.0"
+     }
+   }
+   ```
+
+2. **Vytvoř services/longin-ui/vite.config.ts**
+   ```typescript
+   import { defineConfig } from 'vite';
+   import react from '@vitejs/plugin-react';
+   
+   export default defineConfig({
+     plugins: [react()],
+     server: {
+       port: 3000,
+       strictPort: false,
+       proxy: {
+         '/api': {
+           target: 'http://localhost:3001',
+           changeOrigin: true,
+         },
+       },
+     },
+     build: {
+       outDir: 'dist',
+       sourcemap: true,
+     },
+   });
+   ```
+
+3. **Vytvoř folder struktura**
+   ```
+   services/longin-ui/
+   ├── src/
+   │   ├── pages/
+   │   ├── components/
+   │   ├── hooks/
+   │   ├── services/
+   │   ├── store/
+   │   ├── utils/
+   │   ├── types/
+   │   ├── styles/
+   │   └── App.tsx
+   ├── public/
+   ├── tests/
+   ├── Dockerfile
+   ├── .dockerignore
+   ├── tailwind.config.js
+   ├── tsconfig.json
+   └── README.md
+   ```
+
+4. **Vytvoř tailwind.config.js**
+   ```javascript
+   export default {
+     content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+     theme: {
+       extend: {
+         colors: {
+           dark: '#1a1a2e',
+           darker: '#16213e',
+           accent: '#00d4ff',
+         },
+       },
+     },
+     plugins: [],
+   };
+   ```
+
+5. **Vytvoř src/App.tsx**
+   ```typescript
+   import React from 'react';
+   
+   const App: React.FC = () => {
+     return (
+       <div className="min-h-screen bg-dark text-white">
+         <h1 className="text-4xl font-bold">Longin Hosting</h1>
+         <p>Welcome to Longin Hosting Server</p>
+       </div>
+     );
+   };
+   
+   export default App;
+   ```
+
+6. **Vytvoř public/index.html**
+   ```html
+   <!DOCTYPE html>
+   <html lang="en">
+   <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Longin Hosting</title>
+   </head>
+   <body>
+     <div id="root"></div>
+     <script type="module" src="/src/main.tsx"></script>
+   </body>
+   </html>
+   ```
+
+7. **Vytvoř Dockerfile**
+   ```dockerfile
+   FROM node:20-alpine AS base
+   RUN npm install -g pnpm
+   WORKDIR /app
+   
+   FROM base AS development
+   COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+   COPY services/longin-ui/package.json services/longin-ui/
+   RUN pnpm install
+   COPY . .
+   EXPOSE 3000
+   CMD ["pnpm", "--filter", "longin-ui", "dev"]
+   
+   FROM base AS builder
+   COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+   COPY services/longin-ui/package.json services/longin-ui/
+   RUN pnpm install --frozen-lockfile
+   COPY . .
+   RUN pnpm --filter longin-ui build
+   
+   FROM nginx:alpine
+   COPY --from=builder /app/services/longin-ui/dist /usr/share/nginx/html
+   EXPOSE 80
+   CMD ["nginx", "-g", "daemon off;"]
+   ```
+
+### ✅ CHECKLIST
+
+- [ ] services/longin-ui/package.json created
+- [ ] vite.config.ts created with proxy setup
+- [ ] tailwind.config.js created
+- [ ] Folder struktura vytvořena
+- [ ] src/App.tsx with basic content
+- [ ] public/index.html created
+- [ ] Dockerfile created (dev + production)
+- [ ] README.md created
+- [ ] All dependencies listed
+
+---
+
+## 🟠 TASK 1.4: Database Service Setup
+
+**Nástroje:** PostgreSQL, TypeORM migrations  
+**Vstup:** Project structure  
+**Výstup:** Database folder se schema template  
+**Doba:** 2-3 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 1.1  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Vytvoř services/database/ folder struktura**
+   ```
+   services/database/
+   ├── init-db.sql           # Main schema creation
+   ├── pgvector-init.sql     # PgVector extension setup
+   ├── migrations/           # TypeORM migrations folder
+   │   └── .keep            # Placeholder
+   ├── seeds/                # Database seeding
+   │   └── .keep
+   └── README.md
+   ```
+
+2. **Vytvoř services/database/init-db.sql** (Template s placeholder)
+   ```sql
+   -- Create extensions
+   CREATE EXTENSION IF NOT EXISTS uuid-ossp;
+   CREATE EXTENSION IF NOT EXISTS pgcrypto;
+   
+   -- Create users table
+   CREATE TABLE users (
+     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+     username VARCHAR(255) UNIQUE NOT NULL,
+     email VARCHAR(255) UNIQUE NOT NULL,
+     password_hash VARCHAR(255) NOT NULL,
+     role VARCHAR(50) NOT NULL DEFAULT 'user',
+     is_active BOOLEAN DEFAULT true,
+     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     last_login TIMESTAMP,
+     theme VARCHAR(50) DEFAULT 'dark',
+     notifications_enabled BOOLEAN DEFAULT true,
+     INDEX idx_username (username),
+     INDEX idx_email (email),
+     INDEX idx_role (role)
+   );
+   
+   -- Add more tables...
+   -- (Will be expanded in Phase 2)
+   
+   -- Create initial admin user (optional)
+   INSERT INTO users (username, email, password_hash, role)
+   VALUES ('admin', 'admin@longin.local', 'TO_BE_HASHED', 'admin')
+   ON CONFLICT (username) DO NOTHING;
+   ```
+
+3. **Vytvoř services/database/pgvector-init.sql**
+   ```sql
+   CREATE EXTENSION IF NOT EXISTS vector;
+   
+   -- Create vector storage table (for future AI features)
+   CREATE TABLE IF NOT EXISTS embeddings (
+     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+     entity_type VARCHAR(50),
+     entity_id UUID,
+     embedding vector(1536),
+     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   );
+   
+   CREATE INDEX ON embeddings USING ivfflat (embedding vector_cosine_ops)
+     WITH (lists = 100);
+   ```
+
+### ✅ CHECKLIST
+
+- [ ] services/database/ folder created
+- [ ] init-db.sql template created
+- [ ] pgvector-init.sql created
+- [ ] migrations/ folder created
+- [ ] README.md created
+
+---
+
+## 🟠 TASK 1.5: Docker Compose Development Setup
+
+**Nástroje:** Docker, Docker Compose  
+**Vstup:** All service folders from Tasks 1.1-1.4  
+**Výstup:** Working docker-compose.yml pro development  
+**Doba:** 2-3 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 1.1, 1.2, 1.3, 1.4  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Use docker-compose.yml from longin-config-files.md**
+2. **Update port references** based on .env.example
+3. **Add health checks** for all services
+4. **Test each service** can start without errors
+5. **Add volume mounts** for development hot-reload
+6. **Document all services** in docker-compose comments
+
+### ✅ CHECKLIST
+
+- [ ] docker-compose.yml complete
+- [ ] All services have proper environment variables
+- [ ] All services have health checks
+- [ ] Volume mounts configured for development
+- [ ] Networks configured properly
+- [ ] docker-compose up -d works without errors
+
+---
+
+## 🟡 TASK 1.6: GitHub Actions CI/CD Setup
+
+**Nástroje:** GitHub Actions  
+**Vstup:** Project on GitHub  
+**Výstup:** Working CI/CD workflows  
+**Doba:** 2-3 hodin  
+**Priorita:** 🟡 MEDIUM  
+**Závislosti:** TASK 1.1  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create .github/workflows/build.yml**
+   - Trigger on push to main & PRs
+   - Build Docker images for longin-core & longin-ui
+   - Push to registry (optional)
+   - Run health check
+
+2. **Create .github/workflows/test.yml**
+   - Run Jest unit tests
+   - Run Supertest API tests
+   - Generate coverage report
+   - Check coverage threshold (>80%)
+
+3. **Create .github/workflows/lint.yml**
+   - Run ESLint
+   - Run Prettier check
+   - Run TypeScript type check
+   - Report any violations
+
+### ✅ CHECKLIST
+
+- [ ] .github/workflows/build.yml created
+- [ ] .github/workflows/test.yml created
+- [ ] .github/workflows/lint.yml created
+- [ ] All workflows have proper triggers
+- [ ] All workflows have proper error handling
+
+---
+
+## 📊 PHASE 2: AUTHENTICATION & CORE API (2-3 týdny)
+
+### PHASE OVERVIEW
+
+Implementace user authentication, JWT tokens, a REST API. Po skončení:
+- ✅ User registration & login working
+- ✅ JWT token generation & validation
+- ✅ Password hashing (bcryptjs)
+- ✅ Basic REST API struktura
+- ✅ Comprehensive tests
+
+**Použij:** Prompt 3 z longin-ai-prompts.md
+
+---
+
+## 🔴 TASK 2.1: Database Schema Complete Implementation
+
+**Nástroje:** PostgreSQL, TypeORM entities  
+**Vstup:** init-db.sql template z Task 1.4  
+**Výstup:** Complete database schema + TypeORM entities  
+**Doba:** 6-8 hodin  
+**Priorita:** 🔴 CRITICAL  
+**Závislosti:** TASK 1.4  
+**Chunk Size:** EXTRA LARGE (split into sub-tasks if needed)  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+**Reference:** PRD Database Schema Section
+
+Create complete SQL schema with all 7 tables:
+1. users
+2. applications
+3. containers
+4. deployments
+5. metrics
+6. github_webhooks
+7. api_logs
+
+Plus TypeORM entities for each.
+
+**See:** longin-ai-prompts.md PROMPT 2 for exact specifications
+
+### ✅ CHECKLIST
+
+- [ ] All 7 tables created in init-db.sql
+- [ ] All indexes created
+- [ ] All foreign keys with ON DELETE CASCADE
+- [ ] All TypeORM entities created (.ts files)
+- [ ] TypeORM migration system configured
+- [ ] Database can be initialized without errors
+
+---
+
+## 🔴 TASK 2.2: Redis Configuration & Utilities
+
+**Nástroje:** Redis, ioredis  
+**Vstup:** src/config folder structure  
+**Výstup:** Redis connection & helper functions  
+**Doba:** 3-4 hodin  
+**Priorita:** 🔴 CRITICAL  
+**Závislosti:** TASK 1.2  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create src/config/redis.ts**
+   - Redis client setup using ioredis
+   - Connection pooling
+   - Error handling & logging
+   - Reconnection logic
+   - Health check function
+
+2. **Create src/utils/redis.ts** (helper functions)
+   - getSession(sessionId)
+   - setSession(sessionId, data)
+   - invalidateCache(key)
+   - publishEvent(channel, data)
+   - subscribeToChannel(channel, handler)
+
+3. **Integrate with docker-compose.yml**
+   - Verify Redis service is running
+   - Test connection with health check
+
+### ✅ CHECKLIST
+
+- [ ] src/config/redis.ts created
+- [ ] src/utils/redis.ts created
+- [ ] Health check working
+- [ ] Connection pooling configured
+- [ ] Error handling comprehensive
+- [ ] Unit tests created
+
+---
+
+## 🔴 TASK 2.3: Authentication Service & Utilities
+
+**Nástroje:** JWT, bcryptjs, TypeORM  
+**Vstup:** src/services folder + entities  
+**Výstup:** Complete auth service + helpers  
+**Doba:** 8-10 hodin  
+**Priorita:** 🔴 CRITICAL  
+**Závislosti:** TASK 2.1, 2.2  
+**Chunk Size:** EXTRA LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create src/utils/jwt.ts**
+   - generateAccessToken(userId, role)
+   - generateRefreshToken(userId)
+   - verifyAccessToken(token)
+   - verifyRefreshToken(token)
+   - decodeToken(token)
+
+2. **Create src/utils/password.ts**
+   - hashPassword(plaintext)
+   - comparePassword(plaintext, hash)
+   - validatePasswordStrength(password)
+
+3. **Create src/services/auth.service.ts**
+   - register(registerDto)
+   - login(loginDto)
+   - refreshToken(refreshToken)
+   - logout(userId)
+   - validateUser(username, password)
+   - getMe(userId)
+
+4. **Create src/dtos/**
+   - auth.dto.ts (RegisterDto, LoginDto, RefreshTokenDto)
+   - response.dto.ts (ApiResponse, UserDto, TokenDto)
+   - Validators using class-validator
+
+5. **Create comprehensive tests**
+   - tests/auth.service.test.ts
+   - tests/auth.utils.test.ts
+
+**See:** longin-ai-prompts.md PROMPT 3 for exact specifications
+
+### ✅ CHECKLIST
+
+- [ ] All JWT utilities created
+- [ ] All password utilities created
+- [ ] Auth service with all methods
+- [ ] All DTOs with validators
+- [ ] Comprehensive unit tests
+- [ ] All tests passing
+
+---
+
+## 🟠 TASK 2.4: Middleware Stack Implementation
+
+**Nástroje:** Express middleware, TypeScript  
+**Vstup:** src/middleware folder structure  
+**Výstup:** Complete middleware suite  
+**Doba:** 6-8 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 2.3  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Create 6 middleware files:
+
+1. **src/middleware/auth.middleware.ts**
+   - Extract JWT from headers
+   - Validate & verify signature
+   - Attach user to request
+   - Return 401 if invalid
+
+2. **src/middleware/auth-guard.middleware.ts**
+   - Check user.role against required role
+   - Check resource ownership
+   - Return 403 if unauthorized
+
+3. **src/middleware/validation.middleware.ts**
+   - Validate request body using class-validator
+   - Return 400 with errors
+   - Support nested objects
+
+4. **src/middleware/error-handler.middleware.ts**
+   - Catch all errors
+   - Log with Winston
+   - Return consistent error response
+
+5. **src/middleware/logging.middleware.ts**
+   - Log all requests (method, path, status, duration)
+   - Store in PostgreSQL api_logs table
+
+6. **src/middleware/rate-limit.middleware.ts**
+   - Per IP: 100 req/min
+   - Per user: 1000 req/hour
+   - Return 429 if exceeded
+
+All with comprehensive error handling & tests.
+
+### ✅ CHECKLIST
+
+- [ ] All 6 middleware created
+- [ ] Error responses consistent format
+- [ ] All logging working
+- [ ] Rate limiting working
+- [ ] Comprehensive unit tests
+- [ ] All tests passing
+
+---
+
+## 🟠 TASK 2.5: Auth Routes & Endpoints
+
+**Nástroje:** Express routes, API testing  
+**Vstup:** src/routes folder + auth.service  
+**Výstup:** 5 working authentication endpoints  
+**Doba:** 4-6 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 2.3, 2.4  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Create 5 endpoints:
+
+1. **POST /api/auth/register**
+   - Validate input (username, email, password, confirmPassword)
+   - Hash password
+   - Create user in DB
+   - Generate & return tokens
+   - Return 201 Created
+
+2. **POST /api/auth/login**
+   - Validate credentials
+   - Generate tokens
+   - Store refresh token in Redis
+   - Return 200 OK
+
+3. **POST /api/auth/refresh**
+   - Validate refresh token
+   - Generate new access token
+   - Return 200 OK
+
+4. **POST /api/auth/logout**
+   - Invalidate refresh token
+   - Return 200 OK
+
+5. **GET /api/auth/me**
+   - Requires auth
+   - Return current user info
+   - Return 200 OK
+
+Plus:
+- **GET /health** (no auth)
+- **GET /api/system/status** (admin only)
+
+Create comprehensive integration tests with Supertest.
+
+### ✅ CHECKLIST
+
+- [ ] All 5 auth endpoints working
+- [ ] All validation working
+- [ ] Error handling correct
+- [ ] Integration tests passing
+- [ ] Postman/Insomnia collection created
+
+---
+
+## 🟠 TASK 2.6: App Express Server Setup
+
+**Nástroje:** Express, middleware stack  
+**Vstup:** All middleware + routes from Tasks 2.4-2.5  
+**Výstup:** Production-ready Express app  
+**Doba:** 3-4 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislości:** TASK 2.4, 2.5  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Update src/app.ts:
+
+1. **Import all middleware**
+2. **Apply middleware stack in correct order**
+   - Security (helmet, cors)
+   - Logging
+   - Body parsing
+   - Authentication
+   - Validation
+   - Routes
+   - Error handler (last!)
+3. **Register all routes**
+4. **Start server on correct port**
+5. **Log startup message**
+
+Ensure app:
+- Starts without errors
+- Responds to /health
+- Applies middleware in correct order
+- Returns proper error responses
+
+### ✅ CHECKLIST
+
+- [ ] src/app.ts complete
+- [ ] All middleware applied
+- [ ] All routes registered
+- [ ] Server starts successfully
+- [ ] /health endpoint working
+- [ ] Proper error handling
+
+---
+
+## 🔴 PHASE 2 COMPLETION
+
+After Task 2.6, you should be able to:
+
+```bash
+# Start backend
+pnpm --filter longin-core dev
+
+# Test endpoints
+curl http://localhost:3001/health  # ✅ Should return OK
+curl -X POST http://localhost:3001/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test","email":"test@example.com","password":"Test123!@"}'  # ✅ Should register
+
+curl -X GET http://localhost:3001/api/auth/me \
+  -H "Authorization: Bearer {token}"  # ✅ Should return user
+
+# Backend is ready for Phase 3
+```
+
+---
+
+## 🐳 PHASE 3: DOCKER INTEGRATION (2 týdny)
+
+### PHASE OVERVIEW
+
+Integrace Docker SDK, správa kontejnerů, app lifecycle management.
+
+**Use:** Prompt 4 z longin-ai-prompts.md
+
+Key tasks:
+- Docker SDK wrapper (dockerode)
+- Container creation/start/stop
+- Port allocation
+- App instance limiting
+- Container status tracking
+- Integration tests
+
+[DUE TO LENGTH - Abbreviated for space, but same structure as Phase 2 tasks]
+
+---
+
+## 🔌 PHASE 4: REAL-TIME & WEBSOCKET (2 týdny)
+
+### PHASE OVERVIEW
+
+Socket.io setup, real-time metrics broadcasting, log streaming.
+
+**Use:** Prompt 5 z longin-ai-prompts.md
+
+Key tasks:
+- Socket.io server setup
+- Authenticated connections
+- Event namespaces
+- Metric broadcasting
+- Log streaming
+
+---
+
+## 🎨 PHASE 5: FRONTEND (3-4 týdny)
+
+### PHASE OVERVIEW
+
+React UI, components, API integration, state management.
+
+**Use:** Prompt 6 z longin-ai-prompts.md
+
+Can run PARALLEL with Phases 3-4.
+
+Key tasks:
+- Login/Register pages
+- Dashboard
+- App browser & detail pages
+- Admin panel
+- Socket.io integration
+- Redux store
+- Tailwind styling
+
+---
+
+## 📊 PHASE 6: MONITORING & DEPLOYMENT (3 týdny)
+
+### PHASE OVERVIEW
+
+Prometheus metrics, Grafana dashboards, ELK logging, Traefik proxy, production deployment.
+
+**Use:** Prompt 7 z longin-ai-prompts.md
+
+Key tasks:
+- Prometheus setup & scrape config
+- Grafana dashboards
+- ELK stack (Elasticsearch, Logstash, Kibana)
+- Traefik configuration
+- Docker Swarm setup (optional)
+- Health checks & alerting
+
+---
+
+## ✅ TESTING & QUALITY ASSURANCE
+
+### UNIT TESTING
+
+**Per service requirement:**
+- Backend: Jest 80%+ coverage
+- Frontend: Vitest 70%+ coverage
+
+Run:
+```bash
+pnpm test:coverage
+```
+
+### INTEGRATION TESTING
+
+**API Integration (Supertest):**
+- All endpoints have integration tests
+- Test success & error cases
+- Test middleware chain
+
+**E2E Testing (Cypress - optional):**
+- User registration flow
+- Login flow
+- App launch flow
+- Monitoring views
+
+### LOAD TESTING
+
+**Optional - Phase 7:**
+- k6 or Apache JMeter
+- Test 100 concurrent users
+- Measure response times
+- Identify bottlenecks
+
+---
+
+## 🎉 PROJECT COMPLETION CHECKLIST
+
+- [ ] Phase 1: Foundation ✅
+- [ ] Phase 2: Auth & API ✅
+- [ ] Phase 3: Docker Integration ✅
+- [ ] Phase 4: Real-time ✅
+- [ ] Phase 5: Frontend ✅
+- [ ] Phase 6: Monitoring ✅
+- [ ] All tests passing ✅
+- [ ] Documentation complete ✅
+- [ ] Security audit passed ✅
+- [ ] Production deployment ready ✅
+
+---
+
+**Document Version:** 1.0  
+**Last Updated:** Březen 2025  
+**Status:** READY FOR AI AGENT IMPLEMENTATION

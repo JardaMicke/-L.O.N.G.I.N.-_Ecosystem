@@ -1,0 +1,151 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - "${DATABASE_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./services/database/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql
+    networks:
+      - longin-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - longin-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  longin-core:
+    build:
+      context: ./services/longin-core
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "${LONGIN_CORE_API_PORT}:3001"
+      - "${LONGIN_CORE_WEBSOCKET_PORT}:3002"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - REDIS_URL=redis://redis:6379
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - ./services/longin-core/src:/app/src
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - longin-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.longin-core.rule=Host(`api.localhost`)"
+      - "traefik.http.routers.longin-core.entrypoints=web"
+      - "traefik.http.services.longin-core.loadbalancer.server.port=3001"
+
+  longin-ui:
+    build:
+      context: ./services/longin-ui
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "${LONGIN_UI_PORT}:3000"
+    environment:
+      - REACT_APP_API_URL=${REACT_APP_API_URL}
+      - REACT_APP_SOCKET_URL=${REACT_APP_SOCKET_URL}
+    volumes:
+      - ./services/longin-ui/src:/app/src
+    depends_on:
+      - longin-core
+    networks:
+      - longin-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.longin-ui.rule=Host(`localhost`)"
+      - "traefik.http.routers.longin-ui.entrypoints=web"
+      - "traefik.http.services.longin-ui.loadbalancer.server.port=3000"
+
+  longin-bridge:
+    build:
+      context: ../Longin_bridge
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      - SECRET_KEY=${JWT_ACCESS_SECRET}
+      - PIN_CODE=${BRIDGE_PIN_CODE}
+      - REDIS_URL=${REDIS_URL}
+    networks:
+      - longin-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.longin-bridge.rule=Host(`bridge.localhost`)"
+      - "traefik.http.routers.longin-bridge.entrypoints=web"
+      - "traefik.http.services.longin-bridge.loadbalancer.server.port=5001"
+
+  longin-character:
+    build:
+      context: ./services/longin-character
+      dockerfile: Dockerfile
+    ports:
+      - "5002:3000"
+    environment:
+      - PORT=3000
+      - REDIS_URL=${REDIS_URL}
+      - DATABASE_URL=postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@postgres:5432/${DATABASE_NAME}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    networks:
+      - longin-network
+    depends_on:
+      - postgres
+      - redis
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.longin-character.rule=Host(`character.localhost`)"
+      - "traefik.http.routers.longin-character.entrypoints=web"
+      - "traefik.http.services.longin-character.loadbalancer.server.port=3000"
+
+  traefik:
+    image: traefik:v2.10
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./services/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+    networks:
+      - longin-network
+
+  longin-prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./services/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus

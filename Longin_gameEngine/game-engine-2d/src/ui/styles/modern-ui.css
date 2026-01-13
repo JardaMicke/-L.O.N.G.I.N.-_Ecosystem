@@ -1,0 +1,105 @@
+:root {
+  /* HSL Tailored Colors */
+  --primary-h: 220;
+  --primary-s: 70%;
+  --primary-l: 60%;
+  
+  --bg-h: 0;
+  --bg-s: 0%;
+  --bg-l: 10%;
+  
+  --accent-h: 280;
+  --accent-s: 60%;
+  --accent-l: 55%;
+
+  --glass-bg: hsla(0, 0%, 15%, 0.7);
+  --glass-border: hsla(0, 0%, 100%, 0.1);
+  --glass-shadow: rgba(0, 0, 0, 0.5);
+  
+  --text-main: hsla(0, 0%, 100%, 0.9);
+  --text-muted: hsla(0, 0%, 100%, 0.6);
+  
+  --transition-speed: 0.3s;
+}
+
+/* Base Styles */
+.modern-ui {
+  font-family: 'Inter', 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-main);
+  box-sizing: border-box;
+}
+
+/* Glassmorphism Panel */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px 0 var(--glass-shadow);
+}
+
+/* Modern Button */
+.modern-btn {
+  background: hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.2);
+  border: 1px solid hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.4);
+  color: var(--text-main);
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all var(--transition-speed) ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.modern-btn:hover {
+  background: hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.4);
+  box-shadow: 0 0 15px hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.3);
+  transform: translateY(-1px);
+}
+
+.modern-btn:active {
+  transform: translateY(0);
+}
+
+.modern-btn.accent {
+  background: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.2);
+  border-color: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.4);
+}
+
+.modern-btn.accent:hover {
+  background: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.4);
+  box-shadow: 0 0 15px hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.3);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-speed) ease forwards;
+}
+
+/* Dev Toolbar Specific */
+#dev-toolbar {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  padding: 8px;
+  z-index: 99999;
+}
+
+#dev-toolbar .tool-btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 0;
+  font-size: 1.2rem;
+}

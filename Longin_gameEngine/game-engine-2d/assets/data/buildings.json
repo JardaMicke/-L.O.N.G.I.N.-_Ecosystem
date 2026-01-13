@@ -1,0 +1,33 @@
+[
+    {
+        "id": "building_barracks",
+        "name": "Barracks",
+        "type": "building",
+        "width": 3,
+        "height": 3,
+        "cost": {
+            "wood": 200,
+            "stone": 100
+        },
+        "functions": [
+            "train_units"
+        ],
+        "prefab": "barracks_prefab"
+    },
+    {
+        "id": "building_townhall",
+        "name": "Town Hall",
+        "type": "building",
+        "width": 5,
+        "height": 5,
+        "cost": {
+            "wood": 500,
+            "stone": 300
+        },
+        "functions": [
+            "resource_depot",
+            "train_workers"
+        ],
+        "prefab": "townhall_prefab"
+    }
+]

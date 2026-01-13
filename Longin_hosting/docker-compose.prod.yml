@@ -1,0 +1,187 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - longin-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+    networks:
+      - longin-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  longin-core:
+    build:
+      context: ./services/longin-core
+      target: production
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - FRONTEND_URL=https://${DOMAIN:-localhost}
+      - LONGIN_CORE_API_PORT=3001
+      - LOGSTASH_HOST=longin-logstash
+      - LOGSTASH_PORT=5044
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - longin-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.longin-core.rule=Host(`api.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.longin-core.entrypoints=websecure"
+      - "traefik.http.routers.longin-core.tls.certresolver=myresolver"
+      - "traefik.http.services.longin-core.loadbalancer.server.port=3001"
+
+  longin-ui:
+    build:
+      context: ./services/longin-ui
+      target: production
+    restart: always
+    environment:
+      - REACT_APP_API_URL=https://api.${DOMAIN:-localhost}
+      - REACT_APP_SOCKET_URL=https://api.${DOMAIN:-localhost}
+    depends_on:
+      - longin-core
+    networks:
+      - longin-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.longin-ui.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.longin-ui.entrypoints=websecure"
+      - "traefik.http.routers.longin-ui.tls.certresolver=myresolver"
+      - "traefik.http.services.longin-ui.loadbalancer.server.port=80"
+
+  traefik:
+    image: traefik:v2.10
+    restart: always
+    command:
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Redirect HTTP to HTTPS
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      # Let's Encrypt (Placeholder - requires valid email and domain)
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      # - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080" # Dashboard (secure in real prod)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./services/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - traefik_certificates:/letsencrypt
+    networks:
+      - longin-network
+
+  longin-prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    volumes:
+      - ./services/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - longin-network
+
+  longin-grafana:
+    image: grafana/grafana:latest
+    restart: always
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./services/monitoring/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - longin-network
+    depends_on:
+      - longin-prometheus
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`monitor.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls.certresolver=myresolver"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+
+  longin-elasticsearch:
+    image: elasticsearch:7.17.10
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - longin-network
+
+  longin-logstash:
+    image: logstash:7.17.10
+    restart: always
+    volumes:
+      - ./services/logging/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    networks:
+      - longin-network
+    depends_on:
+      - longin-elasticsearch
+
+  longin-kibana:
+    image: kibana:7.17.10
+    restart: always
+    networks:
+      - longin-network
+    depends_on:
+      - longin-elasticsearch
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kibana.rule=Host(`logs.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.kibana.entrypoints=websecure"
+      - "traefik.http.routers.kibana.tls.certresolver=myresolver"
+      - "traefik.http.services.kibana.loadbalancer.server.port=5601"
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  elasticsearch_data:
+  traefik_certificates:
+
+networks:
+  longin-network:
+    driver: bridge

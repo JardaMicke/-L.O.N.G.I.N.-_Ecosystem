@@ -1,0 +1,21 @@
+ FAIL  tests/final-integration.test.ts
+  ÔŚĆ Test suite failed to run
+
+    tests/final-integration.test.ts:13:31 - error TS2307: Cannot find module '../../src/editor/tools/asset-packager' or its corresponding type declarations.
+
+    13 import { AssetPackager } from '../../src/editor/tools/asset-packager';
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    tests/final-integration.test.ts:14:31 - error TS2307: Cannot find module '../../src/utils/content-loader' or its corresponding type declarations.
+
+    14 import { ContentLoader } from '../../src/utils/content-loader';
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    tests/final-integration.test.ts:15:33 - error TS2307: Cannot find module '../../src/database/postgres-adapter' or its corresponding type declarations.
+
+    15 import { PostgresAdapter } from '../../src/database/postgres-adapter';
+                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        4.505 s
+Ran all test suites matching tests/final-integration.test.ts.

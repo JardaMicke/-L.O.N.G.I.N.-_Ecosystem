@@ -1,0 +1,34 @@
+[
+    {
+        "id": "unit_soldier",
+        "name": "Soldier",
+        "type": "unit",
+        "stats": {
+            "health": 100,
+            "damage": 10,
+            "speed": 5
+        },
+        "cost": {
+            "gold": 50,
+            "food": 1
+        },
+        "prefab": "soldier_prefab"
+    },
+    {
+        "id": "unit_archer",
+        "name": "Archer",
+        "type": "unit",
+        "stats": {
+            "health": 60,
+            "damage": 15,
+            "range": 100,
+            "speed": 6
+        },
+        "cost": {
+            "gold": 75,
+            "wood": 20,
+            "food": 1
+        },
+        "prefab": "archer_prefab"
+    }
+]

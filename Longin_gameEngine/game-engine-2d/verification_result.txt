@@ -1,0 +1,25 @@
+[32minfo[39m: --- STARTING PHASE 12 VERIFICATION --- {"timestamp":"2026-01-03T17:56:46.261Z"}
+[32minfo[39m: Engine initializing... {"timestamp":"2026-01-03T17:56:46.264Z"}
+[dotenv@17.2.3] injecting env (10) from .env -- tip: ÔÜÖ´ŞĆ  write to custom object with { processEnv: myObject }
+[32minfo[39m: AudioManager initialized {"timestamp":"2026-01-03T17:56:46.267Z"}
+[32minfo[39m: System registered: PhysicsSystem (Priority: 1) {"timestamp":"2026-01-03T17:56:46.267Z"}
+[32minfo[39m: System registered: CollisionSystem (Priority: 2) {"timestamp":"2026-01-03T17:56:46.268Z"}
+[32minfo[39m: System registered: BehaviorTreeSystem (Priority: 0) {"timestamp":"2026-01-03T17:56:46.268Z"}
+[32minfo[39m: System registered: CampaignManager (Priority: 0) {"timestamp":"2026-01-03T17:56:46.268Z"}
+[32minfo[39m: System registered: TaskManager (Priority: 0) {"timestamp":"2026-01-03T17:56:46.268Z"}
+[32minfo[39m: System registered: SmartAgentSystem (Priority: 0) {"timestamp":"2026-01-03T17:56:46.269Z"}
+[32minfo[39m: System registered: ScriptSystem (Priority: 0) {"timestamp":"2026-01-03T17:56:46.269Z"}
+[32minfo[39m: System registered: AudioSystem (Priority: 0) {"timestamp":"2026-01-03T17:56:46.269Z"}
+[32minfo[39m: System registered: RenderSystem (Priority: 0) {"timestamp":"2026-01-03T17:56:46.270Z"}
+[32minfo[39m: System registered: LightingSystem (Priority: 0) {"timestamp":"2026-01-03T17:56:46.271Z"}
+[32minfo[39m: System registered: ParticleSystem (Priority: 0) {"timestamp":"2026-01-03T17:56:46.271Z"}
+[32minfo[39m: Dialogue started: [Elder] Please help us, traveler! Orcs are attacking! {"timestamp":"2026-01-03T17:56:46.271Z"}
+[32minfo[39m: Quest STARTED: Defeat the Orc Raiders {"timestamp":"2026-01-03T17:56:46.272Z"}
+Active Quests: 1 (Defeat the Orc Raiders)
+[32minfo[39m: Quest COMPLETED: Defeat the Orc Raiders {"timestamp":"2026-01-03T17:56:46.272Z"}
+[32minfo[39m: Trigger fired: victory_trigger {"timestamp":"2026-01-03T17:56:46.272Z"}
+[32minfo[39m: [TriggerAction] VICTORY ACHIEVED! {"timestamp":"2026-01-03T17:56:46.273Z"}
+[32minfo[39m: Campaign state saved. {"timestamp":"2026-01-03T17:56:46.273Z"}
+Quest Status: COMPLETED
+Trigger Fired: true
+[32minfo[39m: --- PHASE 12 VERIFICATION SUCCESSFUL --- {"timestamp":"2026-01-03T17:56:46.273Z"}

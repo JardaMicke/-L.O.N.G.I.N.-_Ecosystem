@@ -1,0 +1,29 @@
+ FAIL  tests/phase9-robustness.test.ts
+  ÔŚĆ Test suite failed to run
+
+    tests/phase9-robustness.test.ts:1:30 - error TS2307: Cannot find module '../../src/plugin/plugin-loader' or its corresponding type declarations.
+
+    1 import { PluginLoader } from '../../src/plugin/plugin-loader';
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    tests/phase9-robustness.test.ts:2:34 - error TS2307: Cannot find module '../../src/network/delta-compression' or its corresponding type declarations.
+
+    2 import { DeltaCompression } from '../../src/network/delta-compression';
+                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    tests/phase9-robustness.test.ts:3:25 - error TS2307: Cannot find module '../../src/world/tilemap' or its corresponding type declarations.
+
+    3 import { Tilemap } from '../../src/world/tilemap';
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~
+    tests/phase9-robustness.test.ts:4:36 - error TS2307: Cannot find module '../../src/gameplay/pathfinding-manager' or its corresponding type declarations.
+
+    4 import { PathfindingManager } from '../../src/gameplay/pathfinding-manager';
+                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    tests/phase9-robustness.test.ts:5:24 - error TS2307: Cannot find module '../../src/utils/logger' or its corresponding type declarations.
+
+    5 import { Logger } from '../../src/utils/logger';
+                             ~~~~~~~~~~~~~~~~~~~~~~~~
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        3.867 s
+Ran all test suites matching tests/phase9-robustness.test.ts.

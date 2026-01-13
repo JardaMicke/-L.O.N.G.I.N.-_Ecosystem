@@ -1,0 +1,13 @@
+FAIL tests/world/serialization.test.ts
+  ÔŚĆ Test suite failed to run
+
+    src/world/world-serializer.ts:52:57 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error | undefined'.
+
+    52             Logger.error('Failed to deserialize world', e);
+                                                               ~
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        2.954 s
+Ran all test suites matching tests/world/serialization.test.ts.

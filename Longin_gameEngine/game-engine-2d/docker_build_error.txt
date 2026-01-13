@@ -1,0 +1,20 @@
+Dockerfile:30
+
+--------------------
+
+  29 |     # Install only production dependencies
+
+  30 | >>> RUN npm ci --only=production && \
+
+  31 | >>>     npm cache clean --force
+
+  32 |     
+
+--------------------
+
+failed to solve: process "/bin/sh -c npm ci --only=production &&     npm cache clean --force" did not complete successfully: exit code: 127
+
+
+
+View build details: docker-desktop://dashboard/build/default/default/km1mqrk2u57hhbfqwsl0928xa
+

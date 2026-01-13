@@ -1,0 +1,1068 @@
+# 💻 LONGIN HOSTING - AI AGENT IMPLEMENTATION PROMPTS
+
+**Verze:** 1.0  
+**Datum:** Březen 2025  
+**Status:** READY FOR AI CODING AGENT (Claude + Cursor)  
+**Jazyk:** Čeština + English technical terms  
+
+---
+
+## 📑 OBSAH
+
+1. [Introduction & Setup](#introduction--setup)
+2. [Prompt 1: Project Initialization](#prompt-1-project-initialization)
+3. [Prompt 2: Database & Backend Setup](#prompt-2-database--backend-setup)
+4. [Prompt 3: Authentication & Core API](#prompt-3-authentication--core-api)
+5. [Prompt 4: Docker Integration & App Management](#prompt-4-docker-integration--app-management)
+6. [Prompt 5: WebSocket & Real-time Updates](#prompt-5-websocket--real-time-updates)
+7. [Prompt 6: Frontend Implementation](#prompt-6-frontend-implementation)
+8. [Prompt 7: Monitoring, Logging & Deployment](#prompt-7-monitoring-logging--deployment)
+
+---
+
+## 🎯 INTRODUCTION & SETUP
+
+### BEFORE YOU START - READ THIS CAREFULLY
+
+**This document contains 7 comprehensive prompts designed for an AI coding agent (Claude/Cursor) to implement the entire Longin Hosting Server system.**
+
+Each prompt is:
+- ✅ **Self-contained** - Can be executed independently
+- ✅ **Chunked for processing** - Fits within AI context windows (~200K tokens)
+- ✅ **Data-driven** - References exact specs from PRD & architecture docs
+- ✅ **Iterative** - Each builds on previous (but works standalone)
+- ✅ **Production-ready** - Security, error handling, validation included
+- ✅ **Tested approach** - Follows industry best practices
+
+### HOW TO USE THESE PROMPTS
+
+**Option 1: Sequential Implementation**
+```
+Day 1-3:   Prompt 1 (Project Init)
+Day 4-6:   Prompt 2 (Database)
+Day 7-10:  Prompt 3 (Auth + API)
+Day 11-14: Prompt 4 (Docker)
+Day 15-17: Prompt 5 (WebSocket)
+Day 18-22: Prompt 6 (Frontend)
+Day 23-28: Prompt 7 (Monitoring)
+```
+
+**Option 2: Parallel Tasks**
+- Run Prompt 2 (DB) + Prompt 6 (Frontend) in parallel
+- Then run Prompt 3-5 sequentially
+
+**Option 3: Cherry-pick**
+- Copy individual prompt as needed
+- Use for specific components
+
+### EXPECTED OUTPUTS
+
+Each prompt will generate:
+- ✅ Complete source code (TypeScript/React)
+- ✅ Configuration files (.env, docker-compose.yml)
+- ✅ Database migrations/scripts
+- ✅ Docker files
+- ✅ Test files
+- ✅ Documentation
+- ✅ API specifications
+
+### QUALITY STANDARDS
+
+**All code must include:**
+- ✅ TypeScript with strict mode
+- ✅ Error handling & validation
+- ✅ Security best practices
+- ✅ Logging & debugging support
+- ✅ Comments & documentation
+- ✅ Unit tests (Jest)
+- ✅ Input sanitization
+
+---
+
+## 📋 PROMPT 1: PROJECT INITIALIZATION
+
+### WHEN TO USE
+- Starting the project from scratch
+- Setting up monorepo structure
+- Configuring development tools
+- Creating CI/CD pipeline basics
+
+### COPY & PASTE THIS PROMPT
+
+```
+# LONGIN HOSTING SERVER - PROJECT INITIALIZATION PROMPT
+
+You are an expert full-stack developer. Your task is to initialize a complete 
+project structure for "Longin Hosting Server" - a distributed hosting platform 
+for managing Docker applications.
+
+## REQUIREMENTS
+
+### Project Type: Monorepo (pnpm workspaces)
+- Parent: longin-hosting-server/
+- Workspace 1: services/longin-core (Node.js/Express backend)
+- Workspace 2: services/longin-ui (React frontend)
+- Workspace 3: services/database (migrations & scripts)
+
+### Tech Stack
+- **Backend:** Node.js 20 LTS, Express 4.18+, TypeScript 5+
+- **Frontend:** React 18.2+, Vite, TypeScript, Tailwind CSS
+- **Language:** TypeScript everywhere
+- **Package Manager:** pnpm (faster & monorepo support)
+- **Testing:** Jest + Supertest (API)
+- **Code Quality:** ESLint, Prettier, Husky (git hooks)
+
+### Directory Structure Required
+
+```
+longin-hosting-server/
+├── .github/
+│   ├── workflows/
+│   │   ├── build.yml
+│   │   ├── test.yml
+│   │   └── lint.yml
+│   └── CODEOWNERS
+├── services/
+│   ├── longin-core/
+│   │   ├── src/
+│   │   │   ├── config/
+│   │   │   ├── middleware/
+│   │   │   ├── routes/
+│   │   │   ├── services/
+│   │   │   ├── websocket/
+│   │   │   ├── utils/
+│   │   │   ├── entities/
+│   │   │   ├── dtos/
+│   │   │   └── app.ts
+│   │   ├── tests/
+│   │   ├── Dockerfile
+│   │   ├── .dockerignore
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   └── README.md
+│   │
+│   ├── longin-ui/
+│   │   ├── src/
+│   │   │   ├── pages/
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   ├── services/
+│   │   │   ├── store/
+│   │   │   ├── utils/
+│   │   │   ├── types/
+│   │   │   ├── styles/
+│   │   │   └── App.tsx
+│   │   ├── public/
+│   │   ├── tests/
+│   │   ├── Dockerfile
+│   │   ├── package.json
+│   │   ├── vite.config.ts
+│   │   ├── tsconfig.json
+│   │   └── README.md
+│   │
+│   └── database/
+│       ├── init-db.sql
+│       ├── pgvector-init.sql
+│       └── migrations/
+│
+├── config/
+│   ├── .env.example
+│   ├── docker-compose.yml
+│   └── ports-reference.md
+│
+├── scripts/
+│   ├── init-dev.sh
+│   ├── health-check.sh
+│   └── backup-db.sh
+│
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── DEVELOPMENT.md
+│   └── DEPLOYMENT.md
+│
+├── package.json (root - pnpm workspaces)
+├── pnpm-workspace.yaml
+├── .eslintrc.json
+├── .prettierrc.json
+├── tsconfig.json (root)
+├── .gitignore
+├── .dockerignore
+├── README.md
+└── LICENSE
+
+```
+
+### Files to Generate
+
+1. **Root package.json**
+   - pnpm workspaces configuration
+   - Scripts: "dev", "build", "test", "lint", "format"
+   - Shared devDependencies (TypeScript, ESLint, Prettier)
+
+2. **pnpm-workspace.yaml**
+   - Define workspace packages
+   - Configuration for all workspaces
+
+3. **tsconfig.json** (root)
+   - Shared TypeScript configuration
+   - Path aliases (@services/*, @core/*, @ui/*)
+   - Strict mode enabled
+
+4. **.eslintrc.json**
+   - Airbnb style guide
+   - TypeScript support
+   - Next.js/React rules (for UI)
+
+5. **.prettierrc.json**
+   - 2-space indentation
+   - Single quotes
+   - Semicolons enabled
+
+6. **Services/longin-core/package.json**
+   - Dependencies: express, typescript, typeorm, ioredis, socket.io, dockerode, etc.
+   - DevDependencies: jest, supertest, @types/*, ts-node, nodemon
+
+7. **Services/longin-core/tsconfig.json**
+   - Backend-specific configuration
+
+8. **Services/longin-ui/package.json**
+   - Dependencies: react, react-dom, vite, axios, socket.io-client, tailwindcss
+   - DevDependencies: vitest, @testing-library/*, typescript, @types/react
+
+9. **Services/longin-ui/tsconfig.json**
+   - Frontend-specific configuration
+   - React 18 JSX runtime
+
+10. **Services/longin-ui/vite.config.ts**
+    - Vite configuration
+    - Development server (port 3000)
+    - Build optimization
+    - API proxy to localhost:3001
+
+11. **Services/longin-ui/tailwind.config.ts**
+    - Tailwind CSS configuration
+    - Custom theme (colors, spacing)
+    - Extend default configuration
+
+12. **.github/workflows/build.yml**
+    - Docker image build & push
+    - Trigger: on push to main, on pull request
+    - Multi-stage builds for optimization
+
+13. **.github/workflows/test.yml**
+    - Unit tests (Jest)
+    - Lint checks (ESLint)
+    - TypeScript type check
+    - Coverage reporting
+
+14. **config/.env.example**
+    - All environment variables needed
+    - Comments explaining each one
+    - Example values (safe defaults)
+
+15. **config/docker-compose.yml** (development)
+    - All services defined
+    - Development overrides
+    - Port mappings
+    - Volume mounts
+    - Health checks
+    - Network configuration
+
+16. **scripts/init-dev.sh**
+    - Install dependencies (pnpm install)
+    - Create .env from .env.example
+    - Build Docker images
+    - Start services (docker-compose up)
+    - Run migrations
+    - Seed initial data (optional)
+
+17. **README.md** (root)
+    - Project overview
+    - Quick start guide
+    - System requirements
+    - Development setup
+    - Project structure explanation
+    - Contributing guidelines
+
+### Specific Requirements
+
+✅ **Code Quality**
+- Use TypeScript strict mode everywhere
+- No "any" types - use proper typing
+- ESLint configuration enforced
+- Prettier for consistent formatting
+
+✅ **Project Configuration**
+- pnpm as package manager (faster & monorepo support)
+- Workspaces properly configured
+- Path aliases for clean imports
+- Environment variable management (.env handling)
+
+✅ **Development Workflow**
+- Hot reload for both backend (nodemon) and frontend (Vite)
+- Development docker-compose with volume mounts
+- Health checks for all services
+- Proper error handling & logging setup
+
+✅ **CI/CD Pipeline**
+- GitHub Actions workflows
+- Automated testing on PR
+- Build checks
+- Coverage reporting
+
+✅ **Documentation**
+- Each workspace has README.md
+- Installation instructions
+- Development server startup
+- API documentation reference
+
+### DELIVERABLES
+
+1. Complete project structure (all directories & files)
+2. Root-level configuration files
+3. Backend service package.json & configs
+4. Frontend service package.json & vite/tailwind configs
+5. GitHub Actions workflows
+6. .env.example with all variables
+7. docker-compose.yml for development
+8. scripts/init-dev.sh for automated setup
+9. Comprehensive README.md
+10. ESLint + Prettier configuration
+
+### EXECUTION INSTRUCTIONS
+
+1. Generate all directory structure & empty files
+2. Generate root package.json with workspaces
+3. Generate all configuration files
+4. Generate GitHub Actions workflows
+5. Create detailed README.md
+6. Create quick-start guide (DEVELOPMENT.md)
+
+Do NOT include:
+- Implementation code (just structure & config)
+- Migrations or database setup (will be in Prompt 2)
+- Dependencies installation (user will run pnpm install)
+- Example data or seeds (will be in Prompt 2)
+
+Generate all files with proper comments explaining their purpose.
+```
+
+### EXPECTED OUTPUT
+
+After running this prompt, you should have:
+- ✅ Complete project directory structure
+- ✅ All configuration files (.eslintrc, prettier, tsconfig)
+- ✅ package.json files with dependencies listed
+- ✅ docker-compose.yml for development
+- ✅ GitHub Actions CI/CD workflows
+- ✅ .env.example with all required variables
+- ✅ Scripts for automated setup
+- ✅ README.md with setup instructions
+
+---
+
+## 📊 PROMPT 2: DATABASE & BACKEND SETUP
+
+### WHEN TO USE
+- After Prompt 1 (project structure exists)
+- Setting up PostgreSQL database
+- Creating database schema
+- Configuring TypeORM
+- Setting up Redis cache
+
+### COPY & PASTE THIS PROMPT
+
+```
+# LONGIN HOSTING SERVER - DATABASE & BACKEND SETUP PROMPT
+
+You are a database architect and backend specialist. Your task is to set up 
+the complete database layer for Longin Hosting Server.
+
+## CONTEXT
+
+This is Phase 2 of implementing Longin Hosting Server. Phase 1 (project structure) 
+is complete. Now implement the database layer and backend configuration.
+
+Reference the complete PRD: https://[your-docs-url]/longin-full-prd.md
+Reference architecture: https://[your-docs-url]/longin-architecture.md
+
+## REQUIREMENTS
+
+### Database: PostgreSQL 16 + PgVector
+
+**Tabulky které musíte vytvořit:**
+
+1. **users**
+   - id (UUID, PK)
+   - username (VARCHAR 255, UQ)
+   - email (VARCHAR 255, UQ)
+   - password_hash (VARCHAR 255)
+   - role (VARCHAR 50: 'admin' | 'user', DEFAULT 'user')
+   - is_active (BOOLEAN, DEFAULT true)
+   - theme (VARCHAR 50: 'dark' | 'light', DEFAULT 'dark')
+   - notifications_enabled (BOOLEAN, DEFAULT true)
+   - created_at (TIMESTAMP, DEFAULT NOW())
+   - updated_at (TIMESTAMP, DEFAULT NOW())
+   - last_login (TIMESTAMP, NULLABLE)
+   - Indexes: idx_username, idx_email, idx_role
+
+2. **applications**
+   - id (UUID, PK)
+   - name (VARCHAR 255, NOT NULL)
+   - description (TEXT, NULLABLE)
+   - version (VARCHAR 50, NULLABLE)
+   - docker_image (VARCHAR 255, NOT NULL)
+   - dockerfile_path (VARCHAR 255, NULLABLE)
+   - docker_compose_file (TEXT, NULLABLE)
+   - docker_network (VARCHAR 255, NULLABLE)
+   - github_repo_url (VARCHAR 255, NULLABLE)
+   - github_branch (VARCHAR 255, DEFAULT 'main')
+   - webhook_token (VARCHAR 255, NULLABLE)
+   - port_internal (INT, DEFAULT 8080)
+   - port_external (INT, NULLABLE)
+   - custom_url (VARCHAR 255, UQ, NULLABLE)
+   - env_vars (JSONB, DEFAULT '{}')
+   - status (VARCHAR 50, DEFAULT 'stopped')
+   - is_public (BOOLEAN, DEFAULT false)
+   - max_instances (INT, DEFAULT 2)
+   - current_instances (INT, DEFAULT 0)
+   - owner_id (UUID, FK REFERENCES users(id))
+   - auto_update_enabled (BOOLEAN, DEFAULT true)
+   - auto_update_interval (VARCHAR 50, DEFAULT 'daily')
+   - created_at (TIMESTAMP, DEFAULT NOW())
+   - updated_at (TIMESTAMP, DEFAULT NOW())
+   - last_started (TIMESTAMP, NULLABLE)
+   - last_stopped (TIMESTAMP, NULLABLE)
+   - Indexes: idx_owner_id, idx_status, idx_name, idx_github_repo
+
+3. **containers**
+   - id (UUID, PK)
+   - container_id (VARCHAR 255, UQ)
+   - app_id (UUID, FK REFERENCES applications(id) ON DELETE CASCADE)
+   - cpu_limit (VARCHAR 50, DEFAULT '0.5')
+   - memory_limit (VARCHAR 50, DEFAULT '512m')
+   - port_assigned (INT)
+   - ip_address (VARCHAR 50)
+   - status (VARCHAR 50, DEFAULT 'exited')
+   - started_at (TIMESTAMP, NULLABLE)
+   - exited_at (TIMESTAMP, NULLABLE)
+   - node_id (VARCHAR 255, NULLABLE)
+   - node_name (VARCHAR 255, NULLABLE)
+   - created_at (TIMESTAMP, DEFAULT NOW())
+   - updated_at (TIMESTAMP, DEFAULT NOW())
+   - Indexes: idx_app_id, idx_status, idx_node_id
+
+4. **deployments**
+   - id (UUID, PK)
+   - app_id (UUID, FK REFERENCES applications(id) ON DELETE CASCADE)
+   - deployment_type (VARCHAR 50, NOT NULL)
+   - status (VARCHAR 50, DEFAULT 'pending')
+   - git_commit_hash (VARCHAR 255, NULLABLE)
+   - git_commit_message (TEXT, NULLABLE)
+   - git_branch (VARCHAR 255, NULLABLE)
+   - deployed_by (UUID, FK REFERENCES users(id), NULLABLE)
+   - docker_image_hash (VARCHAR 255, NULLABLE)
+   - docker_image_size (INT, NULLABLE)
+   - started_at (TIMESTAMP, DEFAULT NOW())
+   - completed_at (TIMESTAMP, NULLABLE)
+   - duration_seconds (INT, NULLABLE)
+   - build_log (TEXT, NULLABLE)
+   - deployment_error (TEXT, NULLABLE)
+   - created_at (TIMESTAMP, DEFAULT NOW())
+   - Indexes: idx_app_id, idx_status, idx_deployed_by
+
+5. **metrics**
+   - id (BIGSERIAL, PK)
+   - container_id (UUID, FK REFERENCES containers(id) ON DELETE CASCADE)
+   - cpu_percent (FLOAT)
+   - memory_bytes (BIGINT)
+   - memory_percent (FLOAT)
+   - net_in_bytes (BIGINT)
+   - net_out_bytes (BIGINT)
+   - block_read_bytes (BIGINT)
+   - block_write_bytes (BIGINT)
+   - pids_current (INT)
+   - recorded_at (TIMESTAMP, DEFAULT NOW())
+   - Indexes: idx_container_recorded (container_id, recorded_at DESC)
+   - Retention: Delete records older than 30 days
+
+6. **github_webhooks**
+   - id (UUID, PK)
+   - app_id (UUID, FK REFERENCES applications(id) ON DELETE CASCADE)
+   - event_type (VARCHAR 50, NOT NULL)
+   - webhook_payload (JSONB)
+   - status (VARCHAR 50, DEFAULT 'received')
+   - processing_log (TEXT, NULLABLE)
+   - created_at (TIMESTAMP, DEFAULT NOW())
+   - processed_at (TIMESTAMP, NULLABLE)
+   - Indexes: idx_app_id, idx_event_type, idx_created_at
+
+7. **api_logs**
+   - id (BIGSERIAL, PK)
+   - user_id (UUID, FK REFERENCES users(id), NULLABLE)
+   - method (VARCHAR 10, NOT NULL)
+   - endpoint (VARCHAR 255, NOT NULL)
+   - status_code (INT)
+   - response_time_ms (INT)
+   - request_size_bytes (INT)
+   - response_size_bytes (INT)
+   - ip_address (VARCHAR 50)
+   - user_agent (TEXT)
+   - logged_at (TIMESTAMP, DEFAULT NOW())
+   - Indexes: idx_user_id, idx_endpoint, idx_logged_at
+   - Retention: Delete records older than 30 days
+
+### Files to Generate
+
+1. **services/database/init-db.sql**
+   - Complete SQL script with all tables
+   - Indexes
+   - Constraints
+   - Foreign keys with ON DELETE CASCADE where needed
+   - Default values
+   - Comments explaining each table
+
+2. **services/database/pgvector-init.sql**
+   - PgVector extension installation
+   - Configuration
+
+3. **services/longin-core/src/config/database.ts**
+   - TypeORM DataSource configuration
+   - Database connection parameters
+   - Logging configuration
+   - Migration runner setup
+   - Error handling
+
+4. **services/longin-core/src/entities/*.ts** (TypeORM entities)
+   - User.ts
+   - Application.ts
+   - Container.ts
+   - Deployment.ts
+   - Metrics.ts
+   - GitHubWebhook.ts
+   - ApiLog.ts
+   - Each with proper decorators & types
+
+5. **services/longin-core/src/config/redis.ts**
+   - Redis client configuration (ioredis)
+   - Connection pooling
+   - Error handling
+   - Reconnection logic
+
+6. **services/longin-core/src/config/constants.ts**
+   - Application-wide constants
+   - Port numbers
+   - Timeouts
+   - Limits
+   - Default values
+
+7. **services/longin-core/src/utils/database.ts**
+   - Database helper functions
+   - Transaction management
+   - Query helpers
+   - Seed functions (initial admin user)
+
+8. **.env.example** (updated)
+   - Database credentials
+   - Redis configuration
+   - All required variables
+
+9. **scripts/init-db.sh**
+   - Database initialization script
+   - Create database
+   - Run migrations
+   - Seed initial data
+   - Run health check
+
+10. **docker-compose.yml** (updated)
+    - PostgreSQL service
+    - Redis service
+    - Health checks
+    - Proper environment variables
+    - Volume configuration
+
+### Specific Requirements
+
+✅ **Database Security**
+- Use parameterized queries (TypeORM prevents SQL injection)
+- Proper indexes on foreign keys & frequently queried columns
+- Proper data types (UUID for IDs, not strings)
+- Created/updated timestamps on all tables
+
+✅ **Performance**
+- Indexes on all FK columns
+- Indexes on commonly searched columns (status, owner_id, etc.)
+- Proper partitioning considerations for large tables (metrics, api_logs)
+- Connection pooling configuration
+
+✅ **TypeORM Entities**
+- Proper decorators (@Entity, @Column, @PrimaryGeneratedColumn, etc.)
+- Relationships (@OneToMany, @ManyToOne)
+- Lazy loading disabled (eager loading only)
+- Column type mapping to database
+
+✅ **Redis Configuration**
+- Connection pooling
+- Automatic reconnection
+- Error handling & logging
+- Timeout configuration
+- Memory management settings
+
+### DELIVERABLES
+
+1. services/database/init-db.sql (complete schema)
+2. services/database/pgvector-init.sql (vector setup)
+3. services/longin-core/src/entities/ (all 7 entities)
+4. services/longin-core/src/config/database.ts (TypeORM config)
+5. services/longin-core/src/config/redis.ts (Redis config)
+6. services/longin-core/src/config/constants.ts (constants)
+7. services/longin-core/src/utils/database.ts (helpers)
+8. scripts/init-db.sh (setup script)
+9. Updated docker-compose.yml
+10. Updated .env.example
+
+### NOTES
+
+- Use UUID (gen_random_uuid()) for all primary keys
+- Use TIMESTAMP with DEFAULT NOW() for audit fields
+- Include comprehensive indexes
+- Add comments to SQL schema
+- TypeORM entities must match SQL schema exactly
+- Redis should have persistence enabled (RDB + AOF)
+- Include health check functions for both databases
+```
+
+### EXPECTED OUTPUT
+
+After running this prompt, you should have:
+- ✅ Complete database schema (SQL)
+- ✅ TypeORM entities for all tables
+- ✅ Database configuration & connection setup
+- ✅ Redis configuration
+- ✅ Migration & initialization scripts
+- ✅ Docker services for PostgreSQL & Redis
+
+---
+
+## 🔐 PROMPT 3: AUTHENTICATION & CORE API
+
+### WHEN TO USE
+- After Prompt 2 (database is set up)
+- Implementing user authentication
+- Creating REST API endpoints
+- Setting up middleware & error handling
+
+### PREVIEW
+
+This prompt will generate:
+- ✅ User registration & login endpoints
+- ✅ JWT token management
+- ✅ Password hashing (bcryptjs)
+- ✅ Auth middleware
+- ✅ Validation middleware
+- ✅ Error handling
+- ✅ Request/Response DTOs
+- ✅ Complete API structure
+
+[Due to length, the full prompt is below...]
+
+```
+# LONGIN HOSTING SERVER - AUTHENTICATION & CORE API PROMPT
+
+You are a backend API developer specializing in authentication & authorization.
+Your task is to implement the complete authentication system and REST API for 
+Longin Hosting Server.
+
+## CONTEXT
+
+Phase 1: Project structure ✅
+Phase 2: Database setup ✅
+Phase 3: THIS - Authentication & core API
+
+This builds on existing database entities from Prompt 2.
+
+## REQUIREMENTS
+
+### Authentication System
+
+**JWT Token Structure:**
+- Access Token: 1 hour lifetime
+  - Contains: userId, role, issued_at, expires_at
+  - Algorithm: HS256
+  - Stored in: httpOnly cookie (frontend) or Authorization header
+
+- Refresh Token: 7 days lifetime
+  - Contains: userId, token_version
+  - Stored in: Redis with userId as key
+  - Used to issue new access tokens
+
+**Password Security:**
+- Hash with bcryptjs (10 rounds)
+- Min 8 characters
+- Must contain: 1 uppercase, 1 digit, 1 special character
+- Never log passwords
+
+**Authorization:**
+- Role-based (ADMIN | USER)
+- Resource ownership check
+- Endpoint-level permissions
+
+### API Endpoints Required
+
+**Authentication Endpoints:**
+
+1. POST /api/auth/register
+   - Body: {username, email, password, confirmPassword}
+   - Returns: {user, accessToken, refreshToken}
+   - Status: 201 Created
+   - Validates: unique email/username, password strength
+   - Side effects: Create user, issue tokens, store in Redis
+
+2. POST /api/auth/login
+   - Body: {username/email, password}
+   - Returns: {user, accessToken, refreshToken}
+   - Status: 200 OK
+   - Validates: credentials correct
+   - Side effects: Update last_login, store refresh token
+
+3. POST /api/auth/refresh
+   - Body: {refreshToken}
+   - Returns: {accessToken}
+   - Status: 200 OK
+   - Validates: refresh token valid & not expired
+   - Side effects: None (refresh token unchanged)
+
+4. POST /api/auth/logout
+   - Headers: Authorization: Bearer {token}
+   - Returns: {success: true}
+   - Status: 200 OK
+   - Validates: valid token
+   - Side effects: Invalidate token in Redis
+
+5. GET /api/auth/me
+   - Headers: Authorization: Bearer {token}
+   - Returns: {user object with all properties}
+   - Status: 200 OK
+   - Validates: valid token
+
+**System Health Endpoints:**
+
+6. GET /health
+   - No auth required
+   - Returns: {status: 'ok' | 'degraded', checks: {...}}
+   - Checks: database, redis, docker
+
+7. GET /api/system/status (Admin only)
+   - Returns: detailed system status, uptime, services
+   - Status: 200 OK
+
+### Middleware Stack
+
+1. **Auth Middleware** (auth.middleware.ts)
+   - Extract JWT from Authorization header
+   - Validate signature & expiry
+   - Attach user to request.user
+   - Return 401 if invalid
+
+2. **Authorization Middleware** (auth-guard.middleware.ts)
+   - Check user.role against required role
+   - Check resource ownership
+   - Return 403 if unauthorized
+
+3. **Validation Middleware** (validation.middleware.ts)
+   - Validate request body using class-validator
+   - Return 400 with detailed errors
+   - Support nested object validation
+
+4. **Error Handler Middleware** (error-handler.middleware.ts)
+   - Catch all errors
+   - Log errors with Winston
+   - Return consistent error response
+   - Stack trace only in development
+
+5. **Request Logging Middleware** (logging.middleware.ts)
+   - Log all requests (method, path, status, duration)
+   - Log user ID if authenticated
+   - Store in PostgreSQL api_logs table
+
+6. **Rate Limiting Middleware** (rate-limit.middleware.ts)
+   - Per IP: 100 req/min
+   - Per user: 1000 req/hour
+   - Implemented via Redis
+   - Return 429 if exceeded
+
+### Files to Generate
+
+1. **src/dtos/auth.dto.ts**
+   - RegisterDto (username, email, password, confirmPassword)
+   - LoginDto (username, password)
+   - RefreshTokenDto (refreshToken)
+   - All with validators (email format, password strength, etc.)
+
+2. **src/dtos/response.dto.ts**
+   - ApiResponse (success, message, data, errors)
+   - UserDto (exclude password_hash)
+   - TokenDto (accessToken, refreshToken, expiresIn)
+
+3. **src/middleware/auth.middleware.ts**
+   - Extract JWT from headers
+   - Verify signature
+   - Refresh token if near expiry
+   - Attach to request
+
+4. **src/middleware/auth-guard.middleware.ts**
+   - Check role
+   - Check resource ownership
+   - Custom decorators support
+
+5. **src/middleware/validation.middleware.ts**
+   - Validate request body
+   - Return errors in consistent format
+
+6. **src/middleware/error-handler.middleware.ts**
+   - Centralized error handling
+   - Log to file/console
+   - Return proper HTTP status
+
+7. **src/middleware/logging.middleware.ts**
+   - Log all requests
+   - Store in api_logs table
+   - Include response time
+
+8. **src/middleware/rate-limit.middleware.ts**
+   - Check Redis for request count
+   - Increment count
+   - Return 429 if exceeded
+
+9. **src/middleware/index.ts**
+   - Export all middleware
+
+10. **src/utils/jwt.ts**
+    - generateAccessToken(userId, role)
+    - generateRefreshToken(userId)
+    - verifyAccessToken(token)
+    - verifyRefreshToken(token)
+    - decodeToken(token, options)
+
+11. **src/utils/password.ts**
+    - hashPassword(plaintext)
+    - comparePassword(plaintext, hash)
+    - validatePasswordStrength(password)
+    - generateResetToken()
+
+12. **src/utils/validators.ts**
+    - isValidEmail(email)
+    - isValidUsername(username)
+    - isStrongPassword(password)
+    - Custom validators for class-validator
+
+13. **src/services/auth.service.ts**
+    - register(registerDto)
+    - login(loginDto)
+    - refreshToken(refreshToken)
+    - logout(userId)
+    - validateUser(username, password)
+    - getMe(userId)
+
+14. **src/routes/auth.routes.ts**
+    - POST /register
+    - POST /login
+    - POST /refresh
+    - POST /logout
+    - GET /me
+    - All with proper middleware chain
+
+15. **src/routes/health.routes.ts**
+    - GET /health
+    - GET /api/system/status (admin)
+
+16. **src/routes/index.ts**
+    - Register all routes
+    - API versioning
+
+17. **src/app.ts** (updated)
+    - Add middleware stack
+    - Add routes
+    - Error handling
+    - CORS configuration
+    - Helmet security headers
+
+18. **tests/auth.service.test.ts**
+    - Unit tests for auth service
+    - Test register, login, validation
+    - Mock database & redis
+
+19. **tests/auth.routes.test.ts**
+    - Integration tests
+    - Test endpoints with Supertest
+    - Test error cases
+
+20. **src/config/security.ts**
+    - CORS whitelist
+    - Security headers (Helmet config)
+    - Rate limiting thresholds
+
+### Specific Requirements
+
+✅ **Security**
+- Never log passwords
+- Use httpOnly cookies for tokens (XSS protection)
+- CSRF protection via headers
+- Password hashing required
+- Token revocation on logout
+- Refresh token rotation (optional but recommended)
+
+✅ **Validation**
+- All inputs validated (no null/undefined)
+- Email format validation
+- Password strength requirements
+- Username length & character restrictions
+- SQL injection prevention (via TypeORM)
+
+✅ **Error Handling**
+- Consistent error responses
+- Proper HTTP status codes
+- User-friendly error messages
+- Detailed server logging
+- No sensitive info in error responses (client)
+
+✅ **Performance**
+- Redis for token blacklist (fast logout)
+- Index on user lookups
+- Prepared statements (TypeORM)
+- Connection pooling
+
+### DELIVERABLES
+
+1. All DTOs (request/response objects)
+2. All middleware (auth, validation, error, logging, rate-limit)
+3. Utility functions (JWT, password, validators)
+4. Auth service with complete logic
+5. Auth routes (all 5 endpoints)
+6. Health routes
+7. Updated app.ts with middleware stack
+8. Tests for auth service & routes
+9. Security configuration
+10. Postman/Insomnia collection for testing
+```
+
+---
+
+## 🐳 PROMPT 4: DOCKER INTEGRATION & APP MANAGEMENT
+
+### WHEN TO USE
+- After Prompt 3 (auth & basic API exists)
+- Implementing Docker container management
+- Creating app management API endpoints
+- Setting up app lifecycle management
+
+### KEY FEATURES
+- Docker SDK integration (dockerode)
+- Container creation/start/stop
+- Port allocation
+- App instance limiting
+- Status tracking
+
+---
+
+## 🔌 PROMPT 5: WEBSOCKET & REAL-TIME UPDATES
+
+### WHEN TO USE
+- After Prompt 4 (app management API done)
+- Implementing Socket.io real-time updates
+- Broadcasting metrics & events
+- Real-time log streaming
+
+### KEY FEATURES
+- Socket.io server setup
+- Authenticated connections
+- Event namespaces (/apps, /monitoring, /logs)
+- Metric broadcasting every 5 seconds
+- Log streaming
+
+---
+
+## 🎨 PROMPT 6: FRONTEND IMPLEMENTATION
+
+### WHEN TO USE
+- Parallel to Prompts 3-5 (or after all backend done)
+- Building React UI
+- Setting up component library
+- API integration
+
+### KEY FEATURES
+- React 18 + TypeScript
+- Tailwind CSS styling
+- Redux state management
+- Socket.io client integration
+- Responsive design
+
+---
+
+## 📊 PROMPT 7: MONITORING, LOGGING & DEPLOYMENT
+
+### WHEN TO USE
+- After all other services are implemented
+- Setting up monitoring stack
+- Configuring ELK logging
+- Production deployment
+
+### KEY FEATURES
+- Prometheus metrics collection
+- Grafana dashboards
+- ELK stack (Elasticsearch, Logstash, Kibana)
+- Traefik reverse proxy
+- Docker Swarm deployment
+
+---
+
+## 📚 ADDITIONAL RESOURCES
+
+### Reference Documents
+- PRD: Complete system specification
+- Architecture: System design & diagrams
+- API Spec: Detailed endpoint documentation
+- Database Schema: SQL schema & relationships
+
+### Tools & Technologies
+- **API Testing:** Postman / Insomnia / REST Client
+- **Database:** pgAdmin (PostgreSQL GUI)
+- **Redis:** RedisInsight (Redis GUI)
+- **Logging:** Kibana (log visualization)
+- **Monitoring:** Grafana (metrics visualization)
+
+### Usage Flow
+
+```
+1. Run Prompt 1 → Project structure
+2. Run Prompt 2 → Database setup
+3. Run Prompt 3 → Auth & API (start testing!)
+4. Run Prompt 4 → Docker integration
+5. Run Prompt 5 → WebSocket real-time
+6. Run Prompt 6 → React frontend (in parallel with 4-5)
+7. Run Prompt 7 → Monitoring & deployment
+```
+
+---
+
+## 🎯 SUCCESS CRITERIA
+
+✅ **By end of Prompt 1:** Project structure ready, all config files in place
+
+✅ **By end of Prompt 2:** Database running, migrations applied, data accessible
+
+✅ **By end of Prompt 3:** Register/login working, tokens generated & validated
+
+✅ **By end of Prompt 4:** Apps can be started/stopped, containers tracked in DB
+
+✅ **By end of Prompt 5:** Real-time metrics visible in browser, logs streaming
+
+✅ **By end of Prompt 6:** Frontend fully functional, all pages operational
+
+✅ **By end of Prompt 7:** System monitored, logs centralized, ready for production
+
+---
+
+**Document Version:** 1.0  
+**Created:** Březen 2025  
+**Status:** READY - Use with Claude/Cursor AI Agent

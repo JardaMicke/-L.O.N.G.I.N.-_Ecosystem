@@ -1,0 +1,240 @@
+version: '3.8'
+
+services:
+  # Ollama LLM Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: longin-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./data/ollama-models:/root/.ollama
+    restart: unless-stopped
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_HOST=0.0.0.0
+    # GPU support if available
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    # Fallback for systems without GPU
+    profiles:
+      - gpu
+
+  # Ollama CPU fallback service
+  ollama-cpu:
+    image: ollama/ollama:latest
+    container_name: longin-ollama-cpu
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./data/ollama-models:/root/.ollama
+    restart: unless-stopped
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_NUM_PARALLEL=2
+    profiles:
+      - cpu
+
+  # ComfyUI for image generation
+  comfyui:
+    image: ghcr.io/comfyanonymous/comfyui:latest
+    container_name: longin-comfyui
+    ports:
+      - "7860:7860"
+    volumes:
+      - ./data/comfyui-models:/models
+      - ./data/comfyui-outputs:/outputs
+      - ./data/comfyui-input:/input
+    environment:
+      - EXTRA_ARGS=--listen --enable-api --disable-safe-unpickle
+    restart: unless-stopped
+    # GPU support if available
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - gpu
+
+  # ComfyUI CPU fallback service
+  comfyui-cpu:
+    image: ghcr.io/comfyanonymous/comfyui:latest
+    container_name: longin-comfyui-cpu
+    ports:
+      - "7860:7860"
+    volumes:
+      - ./data/comfyui-models:/models
+      - ./data/comfyui-outputs:/outputs
+      - ./data/comfyui-input:/input
+    environment:
+      - EXTRA_ARGS=--listen --enable-api --disable-safe-unpickle --cpu
+    restart: unless-stopped
+    profiles:
+      - cpu
+
+  # Redis for caching and session storage
+  redis:
+    image: redis:alpine
+    container_name: longin-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis-data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis123}
+    restart: unless-stopped
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redis123}
+
+  # Coqui TTS for voice synthesis
+  coqui-tts:
+    image: coqui/tts-cpu:latest
+    container_name: longin-tts
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./data/coqui-models:/app/models
+      - ./data/coqui-cache:/tmp/cache
+    environment:
+      - TTS_CACHE_FOLDER=/tmp/cache
+      - TTS_PORT=5002
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # PostgreSQL Database (alternative to SQLite for production)
+  postgres:
+    image: postgres:15-alpine
+    container_name: longin-postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-longin_ai}
+      - POSTGRES_USER=${POSTGRES_USER:-longin_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-longin_pass123}
+    restart: unless-stopped
+    profiles:
+      - postgres
+
+  # Backend API
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: longin-backend
+    ports:
+      - "3000:3000"
+      - "3001:3001"  # pro HTTPS, pokud je povoleno
+    volumes:
+      - ../backend:/app
+      - /app/node_modules
+      - ./data/uploads:/app/public/uploads
+      - ./data/ssl:/app/ssl
+    depends_on:
+      - redis
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=3000
+      - DB_PATH=${DB_PATH:-/app/database.sqlite}
+      - JWT_SECRET=${JWT_SECRET:-longin-ai-super-secret-jwt-key-2023}
+      - SESSION_SECRET=${SESSION_SECRET:-longin-ai-session-secret-2023}
+      
+      # External API URLs
+      - OLLAMA_API_URL=${OLLAMA_API_URL:-http://ollama:11434}
+      - COMFYUI_API_URL=${COMFYUI_API_URL:-http://comfyui:7860}
+      - TTS_API_URL=${TTS_API_URL:-http://coqui-tts:5002}
+      - REDIS_URL=${REDIS_URL:-redis://:redis123@redis:6379}
+      
+      # Optional external services
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY:-}
+      - AZURE_TTS_KEY=${AZURE_TTS_KEY:-}
+      - AZURE_TTS_REGION=${AZURE_TTS_REGION:-eastus}
+      
+      # Security settings
+      - USE_HTTPS=${USE_HTTPS:-false}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3001}
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - MAX_UPLOAD_SIZE=${MAX_UPLOAD_SIZE:-10485760}
+      
+      # Database settings (for PostgreSQL profile)
+      - USE_POSTGRES=${USE_POSTGRES:-false}
+      - POSTGRES_URL=${POSTGRES_URL:-postgresql://longin_user:longin_pass123@postgres:5432/longin_ai}
+      
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend web aplikace (volitelné, pro standalone deployment)
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: longin-frontend
+    ports:
+      - "3001:80"
+    environment:
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:3000/api}
+      - REACT_APP_SOCKET_URL=${REACT_APP_SOCKET_URL:-http://localhost:3000}
+    restart: unless-stopped
+    profiles:
+      - web
+    depends_on:
+      - backend
+
+  # Nginx reverse proxy (volitelné, pro produkci)
+  nginx:
+    image: nginx:alpine
+    container_name: longin-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    profiles:
+      - proxy
+
+volumes:
+  ollama-models:
+    driver: local
+  comfyui-models:
+    driver: local
+  comfyui-outputs:
+    driver: local
+  redis-data:
+    driver: local
+  postgres-data:
+    driver: local
+  uploads:
+    driver: local
+
+# Network definice pro lepší izolaci
+networks:
+  default:
+    name: longin-ai-network
+    driver: bridge

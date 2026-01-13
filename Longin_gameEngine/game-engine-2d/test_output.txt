@@ -1,0 +1,13 @@
+FAIL tests/world/chunk-system.test.ts
+  ÔŚĆ Test suite failed to run
+
+    src/world/chunk-manager.ts:1:24 - error TS2307: Cannot find module 'rxjs/internal/scheduler/Action' or its corresponding type declarations.
+
+    1 import { Action } from 'rxjs/internal/scheduler/Action';
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        3.03 s
+Ran all test suites matching tests/world/chunk-system.test.ts.

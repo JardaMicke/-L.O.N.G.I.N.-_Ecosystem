@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAN-over-Internet - Síťové Připojení</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-network-wired"></i>
+                    <h1>LAN-over-Internet</h1>
+                </div>
+                <div class="connection-status" id="connectionStatus">
+                    <div class="status-indicator offline" id="statusIndicator"></div>
+                    <span id="statusText">Odpojeno</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Connection Setup -->
+            <section class="connection-setup" id="connectionSetup">
+                <div class="setup-card">
+                    <h2>Připojení k síti</h2>
+                    <p>Zadejte název vašeho počítače pro připojení k síti</p>
+                    
+                    <div class="input-group">
+                        <label for="clientName">Název počítače:</label>
+                        <input type="text" id="clientName" placeholder="Můj počítač" maxlength="50">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="pinCode">PIN kód:</label>
+                        <input type="password" id="pinCode" placeholder="••••" maxlength="4">
+                    </div>
+                    
+                    <button class="btn btn-primary" id="connectBtn">
+                        <i class="fas fa-plug"></i>
+                        Připojit se
+                    </button>
+                </div>
+            </section>
+
+            <!-- Dashboard -->
+            <section class="dashboard" id="dashboard" style="display: none;">
+                <!-- Client Info -->
+                <div class="client-info">
+                    <div class="info-card">
+                        <h3>Informace o klientovi</h3>
+                        <div class="info-item">
+                            <span class="label">Název:</span>
+                            <span class="value" id="clientNameDisplay">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">ID:</span>
+                            <span class="value" id="clientIdDisplay">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Stav:</span>
+                            <span class="value status-online" id="clientStatusDisplay">Online</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Peer List -->
+                <div class="peer-section">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-users"></i>
+                            Online počítače
+                        </h3>
+                        <button class="btn btn-secondary btn-small" id="refreshBtn">
+                            <i class="fas fa-sync-alt"></i>
+                            Obnovit
+                        </button>
+                    </div>
+                    
+                    <div class="peer-list" id="peerList">
+                        <div class="empty-state">
+                            <i class="fas fa-desktop"></i>
+                            <p>Žádné další počítače nejsou online</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Connections -->
+                <div class="connections-section">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-link"></i>
+                            Aktivní připojení
+                        </h3>
+                        <div class="header-actions">
+                            <button class="btn btn-secondary btn-small" id="addServiceBtn">
+                                <i class="fas fa-plus"></i>
+                                Přidat službu
+                            </button>
+                            <button class="btn btn-secondary btn-small" id="diskBtn">
+                                <i class="fas fa-hdd"></i>
+                                Disk
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="connections-list" id="connectionsList">
+                        <div class="empty-state">
+                            <i class="fas fa-unlink"></i>
+                            <p>Žádná aktivní připojení</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LLM Chat Section -->
+                <div class="llm-chat-section">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-robot"></i>
+                            LLM Chat
+                        </h3>
+                    </div>
+                    <div class="llm-chat-window" id="llmChatWindow">
+                        <div class="llm-chat-messages" id="llmMessages">
+                            <div class="llm-message welcome">
+                                <p class="llm-name">AI Asistent</p>
+                                <p class="llm-text">Dobrý den! Jak vám dnes mohu pomoci?</p>
+                            </div>
+                        </div>
+                        <form class="llm-chat-input-form" id="llmChatForm">
+                            <textarea id="llmMessageInput" placeholder="Zadejte svůj dotaz pro AI..." rows="1"></textarea>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Shared Folders -->
+                <div class="shared-folders-section">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-folder-open"></i>
+                            Sdílené složky
+                        </h3>
+                        <button class="btn btn-secondary btn-small" id="addFolderBtn">
+                            <i class="fas fa-plus"></i>
+                            Přidat složku
+                        </button>
+                    </div>
+                    <div class="shared-folders-list" id="sharedFoldersList">
+                        <div class="empty-state">
+                            <i class="fas fa-folder"></i>
+                            <p>Žádné sdílené složky</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Folder Contents View -->
+                <div class="folder-contents-view" id="folderContentsView" style="display: none;">
+                    <div class="section-header">
+                        <button class="btn btn-secondary btn-small" id="backToFoldersBtn">
+                            <i class="fas fa-arrow-left"></i>
+                            Zpět
+                        </button>
+                        <h3 id="folderNameHeader"></h3>
+                    </div>
+                    <div class="folder-contents-list" id="folderContentsList">
+                        <!-- Folder contents will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Add Service Form -->
+                <div class="add-service-form" id="addServiceForm" style="display: none;">
+                    <div class="setup-card">
+                        <h2>Přidat novou službu</h2>
+                        <p>Zadejte podrobnosti o službě, kterou chcete přidat.</p>
+                        
+                        <div class="input-group">
+                            <label for="serviceName">Název služby:</label>
+                            <input type="text" id="serviceName" placeholder="Např. Moje webová stránka">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="serviceUrl">URL:</label>
+                            <input type="text" id="serviceUrl" placeholder="https://...">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="servicePorts">Porty:</label>
+                            <input type="text" id="servicePorts" placeholder="80, 443">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="serviceToken">Token/Klíč:</label>
+                            <input type="text" id="serviceToken" placeholder="Nepovinné">
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" id="cancelAddServiceBtn">Zrušit</button>
+                            <button class="btn btn-primary" id="saveServiceBtn">Uložit službu</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Tools -->
+                <div class="tools-section">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-tools"></i>
+                            Síťové nástroje
+                        </h3>
+                    </div>
+                    
+                    <div class="tools-grid">
+                        <button class="tool-btn" id="pingAllBtn">
+                            <i class="fas fa-satellite-dish"></i>
+                            <span>Ping všechny</span>
+                        </button>
+                        
+                        <button class="tool-btn" id="showStatsBtn">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Statistiky</span>
+                        </button>
+                        
+                        <button class="tool-btn" id="disconnectAllBtn">
+                            <i class="fas fa-power-off"></i>
+                            <span>Odpojit vše</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Disconnect Button -->
+                <div class="disconnect-section">
+                    <button class="btn btn-danger" id="disconnectBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Odpojit se od sítě
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Notifications -->
+        <div class="notifications" id="notifications"></div>
+
+        <!-- Modals -->
+        <!-- Connection Request Modal -->
+        <div class="modal" id="connectionRequestModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Požadavek na připojení</h3>
+                </div>
+                <div class="modal-body">
+                    <p id="connectionRequestText">Počítač "Název" chce se připojit k vašemu počítači.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="rejectConnectionBtn">Odmítnout</button>
+                    <button class="btn btn-primary" id="acceptConnectionBtn">Přijmout</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Modal -->
+        <div class="modal" id="statisticsModal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeStatsModal">&times;</span>
+                <h2>Statistiky sítě</h2>
+                <div id="statisticsContent" class="statistics-grid"></div>
+            </div>
+        </div>
+
+        <!-- Add Shared Folder Modal -->
+        <div class="modal" id="addFolderModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Přidat sdílenou složku</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <label for="folderPath">Cesta ke složce:</label>
+                        <input type="text" id="folderPath" placeholder="C:\Users\...\MojeSložka">
+                    </div>
+                    <div class="input-group">
+                        <label for="folderSize">Velikost (MB):</label>
+                        <input type="number" id="folderSize" placeholder="1024">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="cancelAddFolderBtn">Zrušit</button>
+                    <button class="btn btn-primary" id="saveFolderBtn">Uložit</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="notifications"></div>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="socket-client.js"></script>
+    <script src="webrtc-client.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+

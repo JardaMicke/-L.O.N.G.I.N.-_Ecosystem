@@ -1,0 +1,34 @@
+# Tasks - Reborn from Magic (RFM) Implementation
+
+- [x] Initialize RFM Project Structure <!-- id: 0 -->
+    - [x] Create `services/rfm-game` directory <!-- id: 1 -->
+    - [x] Setup `package.json` for frontend and backend <!-- id: 2 -->
+    - [x] Configure `tsconfig.json` <!-- id: 3 -->
+- [x] Implement Core Engine <!-- id: 4 -->
+    - [x] Create `GameLoop` <!-- id: 5 -->
+    - [x] Implement `GridSystem` (Abstracting Hex/Square) <!-- id: 6 -->
+    - [x] Implement `EntityManager` <!-- id: 7 -->
+- [x] Implement Map & Resources <!-- id: 8 -->
+    - [x] Map Generation (Sources, Terrain) <!-- id: 9 -->
+    - [x] Resource Logic (Energy, Stone, etc.) <!-- id: 10 -->
+    - [x] Rendering System (Canvas/WebGL) <!-- id: 11 -->
+- [x] Implement Units & Tasks <!-- id: 12 -->
+    - [x] `Blob` Entity & Movement <!-- id: 13 -->
+    - [x] `TaskManager` (Job distribution) <!-- id: 14 -->
+    - [x] Worker AI (Gather, Build) <!-- id: 15 -->
+- [x] Implement Buildings & Expansion <!-- id: 16 -->
+    - [x] `Fortress` and Energy Grid <!-- id: 17 -->
+    - [x] `BuilderHut` and Construction <!-- id: 18 -->
+    - [x] Territory Expansion Logic <!-- id: 19 -->
+- [x] Implement Combat & Command Blobs <!-- id: 20 -->
+    - [x] `CommandBlob` Entity <!-- id: 21 -->
+    - [x] Army Editor UI <!-- id: 22 -->
+    - [x] Combat Logic (Waves, HP) <!-- id: 23 -->
+- [x] Integration & UI <!-- id: 24 -->
+    - [x] Main Menu & Lobby <!-- id: 25 -->
+    - [x] Game HUD (Resources, Inspector) <!-- id: 26 -->
+    - [x] Integration with Longin Hosting <!-- id: 27 -->
+- [ ] Implement Real Integration & Rendering <!-- id: 28 -->
+    - [ ] Connect GameView to Game Engine <!-- id: 29 -->
+    - [ ] Implement Entity Rendering in CanvasRenderer <!-- id: 30 -->
+    - [ ] Verify Game Loop & Rendering <!-- id: 31 -->

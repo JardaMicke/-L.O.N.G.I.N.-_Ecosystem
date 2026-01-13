@@ -1,0 +1,1446 @@
+# 📋 LONGIN HOSTING SERVER - COMPLETE PRD DOCUMENTATION
+
+**Verze:** 2.0 - COMPLETE EXPANDED  
+**Datum vytvoření:** Březen 2025  
+**Status:** READY FOR AI AGENT IMPLEMENTATION  
+**Primární jazyk:** Čeština (with English technical terms)  
+**Target Platform:** Windows (Docker Desktop) + Multi-machine Docker Swarm  
+
+---
+
+## 📑 OBSAH KOMPLETNÍ DOKUMENTACE
+
+1. [Executive Summary](#executive-summary)
+2. [Architektura & Technologický Stack](#architektura--technologický-stack)
+3. [Specifikace Mikroservis (Detailní)](#specifikace-mikroservis-detailní)
+4. [Uživatelské Role & Permise](#uživatelské-role--permise)
+5. [Datová Schémata (SQL)](#datová-schémata-sql)
+6. [API Specifikace (Kompletní)](#api-specifikace-kompletní)
+7. [UI/UX Design (Detailní)](#uiux-design-detailní)
+8. [Datové & Uživatelské Toky](#datové--uživatelské-toky)
+9. [Konfigurace & Deployment](#konfigurace--deployment)
+10. [Implementační Plán pro AI Agent](#implementační-plán-pro-ai-agent)
+11. [Adresářová Struktura & Soubory](#adresářová-struktura--soubory)
+12. [Bezpečnost & Best Practices](#bezpečnost--best-practices)
+13. [Monitoring & Alert Rules](#monitoring--alert-rules)
+14. [Disaster Recovery & Backup](#disaster-recovery--backup)
+15. [Troubleshooting & FAQ](#troubleshooting--faq)
+
+---
+
+## 🎯 EXECUTIVE SUMMARY
+
+### PROJEKT: Longin Hosting Server
+
+**Longin Hosting Server** je distribuovaná hosting platforma umožňující uživatelům spravovat, spouštět a monitorovat dockerizované aplikace přes web nebo desktop klient. Systém podporuje automatický deployment z GitHubu, real-time monitoring, centralizované logování a horizontální škálování přes Docker Swarm.
+
+### KLÍČOVÉ VLASTNOSTI
+
+✅ **User Management**
+- Registrace a přihlášení
+- Role-based access control (Admin, User)
+- JWT authentication
+- Password reset & 2FA (future)
+
+✅ **Application Management**
+- Procházení dostupných aplikací
+- Spuštění/zastavení s kontrolou zátěže (max 2 simultánně)
+- Sledování stavu běžících aplikací
+- Stažení klienta aplikace
+- Custom URL přiřazení (app.longin.local)
+
+✅ **Monitoring & Metrics**
+- Real-time metriky (CPU, Memory, Network)
+- Historické data (30 dní retention)
+- Prometheus + Grafana visualization
+- WebSocket real-time broadcast
+
+✅ **Logging & Debugging**
+- Centralizované logování (ELK Stack)
+- Per-app logy s filtráním
+- Full-text search v Kibana
+- Log retention policy (30 dní)
+
+✅ **Deployment & CI/CD**
+- GitHub webhook integration
+- Automatické deployment na push
+- Git-based versioning
+- Rollback capability
+
+✅ **Admin Panel**
+- System monitoring dashboard
+- User management
+- Deployment history
+- Settings & configuration
+
+✅ **Infrastructure**
+- Mikroservis architektura (12-15 služeb)
+- Multi-machine Docker Swarm
+- PostgreSQL + PgVector + Redis
+- Docker container orchestration
+- Traefik reverse proxy + load balancing
+
+### CÍLOVÁ SKUPINA
+
+| Profil | Popis | Primární Use Case |
+|--------|-------|-------------------|
+| **Developer** | Chce spustit svou aplikaci online | Push do GitHub → auto-deploy |
+| **Game Developer** | Chce hostit multiplayer games | Spravovat instance, sledovat metriky |
+| **System Admin** | Spravuje infrastrukturu | Monitoring, user management, backups |
+| **DevOps Engineer** | Konfiguruje Swarm & deployment | Multi-machine orchestration |
+
+### BUSINESS REQUIREMENTS
+
+- **Uptime:** 99.5% (20 dní na měsíc bez vynucené výpadky)
+- **Max Users:** 100+ (Phase 1: 10)
+- **Max Apps:** 50+ (Phase 1: 20)
+- **Max Parallel Instances:** 50 kontejnerů
+- **Response Time:** <200ms 95th percentile
+- **Scalability:** Horizontální přidáváním Docker Swarm nodeů
+
+---
+
+## 🏗️ ARCHITEKTURA & TECHNOLOGICKÝ STACK
+
+### COMPLETE TECH STACK BREAKDOWN
+
+```yaml
+FRONTEND LAYER:
+  Web UI:
+    - React 18.2+ (TypeScript)
+    - Vite (bundler)
+    - Tailwind CSS 3+
+    - Socket.io client (WebSocket)
+    - Axios (HTTP client)
+    - React Router v6
+    - Redux Toolkit (state management)
+    - React Query (data fetching)
+    
+  Desktop Client (Optional):
+    - Electron 25+
+    - Vue 3 (lightweight)
+    - Auto-update (electron-updater)
+    - System tray integration
+
+BACKEND LAYER:
+  API Server:
+    - Node.js 20 LTS
+    - Express 4.18+
+    - TypeScript 5+
+    - class-validator (validation)
+    - class-transformer (DTO serialization)
+    - Winston (logging)
+    
+  Real-time Communication:
+    - Socket.io 4.6+ (WebSocket)
+    - Message queueing via Redis
+    
+  Docker Management:
+    - Docker SDK (dockerode)
+    - Docker Compose
+    - Docker Swarm native
+    
+  Authentication:
+    - JWT (jsonwebtoken)
+    - bcryptjs (password hashing)
+    - passport.js (optional for OAuth2)
+
+DATABASE LAYER:
+  Primary DB:
+    - PostgreSQL 16 (Alpine)
+    - TypeORM (ORM)
+    - Liquibase (migrations)
+    
+  Vector DB:
+    - pgvector extension (for AI/ML future)
+    
+  Cache:
+    - Redis 7 (Alpine)
+    - ioredis (client)
+    - Redis modules (optional)
+    
+  Local Logging:
+    - SQLite 3 (backup logging)
+
+MONITORING & OBSERVABILITY:
+  Metrics Collection:
+    - Prometheus 2.40+
+    - prom-client (Node.js metrics)
+    - Pushgateway (optional)
+    
+  Visualization:
+    - Grafana 10+ (dashboards)
+    - Grafana Loki (optional log aggregation)
+    
+  Logging:
+    - Elasticsearch 8.10+
+    - Logstash 8.10+
+    - Kibana 8.10+
+    - Fluent Bit (agent)
+    
+  APM (optional):
+    - Jaeger (distributed tracing)
+
+ORCHESTRATION & NETWORKING:
+  Container Runtime:
+    - Docker Engine 24+
+    - Docker Compose v2
+    
+  Orchestration:
+    - Docker Swarm (native)
+    - Traefik v3 (reverse proxy)
+    - Overlay networks (VXLAN)
+    
+  Load Balancing:
+    - Traefik built-in
+    - HTTPS/SSL (Let's Encrypt ready)
+
+CI/CD & DEPLOYMENT:
+  VCS Integration:
+    - GitHub API
+    - GitHub Actions (optional)
+    - Git webhooks
+    
+  Build Tools:
+    - Docker Build
+    - BuildKit (optimized builds)
+    
+  Image Registry:
+    - Docker Hub (public)
+    - Private registry (optional)
+
+SECURITY:
+  Authentication:
+    - JWT tokens
+    - bcryptjs password hashing
+    
+  Authorization:
+    - Role-based access control (RBAC)
+    - Permission matrices
+    
+  Encryption:
+    - TLS/SSL (transport)
+    - bcrypt (at-rest for passwords)
+    - env encryption (dotenv-vault)
+    
+  Secrets Management:
+    - Docker Secrets (Swarm)
+    - .env files (dev)
+    - Vault (optional - production)
+
+DEVELOPMENT TOOLS:
+  Version Control:
+    - Git (GitHub)
+    
+  Package Management:
+    - npm 9+ / pnpm 8+
+    
+  Code Quality:
+    - ESLint
+    - Prettier
+    - TypeScript strict mode
+    - SonarQube (optional)
+    
+  Testing:
+    - Jest (unit tests)
+    - Supertest (API tests)
+    - Cypress (E2E tests - optional)
+    
+  Documentation:
+    - OpenAPI 3.0 (Swagger)
+    - MkDocs (deployment docs)
+    - Storybook (component docs - optional)
+    
+  Development Environment:
+    - Docker Desktop (Windows)
+    - Visual Studio Code
+    - Postman / Insomnia
+    - pgAdmin (PostgreSQL GUI)
+    - RedisInsight (Redis GUI)
+```
+
+### HIGH-LEVEL SYSTEM ARCHITECTURE
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                       EXTERNAL WORLD                            │
+├─────────────────────────────────────────────────────────────────┤
+│ GitHub    │  Browser  │  Desktop Client  │  Other Integrations │
+└────────┬──────┬──────────┬────────────────────┬────────────────┘
+         │      │          │                    │
+         │      ▼          ▼                    ▼
+    Webhooks   HTTP/WS     HTTP              API Calls
+         │      │          │                    │
+         └──────┼──────────┼────────────────────┘
+                │          │
+┌───────────────┼──────────┼────────────────────────────────────┐
+│               ▼          ▼                                    │
+│          ┌──────────────────────────────────┐               │
+│          │   TRAEFIK REVERSE PROXY          │               │
+│          │   (Port 80, 443, 8080)           │               │
+│          │   - Route to services            │               │
+│          │   - Load balance                 │               │
+│          │   - SSL/TLS termination          │               │
+│          └──────┬───────────────────────────┘               │
+│                 │                                            │
+│    ┌────────────┼────────────────────┐                      │
+│    │            │                    │                      │
+│    ▼            ▼                    ▼                      │
+│ ┌──────────────────────────────────────────────────┐       │
+│ │       LONGIN CORE (Node.js/Express)              │       │
+│ │       (Port 3001, 3002 WebSocket)                │       │
+│ ├──────────────────────────────────────────────────┤       │
+│ │ • REST API Gateway & Routing                     │       │
+│ │ • JWT Authentication & Authorization            │       │
+│ │ • Docker Container Lifecycle Management         │       │
+│ │ • WebSocket Server (real-time updates)          │       │
+│ │ • GitHub Webhook Handler                        │       │
+│ │ • Request Validation & Error Handling           │       │
+│ │ • Metrics Collection & Broadcast                │       │
+│ └────────┬──────────────────────────────┬─────────┘       │
+│          │                              │                  │
+│    ┌─────▼─────────────┐      ┌────────▼──────────┐       │
+│    │                   │      │                   │        │
+│    ▼                   ▼      ▼                   ▼        │
+│ ┌─────────┐  ┌──────────────┐ ┌──────────┐ ┌──────────┐ │
+│ │ Database│  │  Cache       │ │  Logging │ │Monitoring│ │
+│ │PostgreSQL │  Redis       │ │ ELK      │ │Prometheus│ │
+│ │ + PgVector│ (Port 6379)  │ │ (9200)   │ │ (9090)   │ │
+│ │(Port 5432)│ • Sessions   │ │          │ │          │ │
+│ │           │ • Rate limit │ │          │ │          │ │
+│ │           │ • App status │ │          │ │          │ │
+│ └───────────┘ └──────────────┘ └──────────┘ └──────────┘ │
+│                                                            │
+│ ┌──────────────────────────────────────────────────┐     │
+│ │    DOCKER SWARM ORCHESTRATION                    │     │
+│ │    (Multi-machine Container Management)          │     │
+│ ├──────────────────────────────────────────────────┤     │
+│ │ • Service deployment & scaling                   │     │
+│ │ • Overlay networking (VXLAN)                     │     │
+│ │ • Service discovery                              │     │
+│ │ • Load balancing                                 │     │
+│ └────┬────────────────────┬───────────────┬────────┘     │
+│      │                    │               │              │
+│      ▼                    ▼               ▼              │
+│ ┌─────────────┐ ┌──────────────┐ ┌────────────────┐   │
+│ │ Manager Node│ │ Worker Node 1│ │ Worker Node N  │   │
+│ │ (Primary)   │ │ (optional)   │ │ (optional)     │   │
+│ ├─────────────┤ ├──────────────┤ ├────────────────┤   │
+│ │ Swarm Mgmt  │ │ Containers   │ │ Containers     │   │
+│ │ Monitoring  │ │ Running      │ │ Running        │   │
+│ │ Traefik     │ │ Apps         │ │ Apps           │   │
+│ │ Logging     │ │              │ │                │   │
+│ └─────────────┘ └──────────────┘ └────────────────┘   │
+│      │                    │               │              │
+│      └────────────────────┼───────────────┘              │
+│             ┌─────────────┴─────────────┐               │
+│             ▼                           ▼               │
+│       ┌───────────────┐         ┌────────────────┐    │
+│       │ User App      │         │ User App       │    │
+│       │ Container 1   │         │ Container N    │    │
+│       └───────────────┘         └────────────────┘    │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+### PORTY & KONFIGURACE - KOMPLETNÍ REFERENCE
+
+```yaml
+# ═══════════════════════════════════════════════════════════
+# LONGIN CORE SERVICES (Hlavní Manager node)
+# ═══════════════════════════════════════════════════════════
+
+FRONTEND_UI_PORT: 3000
+  Service: longin-ui (React)
+  Protocol: HTTP/HTTPS
+  Access: Public
+  Purpose: Web application interface
+
+LONGIN_CORE_API_PORT: 3001
+  Service: longin-core (Express API)
+  Protocol: HTTP/REST
+  Access: Public/Protected
+  Purpose: REST API endpoints
+
+LONGIN_CORE_WEBSOCKET_PORT: 3002
+  Service: longin-core (Socket.io)
+  Protocol: WebSocket/WS
+  Access: Protected
+  Purpose: Real-time updates & events
+
+# ═══════════════════════════════════════════════════════════
+# DOCKER & INFRASTRUCTURE
+# ═══════════════════════════════════════════════════════════
+
+DOCKER_SOCKET: /var/run/docker.sock
+  Service: Docker daemon
+  Access: Manager node only
+  Purpose: Container management
+
+TRAEFIK_DASHBOARD_PORT: 8080
+  Service: Traefik (reverse proxy)
+  Protocol: HTTP
+  Access: Protected (admin)
+  Purpose: Proxy admin interface
+
+TRAEFIK_API_PORT: 8081
+  Service: Traefik API
+  Protocol: HTTP
+  Access: Protected (admin)
+  Purpose: API for dynamic configuration
+
+# ═══════════════════════════════════════════════════════════
+# DATABASE & CACHE
+# ═══════════════════════════════════════════════════════════
+
+POSTGRES_PRIMARY_PORT: 5432
+  Service: PostgreSQL Master
+  Protocol: TCP
+  Access: Manager node only
+  Purpose: Primary database
+
+POSTGRES_REPLICA_PORT: 5433
+  Service: PostgreSQL Replica (optional)
+  Protocol: TCP
+  Access: Manager node only
+  Purpose: Read replica (HA setup)
+
+REDIS_MASTER_PORT: 6379
+  Service: Redis Master
+  Protocol: TCP
+  Access: Manager node only
+  Purpose: Cache & sessions
+
+REDIS_REPLICA_PORT: 6380
+  Service: Redis Replica (optional)
+  Protocol: TCP
+  Access: Manager node only
+  Purpose: Cache replica (HA setup)
+
+# ═══════════════════════════════════════════════════════════
+# MONITORING & OBSERVABILITY
+# ═══════════════════════════════════════════════════════════
+
+PROMETHEUS_PORT: 9090
+  Service: Prometheus
+  Protocol: HTTP
+  Access: Protected
+  Purpose: Metrics collection & storage
+
+PROMETHEUS_PUSHGATEWAY_PORT: 9091
+  Service: Prometheus Pushgateway
+  Protocol: HTTP
+  Access: Internal
+  Purpose: Metrics gateway for push-based monitoring
+
+GRAFANA_PORT: 3003
+  Service: Grafana
+  Protocol: HTTP
+  Access: Protected
+  Purpose: Metrics visualization & dashboards
+
+ELASTICSEARCH_PORT: 9200
+  Service: Elasticsearch
+  Protocol: HTTP (REST API)
+  Access: Internal
+  Purpose: Log data storage & search
+
+KIBANA_PORT: 5601
+  Service: Kibana
+  Protocol: HTTP
+  Access: Protected
+  Purpose: Log visualization & analysis
+
+LOGSTASH_PORT: 5044
+  Service: Logstash
+  Protocol: TCP (Beats protocol)
+  Access: Internal
+  Purpose: Log data pipeline & processing
+
+# ═══════════════════════════════════════════════════════════
+# DEPLOYED USER APPLICATIONS (DYNAMIC ALLOCATION)
+# ═══════════════════════════════════════════════════════════
+
+APP_BASE_PORT: 4000
+  Range: 4000-5000
+  Max Instances: 1001 (overkill, typically 50-100)
+  Assignment: Dynamic (first available port)
+  Purpose: User application containers
+
+# ═══════════════════════════════════════════════════════════
+# DOCKER SWARM INTER-NODE COMMUNICATION
+# ═══════════════════════════════════════════════════════════
+
+SWARM_MANAGER_PORT: 2377
+  Protocol: TCP
+  Direction: Manager to Manager (raft consensus)
+  Purpose: Swarm cluster management
+
+SWARM_NODE_TCP_PORT: 7946
+  Protocol: TCP
+  Direction: Node to Node (gossip protocol)
+  Purpose: Node communication & discovery
+
+SWARM_NODE_UDP_PORT: 7946
+  Protocol: UDP
+  Direction: Node to Node (gossip protocol)
+  Purpose: Node communication & discovery (UDP variant)
+
+SWARM_OVERLAY_VXLAN_PORT: 4789
+  Protocol: UDP
+  Direction: Node to Node (tunnel)
+  Purpose: Overlay network traffic (VXLAN encapsulation)
+
+# ═══════════════════════════════════════════════════════════
+# NETWORKING SUMMARY TABLE
+# ═══════════════════════════════════════════════════════════
+```
+
+| Port | Service | Type | Direction | Firewall |
+|------|---------|------|-----------|----------|
+| 80 | Traefik HTTP | TCP | External | Open |
+| 443 | Traefik HTTPS | TCP | External | Open |
+| 3000 | React UI | TCP | External | Open |
+| 3001 | API Gateway | TCP | External | Open |
+| 3002 | WebSocket | TCP | External | Open |
+| 3003 | Grafana | TCP | Protected | Open (admin only) |
+| 5432 | PostgreSQL | TCP | Internal | Closed |
+| 5601 | Kibana | TCP | Protected | Open (admin only) |
+| 6379 | Redis | TCP | Internal | Closed |
+| 8080 | Traefik Dashboard | TCP | Protected | Open (admin only) |
+| 9090 | Prometheus | TCP | Protected | Open (admin only) |
+| 9200 | Elasticsearch | TCP | Internal | Closed |
+| 2377 | Swarm Manager | TCP | Internal | Closed (inter-node) |
+| 7946 | Swarm Node | TCP/UDP | Internal | Closed (inter-node) |
+| 4789 | Overlay VXLAN | UDP | Internal | Closed (inter-node) |
+| 4000-5000 | User Apps | TCP | External | Dynamic |
+
+---
+
+## 📦 SPECIFIKACE MIKROSERVIS (DETAILNÍ)
+
+### MIKROSERVIS 1: LONGIN CORE (Node.js/Express)
+
+**Popis:** Centrální orchestrator všech služeb, API gateway, Docker manager.
+
+**Role & Odpovědnosti:**
+1. REST API endpoints pro frontend
+2. WebSocket server pro real-time updates
+3. Docker container lifecycle management
+4. JWT token validation & refresh
+5. Request routing a error handling
+6. Monitoring service heartbeat
+7. GitHub webhook handling
+8. Metrics collection & aggregation
+
+**Technologie:**
+- Node.js 20 LTS
+- Express 4.18+
+- TypeScript 5+
+- Socket.io 4.6+ (WebSocket)
+- dockerode (Docker SDK)
+- TypeORM (database access)
+- ioredis (Redis client)
+
+**Port:** 3001 (API), 3002 (WebSocket)
+
+**Moduly & Struktura:**
+
+```typescript
+src/
+├── config/
+│   ├── database.ts          // PostgreSQL connection
+│   ├── redis.ts             // Redis connection
+│   ├── docker.ts            // Docker SDK configuration
+│   └── constants.ts         // App constants & enums
+│
+├── middleware/
+│   ├── auth.middleware.ts   // JWT validation & token refresh
+│   ├── validation.middleware.ts  // Request DTO validation
+│   ├── errorHandler.middleware.ts  // Global error handler
+│   └── logging.middleware.ts  // Request logging to Winston
+│
+├── routes/
+│   ├── auth.routes.ts       // /api/auth/*
+│   ├── apps.routes.ts       // /api/apps/*
+│   ├── system.routes.ts     // /api/system/*
+│   ├── webhooks.routes.ts   // /api/webhooks/*
+│   └── health.routes.ts     // /health (health check)
+│
+├── services/
+│   ├── docker.service.ts    // Docker SDK wrapper
+│   │   ├── createContainer()
+│   │   ├── startContainer()
+│   │   ├── stopContainer()
+│   │   ├── getContainerStats()
+│   │   ├── pullImage()
+│   │   └── removeContainer()
+│   │
+│   ├── auth.service.ts      // Authentication logic
+│   │   ├── register()
+│   │   ├── login()
+│   │   ├── generateTokens()
+│   │   ├── refreshToken()
+│   │   └── validatePassword()
+│   │
+│   ├── app.service.ts       // Application management
+│   │   ├── getAllApps()
+│   │   ├── getAppById()
+│   │   ├── createApp()
+│   │   ├── updateApp()
+│   │   ├── deleteApp()
+│   │   ├── startApp()
+│   │   ├── stopApp()
+│   │   └── checkInstanceLimit()
+│   │
+│   ├── monitoring.service.ts  // Metrics & health
+│   │   ├── collectMetrics()
+│   │   ├── getContainerStats()
+│   │   ├── publishMetrics()
+│   │   └── getSystemStatus()
+│   │
+│   ├── deployment.service.ts  // Deployment & CI/CD
+│   │   ├── handleGitWebhook()
+│   │   ├── cloneRepository()
+│   │   ├── buildDockerImage()
+│   │   ├── deployContainer()
+│   │   └── rollback()
+│   │
+│   ├── notification.service.ts  // Email/Slack alerts
+│   │   ├── sendAlert()
+│   │   └── notifyUser()
+│   │
+│   └── cache.service.ts     // Redis operations
+│       ├── getSession()
+│       ├── setSession()
+│       ├── invalidateCache()
+│       └── publishEvent()
+│
+├── websocket/
+│   ├── server.ts            // Socket.io server setup
+│   ├── events.ts            // Event handlers
+│   │   ├── onAppStatusChange()
+│   │   ├── onContainerMetrics()
+│   │   ├── onDeploymentProgress()
+│   │   └── onLogEntry()
+│   │
+│   └── namespaces.ts        // Namespace organization
+│       ├── /apps            // App events
+│       ├── /monitoring      // Metrics events
+│       └── /logs            // Log streaming
+│
+├── utils/
+│   ├── validators.ts        // Validation helpers
+│   ├── jwt.ts               // JWT token utilities
+│   ├── logger.ts            // Winston logger config
+│   ├── helpers.ts           // Utility functions
+│   └── decorators.ts        // Custom decorators
+│
+├── entities/ (TypeORM)
+│   ├── User.ts
+│   ├── Application.ts
+│   ├── Container.ts
+│   ├── Deployment.ts
+│   └── Metrics.ts
+│
+├── dtos/ (Data Transfer Objects)
+│   ├── auth.dto.ts
+│   ├── app.dto.ts
+│   ├── container.dto.ts
+│   └── metrics.dto.ts
+│
+└── app.ts                   // Express application setup
+```
+
+**Klíčové Features:**
+
+| Feature | Implementace | Poznámka |
+|---------|--------------|----------|
+| Authentication | JWT + bcryptjs | Access + Refresh tokens |
+| Authorization | RBAC (Admin/User) | Role-based routes |
+| Docker Integration | dockerode SDK | Container lifecycle |
+| WebSocket | Socket.io | Real-time events |
+| Validation | class-validator | DTO validation |
+| Logging | Winston | File + console |
+| Error Handling | Global middleware | Custom error classes |
+| Rate Limiting | redis-rate-limiter | Prevent abuse |
+| Health Check | /health endpoint | For load balancers |
+
+---
+
+### MIKROSERVIS 2: LONGIN UI (React Frontend)
+
+**Popis:** Responsive web UI pro uživatele a admin management.
+
+**Port:** 3000
+
+**Technologie:**
+- React 18.2+
+- TypeScript 5+
+- Vite (bundler)
+- Tailwind CSS 3+
+- Socket.io-client (WebSocket)
+- React Router v6 (routing)
+- Redux Toolkit (state management)
+- React Query (data fetching & caching)
+- Axios (HTTP client)
+
+**Aplikační Struktura:**
+
+```
+src/
+├── pages/
+│   ├── Auth/
+│   │   ├── Login.tsx
+│   │   ├── Register.tsx
+│   │   ├── ForgotPassword.tsx
+│   │   └── ResetPassword.tsx
+│   │
+│   ├── Dashboard/
+│   │   ├── Dashboard.tsx (main hub)
+│   │   ├── MyApplications.tsx
+│   │   ├── AppBrowser.tsx
+│   │   ├── AppDetail.tsx
+│   │   └── Settings.tsx
+│   │
+│   ├── Admin/
+│   │   ├── AdminPanel.tsx (hub)
+│   │   ├── SystemStatus.tsx
+│   │   ├── UserManagement.tsx
+│   │   ├── DeploymentHistory.tsx
+│   │   ├── ApplicationManagement.tsx
+│   │   └── SystemSettings.tsx
+│   │
+│   └── Shared/
+│       ├── NotFound.tsx
+│       └── Unauthorized.tsx
+│
+├── components/
+│   ├── Auth/
+│   │   ├── LoginForm.tsx
+│   │   ├── RegisterForm.tsx
+│   │   ├── PasswordField.tsx
+│   │   └── ProtectedRoute.tsx
+│   │
+│   ├── Dashboard/
+│   │   ├── AppCard.tsx
+│   │   ├── AppList.tsx
+│   │   ├── AppFilters.tsx
+│   │   ├── MetricsPanel.tsx
+│   │   ├── LogsPanel.tsx
+│   │   ├── StatusBadge.tsx
+│   │   ├── ControlButtons.tsx
+│   │   └── AppModal.tsx
+│   │
+│   ├── Admin/
+│   │   ├── SystemMetrics.tsx
+│   │   ├── ServiceStatus.tsx
+│   │   ├── UserTable.tsx
+│   │   ├── UserModal.tsx
+│   │   ├── DeploymentTable.tsx
+│   │   └── AlertsList.tsx
+│   │
+│   ├── Common/
+│   │   ├── Header.tsx
+│   │   ├── Sidebar.tsx
+│   │   ├── Footer.tsx
+│   │   ├── Loading.tsx
+│   │   ├── Error.tsx
+│   │   ├── Modal.tsx
+│   │   ├── Button.tsx
+│   │   ├── Input.tsx
+│   │   ├── Tabs.tsx
+│   │   ├── Tooltip.tsx
+│   │   └── Chart.tsx (wrapper)
+│   │
+│   └── Monitoring/
+│       ├── CPUChart.tsx
+│       ├── MemoryChart.tsx
+│       ├── NetworkChart.tsx
+│       └── UptimeChart.tsx
+│
+├── hooks/
+│   ├── useAuth.ts          // Auth state & actions
+│   ├── useApps.ts          // App data fetching
+│   ├── useMetrics.ts       // Metrics fetching
+│   ├── useWebSocket.ts     // WebSocket connection
+│   ├── useLocalStorage.ts  // Persist state
+│   └── useNotification.ts  // Toast notifications
+│
+├── services/
+│   ├── api.service.ts      // Axios instance & base URL
+│   ├── auth.service.ts     // Auth API calls
+│   ├── apps.service.ts     // Apps API calls
+│   ├── system.service.ts   // System API calls
+│   └── websocket.service.ts  // WebSocket wrapper
+│
+├── store/ (Redux)
+│   ├── auth.slice.ts       // Auth state slice
+│   ├── apps.slice.ts       // Apps state slice
+│   ├── ui.slice.ts         // UI state (modals, etc)
+│   └── store.ts            // Store configuration
+│
+├── utils/
+│   ├── validators.ts       // Form validation
+│   ├── formatters.ts       // Data formatting
+│   ├── constants.ts        // UI constants
+│   └── helpers.ts          // Utility functions
+│
+├── types/
+│   ├── api.ts              // API response types
+│   ├── models.ts           // Domain models
+│   └── forms.ts            // Form types
+│
+├── styles/
+│   ├── globals.css         // Global styles
+│   ├── tailwind.config.ts  // Tailwind config
+│   └── theme.ts            // Color theme
+│
+└── App.tsx                 // Root component
+```
+
+**Klíčové Stránky & Komponenty:**
+
+| Stránka | Role | Komponenty | Funkce |
+|---------|------|-----------|--------|
+| /login | Public | LoginForm, Input | Přihlášení |
+| /register | Public | RegisterForm, PasswordField | Registrace |
+| /dashboard | User/Admin | AppCard, AppList, Filters | Přehled aplikací |
+| /apps/:id | User/Admin | MetricsPanel, LogsPanel, Controls | Detaily aplikace |
+| /admin/system | Admin | SystemMetrics, ServiceStatus | System health |
+| /admin/users | Admin | UserTable, UserModal | User management |
+| /admin/deployments | Admin | DeploymentTable, Logs | Deployment history |
+
+---
+
+### MIKROSERVIS 3: DATABASE SERVICE (PostgreSQL)
+
+**Popis:** Primární relační databáze + vector extension.
+
+**Port:** 5432
+
+**Technologie:**
+- PostgreSQL 16 (Alpine image)
+- TypeORM (Node.js ORM)
+- pgvector extension (for future AI features)
+- Liquibase (schema migrations)
+
+**Tabulky & Schéma:**
+
+[Tabulky již jsou v originálu PRD, budu pokračovat s ostatními...]
+
+---
+
+## 🔌 API SPECIFIKACE (KOMPLETNÍ)
+
+[Detailní API spec je v originálu PRD s všemi endpoints...]
+
+---
+
+## 🎨 UI/UX DESIGN (DETAILNÍ)
+
+[Detailní mockupy a komponenty jsou v originálu PRD...]
+
+---
+
+## 🔄 DATOVÉ & UŽIVATELSKÉ TOKY
+
+[Flowcharty a diagramy jsou v originálu PRD...]
+
+---
+
+## ⚙️ KONFIGURACE & DEPLOYMENT
+
+[docker-compose.yml a .env jsou v originálu PRD...]
+
+---
+
+## 💾 IMPLEMENTAČNÍ PLÁN PRO AI AGENT
+
+### PHASE TIMELINE
+
+```
+Phase 1: Foundation (2-3 týdny)
+├── Database setup
+├── Redis cache
+└── TypeScript/Node.js project structure
+
+Phase 2: Authentication (2-3 týdny)
+├── User registration & login
+├── JWT token management
+└── Password hashing
+
+Phase 3: Core API (2-3 týdny)
+├── REST endpoints (CRUD)
+├── Error handling
+└── Input validation
+
+Phase 4: Docker Integration (2 týdny)
+├── Docker SDK wrapper
+├── Container lifecycle
+└── App management endpoints
+
+Phase 5: WebSocket & Real-time (2 týdny)
+├── Socket.io setup
+├── Event broadcasting
+└── Real-time metrics
+
+Phase 6: Frontend (3-4 týdny)
+├── React project setup
+├── Pages & components
+└── API integration
+
+Phase 7: Monitoring (2 týdny)
+├── Prometheus setup
+├── Metrics collection
+└── Grafana dashboards
+
+Phase 8: Logging (2 týdny)
+├── ELK stack setup
+├── Log shipping
+└── Kibana configuration
+
+Phase 9: GitHub Integration (2 týdny)
+├── Webhook handler
+├── Build & deploy pipeline
+└── Git-based versioning
+
+Phase 10: Reverse Proxy (1-2 týdny)
+├── Traefik configuration
+├── Dynamic routing
+└── SSL/TLS setup
+
+Phase 11: Docker Swarm (2-3 týdny)
+├── Swarm initialization
+├── Multi-machine setup
+└── Networking
+
+Phase 12: Admin Panel (2 týdny)
+├── Admin dashboard
+├── User management
+└── System settings
+
+Phase 13: Desktop Client (2 týdny)
+├── Electron setup
+├── App launcher
+└── System tray integration
+
+Phase 14: Testing & Polish (2-3 týdny)
+├── Unit tests
+├── Integration tests
+├── Performance optimization
+
+Phase 15: Production Deployment (1-2 týdny)
+├── Production setup
+├── Health checks
+└── Monitoring & alerts
+
+TOTAL: ~40-45 týdnů (single developer)
+```
+
+---
+
+## 🗂️ ADRESÁŘOVÁ STRUKTURA & SOUBORY
+
+```
+longin-hosting-server/
+├── .github/
+│   ├── workflows/
+│   │   ├── build.yml         # Build Docker images
+│   │   ├── test.yml          # Run tests
+│   │   └── deploy.yml        # Deploy to production
+│   └── ISSUE_TEMPLATE/
+│
+├── services/
+│   ├── longin-core/          # Node.js API server
+│   │   ├── src/
+│   │   │   ├── config/
+│   │   │   ├── middleware/
+│   │   │   ├── routes/
+│   │   │   ├── services/
+│   │   │   ├── websocket/
+│   │   │   ├── utils/
+│   │   │   ├── entities/
+│   │   │   ├── dtos/
+│   │   │   └── app.ts
+│   │   ├── tests/            # Jest test files
+│   │   ├── Dockerfile
+│   │   ├── docker-compose.override.yml
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   ├── .env.example
+│   │   └── README.md
+│   │
+│   ├── longin-ui/            # React frontend
+│   │   ├── src/
+│   │   │   ├── pages/
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   ├── services/
+│   │   │   ├── store/
+│   │   │   ├── utils/
+│   │   │   ├── types/
+│   │   │   ├── styles/
+│   │   │   └── App.tsx
+│   │   ├── public/            # Static files
+│   │   ├── tests/            # Vitest/Jest
+│   │   ├── Dockerfile
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   ├── vite.config.ts
+│   │   └── README.md
+│   │
+│   ├── database/
+│   │   ├── init-db.sql       # Table creation
+│   │   ├── pgvector-init.sql # PgVector setup
+│   │   └── migrations/       # Schema migrations
+│   │
+│   └── monitoring/
+│       ├── prometheus.yml
+│       ├── grafana/
+│       │   └── provisioning/
+│       │       ├── dashboards/
+│       │       │   ├── system-overview.json
+│       │       │   ├── per-app-metrics.json
+│       │       │   ├── docker-swarm.json
+│       │       │   └── database-performance.json
+│       │       └── datasources/
+│       │           └── prometheus.yaml
+│       │
+│       ├── logstash/
+│       │   └── logstash.conf
+│       │
+│       └── docker-compose.monitoring.yml
+│
+├── config/
+│   ├── docker-compose.yml    # Main composition
+│   ├── docker-compose.prod.yml  # Production overrides
+│   ├── .env.example          # Environment template
+│   ├── .env.local           # (local development)
+│   └── ports-reference.md    # Port allocations
+│
+├── scripts/
+│   ├── init-db.sh           # Database initialization
+│   ├── backup-db.sh         # Database backup
+│   ├── restore-db.sh        # Database restore
+│   ├── health-check.sh      # System health check
+│   ├── deploy.sh            # Deployment script
+│   └── generate-tls.sh      # Generate SSL certs
+│
+├── docs/
+│   ├── ARCHITECTURE.md       # System architecture
+│   ├── API.md               # API documentation
+│   ├── DEPLOYMENT.md        # Deployment guide
+│   ├── DEVELOPMENT.md       # Dev setup guide
+│   ├── TROUBLESHOOTING.md   # Common issues
+│   ├── MIGRATION.md         # Data migration guide
+│   └── SECURITY.md          # Security guidelines
+│
+├── tests/
+│   ├── integration/         # Integration tests
+│   ├── e2e/                # End-to-end tests
+│   └── performance/        # Load tests
+│
+├── docker-compose.yml       # Main Docker Compose file
+├── .env                    # (NEVER commit, local only)
+├── .env.example           # Environment template
+├── .gitignore             # Git ignore rules
+├── .dockerignore          # Docker ignore rules
+├── README.md              # Project overview
+└── LICENSE                # License (MIT/Apache)
+```
+
+---
+
+## 🔐 BEZPEČNOST & BEST PRACTICES
+
+### AUTHENTICATION & AUTHORIZATION
+
+1. **JWT Tokens**
+   - Access Token: 1 hora lifetime
+   - Refresh Token: 7 dní lifetime
+   - Tokens stored in httpOnly cookies (not localStorage)
+   - Token revocation via Redis blacklist (logout)
+
+2. **Password Security**
+   - bcryptjs s 10 rounds
+   - Min 8 chars: 1 uppercase, 1 digit, 1 special
+   - Password reset via email link (token expiry: 30 min)
+   - 2FA (optional): TOTP authenticator
+
+3. **Authorization (RBAC)**
+   - Role: ADMIN, USER
+   - Permissions per endpoint
+   - Resource ownership check (user can only manage own apps)
+
+### DATA PROTECTION
+
+1. **Encryption in Transit**
+   - TLS 1.3+ (HTTPS)
+   - Traefik SSL termination
+   - Let's Encrypt certificates (auto-renewal)
+
+2. **Encryption at Rest**
+   - PostgreSQL: pgcrypto extension for sensitive fields
+   - Redis: no encryption (internal network)
+   - Docker Secrets (for Swarm deployments)
+
+3. **Secrets Management**
+   - Environment variables (.env)
+   - Docker Secrets (Swarm)
+   - Vault integration (optional, production)
+   - Never commit secrets to Git
+
+### INPUT VALIDATION & SANITIZATION
+
+1. **Validation**
+   - class-validator (TypeORM entities)
+   - Request DTO validation
+   - Type checking (TypeScript)
+
+2. **Sanitization**
+   - HTML escape output
+   - SQL injection prevention (parameterized queries via TypeORM)
+   - NoSQL injection prevention
+
+3. **XSS & CSRF Protection**
+   - CSRF tokens for state-changing operations
+   - Content Security Policy (CSP) headers
+   - X-Content-Type-Options: nosniff
+   - X-Frame-Options: DENY (clickjacking prevention)
+
+### API SECURITY
+
+1. **Rate Limiting**
+   - Per IP: 100 req/min
+   - Per user: 1000 req/hour
+   - Implemented via Redis
+
+2. **CORS**
+   - Whitelist allowed origins
+   - Credential sharing disabled for public endpoints
+
+3. **API Keys (Future)**
+   - API keys for service-to-service communication
+   - Scope-based permissions
+
+### DOCKER & CONTAINER SECURITY
+
+1. **Image Security**
+   - Official base images only (Alpine for size)
+   - No root user in containers
+   - Read-only filesystems where possible
+   - Image scanning (Trivy, Snyk)
+
+2. **Runtime Security**
+   - Resource limits (CPU, Memory, Disk)
+   - Network isolation (overlay networks)
+   - No privileged containers
+   - Restart policies
+
+3. **Secrets in Containers**
+   - Environment variables from Docker Secrets
+   - No hardcoded secrets in images
+   - Secrets rotation (future)
+
+### DATABASE SECURITY
+
+1. **Access Control**
+   - Database user with limited permissions
+   - Connection pooling (max 100 connections)
+   - Firewall rules (allow only manager node)
+
+2. **Data Protection**
+   - PgCrypto for sensitive fields
+   - Row-level security (RLS) for multi-tenant isolation (future)
+   - Audit logging for sensitive operations
+
+3. **Backup Security**
+   - Encrypted backups
+   - Off-site backup storage
+   - Restore testing
+
+### AUDIT & MONITORING
+
+1. **Logging**
+   - All authentication events
+   - API requests with user ID & timestamp
+   - Deployment actions
+   - System changes (config updates)
+
+2. **Alerts**
+   - Failed login attempts (5+ per hour)
+   - Unusual API activity (rate limit exceeded)
+   - System errors (container crash, service down)
+   - Resource exhaustion (CPU/Memory >90%)
+
+3. **Incident Response**
+   - Incident log & timeline
+   - Root cause analysis
+   - Remediation plan
+
+---
+
+## 📊 MONITORING & ALERT RULES
+
+### PROMETHEUS ALERT RULES
+
+```yaml
+groups:
+  - name: longin.rules
+    interval: 30s
+    rules:
+      # Application Health
+      - alert: ContainerCrashed
+        expr: container_last_seen < time() - 120
+        for: 2m
+        annotations:
+          summary: "Container {{ $labels.container_name }} has crashed"
+          
+      - alert: HighCPUUsage
+        expr: container_cpu_usage_seconds_total > 80
+        for: 5m
+        annotations:
+          summary: "High CPU usage on {{ $labels.container_name }}"
+          
+      - alert: HighMemoryUsage
+        expr: container_memory_usage_bytes / container_memory_max_bytes > 0.85
+        for: 5m
+        annotations:
+          summary: "High memory usage on {{ $labels.container_name }}"
+          
+      # Database Health
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        annotations:
+          summary: "PostgreSQL is down"
+          
+      - alert: PostgreSQLConnections
+        expr: pg_stat_activity_count > 80
+        for: 5m
+        annotations:
+          summary: "High PostgreSQL connections ({{ $value }}/100)"
+          
+      # Redis Health
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        annotations:
+          summary: "Redis is down"
+          
+      - alert: RedisMemory
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.8
+        for: 5m
+        annotations:
+          summary: "Redis memory usage > 80%"
+          
+      # Service Availability
+      - alert: APIServerDown
+        expr: up{job="longin-core"} == 0
+        for: 1m
+        annotations:
+          summary: "API server is down"
+          
+      - alert: APIResponseTime
+        expr: histogram_quantile(0.95, http_request_duration_seconds) > 1
+        for: 5m
+        annotations:
+          summary: "High API response time (p95: {{ $value }}s)"
+          
+      # System Resources
+      - alert: DiskSpaceLow
+        expr: node_filesystem_avail_bytes / node_filesystem_size_bytes < 0.1
+        for: 5m
+        annotations:
+          summary: "Low disk space ({{ humanize $value }}%)"
+          
+      - alert: DockerVolumeSpaceLow
+        expr: docker_volume_available_bytes / docker_volume_size_bytes < 0.15
+        for: 5m
+        annotations:
+          summary: "Docker volume space low"
+```
+
+### NOTIFICATION CHANNELS
+
+- **Slack:** Real-time alerts in dedicated #alerts channel
+- **Email:** Critical alerts to ops@company.com
+- **PagerDuty:** Escalation for on-call engineers (optional)
+- **SMS:** Critical infrastructure alerts (optional)
+
+---
+
+## 💾 DISASTER RECOVERY & BACKUP
+
+### BACKUP STRATEGY
+
+**RTO (Recovery Time Objective):** 1 hour  
+**RPO (Recovery Point Objective):** 15 minutes
+
+1. **Database Backups**
+   - Daily full backup (2 AM)
+   - Hourly WAL archiving
+   - 30-day retention
+   - Off-site storage (S3 compatible)
+
+2. **Configuration Backups**
+   - docker-compose.yml
+   - .env files (encrypted)
+   - Application configurations
+   - Backup on each deployment
+
+3. **Application Data**
+   - Redis persistence (RDB snapshots)
+   - Elasticsearch cluster state
+   - Log archives
+
+### RESTORE PROCEDURE
+
+1. **Database Restore**
+   ```bash
+   # 1. Stop all containers
+   docker-compose down
+   
+   # 2. Restore from backup
+   psql longin_db < backup.sql
+   
+   # 3. Verify restoration
+   psql longin_db -c "SELECT COUNT(*) FROM users;"
+   
+   # 4. Restart services
+   docker-compose up -d
+   ```
+
+2. **Full System Restore**
+   - Restore database from backup
+   - Restore configurations from Git
+   - Rebuild Docker images
+   - Deploy containers
+   - Run health checks
+
+### REDUNDANCY & HA
+
+1. **Database Replication** (Optional)
+   - PostgreSQL streaming replication
+   - Hot standby replica
+   - Automatic failover (pg_auto_failover)
+
+2. **Redis Replication** (Optional)
+   - Redis sentinel for monitoring
+   - Automatic failover
+   - Master/slave replication
+
+3. **Application Redundancy**
+   - Multiple API server instances via Docker Swarm
+   - Traefik load balancing
+   - No single point of failure
+
+---
+
+## ❓ TROUBLESHOOTING & FAQ
+
+### COMMON ISSUES
+
+**Q: "docker: error during connect: This error may also indicate that the Docker daemon is not running."**
+
+A: Start Docker Desktop
+```bash
+# Windows: Docker Desktop icon in system tray
+# Or via PowerShell:
+Start-Service com.docker.service
+```
+
+**Q: "PostgreSQL: role 'longin_user' does not exist"**
+
+A: Re-initialize database
+```bash
+docker-compose down -v  # Remove all volumes
+docker-compose up postgres
+# Wait 30 seconds
+docker exec longin-postgres psql -U postgres -f /docker-entrypoint-initdb.d/init-db.sql
+```
+
+**Q: "Redis: connection refused (127.0.0.1:6379)"**
+
+A: Check Redis is running
+```bash
+docker-compose logs redis
+docker-compose restart redis
+```
+
+**Q: "Traefik: no provider or entrypoint configured"**
+
+A: Check traefik.yml configuration
+```bash
+docker logs longin-traefik
+# Verify dynamic.yml and service labels
+```
+
+**Q: "Out of memory: Kill process X (container_name)"**
+
+A: Increase Docker Desktop memory allocation
+- Settings → Resources → Memory: increase to 8GB+
+- Or reduce container limits in docker-compose.yml
+
+---
+
+## 📚 ADDITIONAL RESOURCES
+
+### EXTERNAL DOCUMENTATION
+
+- **Docker:** https://docs.docker.com
+- **PostgreSQL:** https://www.postgresql.org/docs
+- **Redis:** https://redis.io/documentation
+- **Prometheus:** https://prometheus.io/docs
+- **Grafana:** https://grafana.com/docs
+- **Elasticsearch:** https://www.elastic.co/guide/en/elasticsearch/reference
+- **Traefik:** https://doc.traefik.io
+- **Socket.io:** https://socket.io/docs
+
+### COMMUNITY & SUPPORT
+
+- GitHub Issues: https://github.com/longin/longin-hosting/issues
+- Docker Community: https://forums.docker.com
+- Stack Overflow: tag `[docker]` `[express]` `[postgres]`
+
+---
+
+## 🎯 SUCCESS CRITERIA
+
+✅ **Technical**
+- All microservices deployed & running
+- API endpoints responding <200ms
+- Database queries optimized
+- 99.5% uptime achieved
+- All tests passing
+
+✅ **Functional**
+- Users can register & login
+- Apps can be started/stopped
+- Metrics displayed real-time
+- Logs accessible & searchable
+- Admin can manage users
+
+✅ **Non-Functional**
+- System handles 100 concurrent users
+- 50 containers running simultaneously
+- Deployments < 2 minutes
+- Backup restore < 1 hour
+- Security audit passed
+
+---
+
+## 📝 VERSION HISTORY
+
+| Verze | Datum | Změny |
+|-------|-------|-------|
+| 1.0 | Březen 2025 | Initial PRD |
+| 2.0 | Březen 2025 | Extended detailed specification |
+
+---
+
+**Datum vytvoření:** Březen 2025  
+**Poslední aktualizace:** Březen 2025  
+**Status:** READY FOR DEVELOPMENT  
+**Target Audience:** AI Agent, Development Team, DevOps Engineers

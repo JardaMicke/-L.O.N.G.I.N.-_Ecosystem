@@ -1,0 +1,280 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.17kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:20-alpine
+#2 ...
+
+#3 [auth] library/node:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 1.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 127B done
+#4 DONE 0.0s
+
+#5 [builder 1/7] FROM docker.io/library/node:20-alpine@sha256:658d0f63e501824d6c23e06d4bb95c71e7d704537c9d9272f488ac03a370d448
+#5 resolve docker.io/library/node:20-alpine@sha256:658d0f63e501824d6c23e06d4bb95c71e7d704537c9d9272f488ac03a370d448 0.0s done
+#5 DONE 0.0s
+
+#6 [builder 2/7] WORKDIR /app
+#6 CACHED
+
+#7 [internal] load build context
+#7 transferring context: 14.93kB 0.0s done
+#7 DONE 0.0s
+
+#8 [builder 3/7] COPY package*.json ./
+#8 DONE 0.0s
+
+#9 [stage-1 3/7] RUN apk add --no-cache python3 make g++ git
+#9 1.157 ( 1/40) Installing libstdc++-dev (15.2.0-r2)
+#9 1.725 ( 2/40) Installing jansson (2.14.1-r0)
+#9 1.776 ( 3/40) Installing zstd-libs (1.5.7-r2)
+#9 1.873 ( 4/40) Installing binutils (2.45.1-r0)
+#9 2.279 ( 5/40) Installing libgomp (15.2.0-r2)
+#9 2.349 ( 6/40) Installing libatomic (15.2.0-r2)
+#9 2.395 ( 7/40) Installing gmp (6.3.0-r4)
+#9 2.483 ( 8/40) Installing isl26 (0.26-r1)
+#9 2.652 ( 9/40) Installing mpfr4 (4.2.2-r0)
+#9 2.697 (10/40) Installing mpc1 (1.3.1-r1)
+#9 2.720 (11/40) Installing gcc (15.2.0-r2)
+#9 ...
+
+#10 [builder 4/7] RUN apk add --no-cache python3 make g++ git
+#10 1.322 ( 1/40) Installing libstdc++-dev (15.2.0-r2)
+#10 1.900 ( 2/40) Installing jansson (2.14.1-r0)
+#10 1.955 ( 3/40) Installing zstd-libs (1.5.7-r2)
+#10 2.144 ( 4/40) Installing binutils (2.45.1-r0)
+#10 2.550 ( 5/40) Installing libgomp (15.2.0-r2)
+#10 2.586 ( 6/40) Installing libatomic (15.2.0-r2)
+#10 2.604 ( 7/40) Installing gmp (6.3.0-r4)
+#10 2.638 ( 8/40) Installing isl26 (0.26-r1)
+#10 2.787 ( 9/40) Installing mpfr4 (4.2.2-r0)
+#10 2.895 (10/40) Installing mpc1 (1.3.1-r1)
+#10 2.961 (11/40) Installing gcc (15.2.0-r2)
+#10 12.86 (12/40) Installing musl-dev (1.2.5-r21)
+#10 ...
+
+#9 [stage-1 3/7] RUN apk add --no-cache python3 make g++ git
+#9 13.43 (12/40) Installing musl-dev (1.2.5-r21)
+#9 14.09 (13/40) Installing g++ (15.2.0-r2)
+#9 17.65 (14/40) Installing brotli-libs (1.2.0-r0)
+#9 17.72 (15/40) Installing c-ares (1.34.6-r0)
+#9 17.74 (16/40) Installing libunistring (1.4.1-r0)
+#9 17.82 (17/40) Installing libidn2 (2.3.8-r0)
+#9 17.85 (18/40) Installing nghttp2-libs (1.68.0-r0)
+#9 17.87 (19/40) Installing nghttp3 (1.13.1-r0)
+#9 17.89 (20/40) Installing libpsl (0.21.5-r3)
+#9 17.91 (21/40) Installing libcurl (8.17.0-r1)
+#9 17.97 (22/40) Installing libexpat (2.7.3-r0)
+#9 18.01 (23/40) Installing pcre2 (10.47-r0)
+#9 18.09 (24/40) Installing git (2.52.0-r0)
+#9 18.92 (25/40) Installing git-init-template (2.52.0-r0)
+#9 19.00 (26/40) Installing make (4.4.1-r3)
+#9 19.10 (27/40) Installing libbz2 (1.0.8-r6)
+#9 19.12 (28/40) Installing libffi (3.5.2-r0)
+#9 19.14 (29/40) Installing gdbm (1.26-r0)
+#9 19.20 (30/40) Installing xz-libs (5.8.1-r0)
+#9 19.29 (31/40) Installing mpdecimal (4.0.1-r0)
+#9 19.39 (32/40) Installing ncurses-terminfo-base (6.5_p20251123-r0)
+#9 19.49 (33/40) Installing libncursesw (6.5_p20251123-r0)
+#9 19.54 (34/40) Installing libpanelw (6.5_p20251123-r0)
+#9 19.55 (35/40) Installing readline (8.3.1-r0)
+#9 19.59 (36/40) Installing sqlite-libs (3.51.1-r0)
+#9 ...
+
+#10 [builder 4/7] RUN apk add --no-cache python3 make g++ git
+#10 13.38 (13/40) Installing g++ (15.2.0-r2)
+#10 16.22 (14/40) Installing brotli-libs (1.2.0-r0)
+#10 16.34 (15/40) Installing c-ares (1.34.6-r0)
+#10 16.41 (16/40) Installing libunistring (1.4.1-r0)
+#10 16.57 (17/40) Installing libidn2 (2.3.8-r0)
+#10 16.63 (18/40) Installing nghttp2-libs (1.68.0-r0)
+#10 16.68 (19/40) Installing nghttp3 (1.13.1-r0)
+#10 16.74 (20/40) Installing libpsl (0.21.5-r3)
+#10 16.79 (21/40) Installing libcurl (8.17.0-r1)
+#10 16.89 (22/40) Installing libexpat (2.7.3-r0)
+#10 16.95 (23/40) Installing pcre2 (10.47-r0)
+#10 17.04 (24/40) Installing git (2.52.0-r0)
+#10 17.59 (25/40) Installing git-init-template (2.52.0-r0)
+#10 17.60 (26/40) Installing make (4.4.1-r3)
+#10 17.65 (27/40) Installing libbz2 (1.0.8-r6)
+#10 17.66 (28/40) Installing libffi (3.5.2-r0)
+#10 17.68 (29/40) Installing gdbm (1.26-r0)
+#10 17.73 (30/40) Installing xz-libs (5.8.1-r0)
+#10 17.76 (31/40) Installing mpdecimal (4.0.1-r0)
+#10 17.78 (32/40) Installing ncurses-terminfo-base (6.5_p20251123-r0)
+#10 17.80 (33/40) Installing libncursesw (6.5_p20251123-r0)
+#10 17.83 (34/40) Installing libpanelw (6.5_p20251123-r0)
+#10 17.84 (35/40) Installing readline (8.3.1-r0)
+#10 17.89 (36/40) Installing sqlite-libs (3.51.1-r0)
+#10 17.98 (37/40) Installing python3 (3.12.12-r0)
+#10 19.04 (38/40) Installing python3-pycache-pyc0 (3.12.12-r0)
+#10 19.46 (39/40) Installing pyc (3.12.12-r0)
+#10 19.46 (40/40) Installing python3-pyc (3.12.12-r0)
+#10 19.46 Executing busybox-1.37.0-r30.trigger
+#10 19.47 OK: 312.7 MiB in 58 packages
+#10 DONE 19.7s
+
+#9 [stage-1 3/7] RUN apk add --no-cache python3 make g++ git
+#9 19.69 (37/40) Installing python3 (3.12.12-r0)
+#9 ...
+
+#11 [builder 5/7] RUN npm install
+#11 ...
+
+#9 [stage-1 3/7] RUN apk add --no-cache python3 make g++ git
+#9 20.46 (38/40) Installing python3-pycache-pyc0 (3.12.12-r0)
+#9 20.97 (39/40) Installing pyc (3.12.12-r0)
+#9 20.97 (40/40) Installing python3-pyc (3.12.12-r0)
+#9 20.97 Executing busybox-1.37.0-r30.trigger
+#9 20.98 OK: 312.7 MiB in 58 packages
+#9 DONE 21.1s
+
+#12 [stage-1 4/7] COPY package*.json ./
+#12 DONE 0.0s
+
+#13 [stage-1 5/7] RUN npm install --omit=dev --ignore-scripts &&   npm cache clean --force
+#13 6.646 
+#13 6.646 added 180 packages, and audited 181 packages in 6s
+#13 6.646 
+#13 6.646 25 packages are looking for funding
+#13 6.646   run `npm fund` for details
+#13 6.650 
+#13 6.650 1 high severity vulnerability
+#13 6.650 
+#13 6.650 To address all issues, run:
+#13 6.650   npm audit fix
+#13 6.650 
+#13 6.650 Run `npm audit` for details.
+#13 6.655 npm notice
+#13 6.655 npm notice New major version of npm available! 10.8.2 -> 11.7.0
+#13 6.655 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.7.0
+#13 6.655 npm notice To update run: npm install -g npm@11.7.0
+#13 6.655 npm notice
+#13 6.875 npm warn using --force Recommended protections disabled.
+#13 ...
+
+#11 [builder 5/7] RUN npm install
+#11 8.357 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+#11 ...
+
+#13 [stage-1 5/7] RUN npm install --omit=dev --ignore-scripts &&   npm cache clean --force
+#13 DONE 7.4s
+
+#11 [builder 5/7] RUN npm install
+#11 11.75 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+#11 15.50 
+#11 15.50 > game-engine-2d@1.0.0 prepare
+#11 15.50 > husky
+#11 15.50 
+#11 15.56 .git can't be found
+#11 15.58 added 828 packages, and audited 829 packages in 15s
+#11 15.58 
+#11 15.58 203 packages are looking for funding
+#11 15.58   run `npm fund` for details
+#11 15.58 
+#11 15.58 1 high severity vulnerability
+#11 15.58 
+#11 15.58 To address all issues, run:
+#11 15.58   npm audit fix
+#11 15.58 
+#11 15.58 Run `npm audit` for details.
+#11 15.58 npm notice
+#11 15.58 npm notice New major version of npm available! 10.8.2 -> 11.7.0
+#11 15.58 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.7.0
+#11 15.58 npm notice To update run: npm install -g npm@11.7.0
+#11 15.58 npm notice
+#11 DONE 15.9s
+
+#14 [builder 6/7] COPY . .
+#14 DONE 0.2s
+
+#15 [builder 7/7] RUN npm run build
+#15 0.373 
+#15 0.373 > game-engine-2d@1.0.0 build
+#15 0.373 > npm run build:client && npm run build:server && node scripts/copy-assets.js
+#15 0.373 
+#15 0.527 
+#15 0.527 > game-engine-2d@1.0.0 build:client
+#15 0.527 > webpack --mode production
+#15 0.527 
+#15 10.50 assets by status 1.6 MiB [cached] 277 assets
+#15 10.50 orphan modules 448 KiB [orphan] 113 modules
+#15 10.50 runtime modules 1.25 KiB 5 modules
+#15 10.50 cacheable modules 571 KiB
+#15 10.50   modules by path ./src/ 568 KiB 36 modules
+#15 10.50   optional modules 30 bytes [optional]
+#15 10.50     winston (ignored) 15 bytes [optional] [built] [code generated]
+#15 10.50     path (ignored) 15 bytes [optional] [built] [code generated]
+#15 10.50   fs (ignored) 15 bytes [built] [code generated]
+#15 10.50   dotenv (ignored) 15 bytes [built] [code generated]
+#15 10.50   ./node_modules/uuid/dist/v4.js + 3 modules 2.57 KiB [built] [code generated]
+#15 10.50 
+#15 10.50 ERROR in ./src/audio/audio-manager.ts 1:0-38
+#15 10.50 Module not found: Error: Can't resolve 'howler' in '/app/src/audio'
+#15 10.50  @ ./src/core/engine-factory.ts 4:0-54 42:29-53
+#15 10.50  @ ./src/main.ts 1:0-54 28:19-45
+#15 10.50 
+#15 10.50 ERROR in /app/src/audio/audio-manager.ts
+#15 10.50 ./src/audio/audio-manager.ts 1:29-37
+#15 10.50 [tsl] ERROR in /app/src/audio/audio-manager.ts(1,30)
+#15 10.50       TS2307: Cannot find module 'howler' or its corresponding type declarations.
+#15 10.50  @ ./src/core/engine-factory.ts 4:0-54 42:29-53
+#15 10.50  @ ./src/main.ts 1:0-54 28:19-45
+#15 10.50 
+#15 10.50 ERROR in /app/src/audio/audio-manager.ts
+#15 10.50 ./src/audio/audio-manager.ts 99:22-24
+#15 10.50 [tsl] ERROR in /app/src/audio/audio-manager.ts(99,23)
+#15 10.50       TS7006: Parameter 'id' implicitly has an 'any' type.
+#15 10.50  @ ./src/core/engine-factory.ts 4:0-54 42:29-53
+#15 10.50  @ ./src/main.ts 1:0-54 28:19-45
+#15 10.50 
+#15 10.50 ERROR in /app/src/audio/audio-manager.ts
+#15 10.50 ./src/audio/audio-manager.ts 99:26-29
+#15 10.50 [tsl] ERROR in /app/src/audio/audio-manager.ts(99,27)
+#15 10.50       TS7006: Parameter 'err' implicitly has an 'any' type.
+#15 10.50  @ ./src/core/engine-factory.ts 4:0-54 42:29-53
+#15 10.50  @ ./src/main.ts 1:0-54 28:19-45
+#15 10.50 
+#15 10.50 ERROR in /app/src/core/resource-manager.ts
+#15 10.50 ./src/core/resource-manager.ts 1:21-29
+#15 10.50 [tsl] ERROR in /app/src/core/resource-manager.ts(1,22)
+#15 10.50       TS2307: Cannot find module 'howler' or its corresponding type declarations.
+#15 10.50  @ ./src/core/engine-factory.ts 7:0-53 43:36-51
+#15 10.50  @ ./src/main.ts 1:0-54 28:19-45
+#15 10.50 
+#15 10.50 5 errors have detailed information that is not shown.
+#15 10.50 Use 'stats.errorDetails: true' resp. '--stats-error-details' to show it.
+#15 10.50 
+#15 10.50 webpack 5.103.0 compiled with 5 errors in 9391 ms
+#15 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+------
+ > [builder 7/7] RUN npm run build:
+10.50 ./src/core/resource-manager.ts 1:21-29
+10.50 [tsl] ERROR in /app/src/core/resource-manager.ts(1,22)
+10.50       TS2307: Cannot find module 'howler' or its corresponding type declarations.
+10.50  @ ./src/core/engine-factory.ts 7:0-53 43:36-51
+10.50  @ ./src/main.ts 1:0-54 28:19-45
+10.50 
+10.50 5 errors have detailed information that is not shown.
+10.50 Use 'stats.errorDetails: true' resp. '--stats-error-details' to show it.
+10.50 
+10.50 webpack 5.103.0 compiled with 5 errors in 9391 ms
+------
+Dockerfile:19
+--------------------
+  17 |     
+  18 |     # Build the application
+  19 | >>> RUN npm run build
+  20 |     
+  21 |     # Stage 2: Production
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/ycix15h8m18gyiulzq0oa5lkg

@@ -1,0 +1,122 @@
+{
+  "version": "1.0.0",
+  "name": "Candy AI Clone Installer",
+  "description": "Autonomní webový instalátor s pokročilými funkcemi pro automatickou detekci a opravu problémů",
+  "author": "Candy AI Team",
+  "license": "MIT",
+  "installer": {
+    "supportedPlatforms": ["win32", "linux", "darwin"],
+    "minimumRequirements": {
+      "nodeVersion": "16.0.0",
+      "npmVersion": "7.0.0",
+      "memory": 8,
+      "diskSpace": 10
+    },
+    "optionalDependencies": {
+      "git": {
+        "version": "2.0.0",
+        "required": false,
+        "purpose": "GitHub repository cloning"
+      },
+      "docker": {
+        "version": "20.0.0",
+        "required": false,
+        "purpose": "Container services"
+      }
+    },
+    "downloadUrls": {
+      "nodejs": {
+        "win32": "https://nodejs.org/dist/v16.15.0/node-v16.15.0-x64.msi",
+        "linux": "https://nodejs.org/dist/v16.15.0/node-v16.15.0-linux-x64.tar.xz",
+        "darwin": "https://nodejs.org/dist/v16.15.0/node-v16.15.0.pkg"
+      },
+      "git": {
+        "win32": "https://github.com/git-for-windows/git/releases/download/v2.41.0.windows.1/Git-2.41.0-64-bit.exe"
+      }
+    },
+    "repositories": {
+      "primary": "https://github.com/candy-ai/candy-ai-clone.git",
+      "mirror": "https://github.com/candy-ai-mirror/candy-ai-clone.git",
+      "zipUrl": "https://github.com/candy-ai/candy-ai-clone/archive/refs/heads/main.zip"
+    }
+  },
+  "server": {
+    "port": 8080,
+    "host": "localhost",
+    "cors": {
+      "enabled": true,
+      "origins": ["http://localhost:8080", "file://"]
+    },
+    "rateLimit": {
+      "enabled": true,
+      "maxRequests": 100,
+      "windowMs": 900000
+    },
+    "security": {
+      "enableHttps": false,
+      "validateCommands": true,
+      "allowedCommands": [
+        "node", "npm", "git", "docker", "powershell",
+        "mkdir", "dir", "copy", "xcopy", "del",
+        "where", "taskkill", "msiexec"
+      ]
+    }
+  },
+  "autoRepair": {
+    "enabled": true,
+    "maxAttempts": 3,
+    "retryDelay": 2000,
+    "retryMultiplier": 1.5,
+    "maxRetryDelay": 10000,
+    "enableNetworkRetry": true,
+    "enableDependencyRepair": true,
+    "enableCodeIntegrityCheck": true,
+    "enableSelfHealing": true
+  },
+  "logging": {
+    "level": "info",
+    "enableConsole": true,
+    "enableFile": true,
+    "maxFileSize": "10MB",
+    "maxFiles": 5,
+    "logDirectory": "%TEMP%/candy-ai-logs"
+  },
+  "paths": {
+    "defaultInstallPath": {
+      "win32": "C:\\Users\\%USERNAME%\\candy-ai-clone",
+      "linux": "/home/$USER/candy-ai-clone",
+      "darwin": "/Users/$USER/candy-ai-clone"
+    },
+    "configPath": {
+      "win32": "%LOCALAPPDATA%\\candy-ai-clone",
+      "linux": "~/.config/candy-ai-clone",
+      "darwin": "~/Library/Application Support/candy-ai-clone"
+    },
+    "tempPath": {
+      "win32": "%TEMP%\\candy-ai-temp",
+      "linux": "/tmp/candy-ai-temp",
+      "darwin": "/tmp/candy-ai-temp"
+    }
+  },
+  "validation": {
+    "enablePathValidation": true,
+    "enablePermissionCheck": true,
+    "enableSpaceCheck": true,
+    "enableNetworkCheck": true,
+    "checkFileIntegrity": true
+  },
+  "ui": {
+    "theme": "modern",
+    "enableAnimations": true,
+    "progressBarStyle": "gradient",
+    "showAdvancedOptions": false,
+    "autoExpandErrors": true,
+    "enableTooltips": true
+  },
+  "experimental": {
+    "enableParallelDownloads": false,
+    "enableAdvancedErrorRecovery": true,
+    "enablePredictiveRepair": false,
+    "enableTelemetry": false
+  }
+}

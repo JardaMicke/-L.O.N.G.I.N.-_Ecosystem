@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candy AI Clone - Test Suite</title>
+    <script src="../utils/config-loader.js"></script>
+    <style>
+        :root {
+            --primary: #ff69b4;
+            --secondary: #9370db;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .test-controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--light);
+            border-radius: 5px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #e5007d;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-left: 15px;
+        }
+        
+        .checkbox-group label {
+            margin-left: 5px;
+            font-weight: 600;
+        }
+        
+        .test-summary {
+            background-color: var(--light);
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .summary-stats {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 15px;
+            border-radius: 5px;
+            min-width: 100px;
+        }
+        
+        .stat-passed {
+            background-color: rgba(40, 167, 69, 0.1);
+            border: 1px solid var(--success);
+        }
+        
+        .stat-failed {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid var(--danger);
+        }
+        
+        .stat-skipped {
+            background-color: rgba(255, 193, 7, 0.1);
+            border: 1px solid var(--warning);
+        }
+        
+        .stat-total {
+            background-color: rgba(23, 162, 184, 0.1);
+            border: 1px solid var(--info);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: var(--dark);
+        }
+        
+        .test-details {
+            margin-top: 30px;
+        }
+        
+        .test-group {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .group-header {
+            background-color: var(--light);
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .group-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .group-stats {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .group-stat {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .group-tests {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .group-tests.expanded {
+            max-height: 1000px;
+            padding: 15px;
+        }
+        
+        .test-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border-left: 4px solid transparent;
+        }
+        
+        .test-passed {
+            background-color: rgba(40, 167, 69, 0.05);
+            border-left-color: var(--success);
+        }
+        
+        .test-failed {
+            background-color: rgba(220, 53, 69, 0.05);
+            border-left-color: var(--danger);
+        }
+        
+        .test-skipped {
+            background-color: rgba(255, 193, 7, 0.05);
+            border-left-color: var(--warning);
+        }
+        
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .test-duration {
+            font-size: 0.8rem;
+            color: #777;
+        }
+        
+        .test-error {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: rgba(220, 53, 69, 0.1);
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .badge-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .badge-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .badge-warning {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+        
+        /* Report download section */
+        .report-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--light);
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .download-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            display: inline-block;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Candy AI Clone - Test Suite</h1>
+            <p>Run tests to verify the functionality of the installer and application components.</p>
+        </header>
+        
+        <div class="content">
+            <div class="test-controls">
+                <button id="runAllTests" class="btn btn-primary">Run All Tests</button>
+                <button id="runSelectedGroup" class="btn btn-success">Run Selected Group</button>
+                <button id="stopTests" class="btn btn-danger">Stop Tests</button>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="showPassedTests" checked>
+                    <label for="showPassedTests">Show Passed Tests</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="stopOnFail">
+                    <label for="stopOnFail">Stop On First Failure</label>
+                </div>
+            </div>
+            
+            <div class="test-summary">
+                <div class="summary-stats">
+                    <div class="stat stat-passed">
+                        <div class="stat-value" id="passedCount">0</div>
+                        <div class="stat-label">Passed</div>
+                    </div>
+                    <div class="stat stat-failed">
+                        <div class="stat-value" id="failedCount">0</div>
+                        <div class="stat-label">Failed</div>
+                    </div>
+                    <div class="stat stat-skipped">
+                        <div class="stat-value" id="skippedCount">0</div>
+                        <div class="stat-label">Skipped</div>
+                    </div>
+                    <div class="stat stat-total">
+                        <div class="stat-value" id="totalCount">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                </div>
+                <div>
+                    <span id="timeElapsed">0.00s</span> elapsed
+                </div>
+            </div>
+            
+            <!-- Report Download Section -->
+            <div class="report-section">
+                <h3>Test Report</h3>
+                <p>Download a detailed report of the test results</p>
+                <button id="downloadReport" class="download-btn">Download PDF Report</button>
+            </div>
+            
+            <div class="test-details" id="testGroups">
+                <!-- Test groups will be generated here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load test modules -->
+    <script src="../utils/logger.js"></script>
+    <script src="../utils/config-loader.js"></script>
+    <script src="../utils/error-handler.js"></script>
+    <!-- Prioritize local files over CDN -->
+    <script>
+        // Check if jsPDF is already loaded from CDN
+        window.loadJsPDF = function() {
+            if (typeof window.jspdf === 'undefined') {
+                // Try to load local files if CDN failed
+                const jsPdfScript = document.createElement('script');
+                jsPdfScript.src = '../assets/js/jspdf.umd.min.js';
+                document.head.appendChild(jsPdfScript);
+                
+                const autoTableScript = document.createElement('script');
+                autoTableScript.src = '../assets/js/jspdf.plugin.autotable.min.js';
+                document.head.appendChild(autoTableScript);
+            }
+        };
+        
+        // Try to load from CDN first
+        window.addEventListener('load', window.loadJsPDF);
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" 
+            onerror="window.loadJsPDF()"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
+    <script>
+        // Test registry
+        const testRegistry = {
+            groups: {},
+            registerGroup: function(name) {
+                if (!this.groups[name]) {
+                    this.groups[name] = {
+                        tests: []
+                    };
+                }
+                return this.groups[name];
+            },
+            registerTest: function(groupName, testName, testFn) {
+                const group = this.registerGroup(groupName);
+                group.tests.push({
+                    name: testName,
+                    fn: testFn,
+                    result: null
+                });
+            }
+        };
+        
+        // Test runner
+        const testRunner = {
+            running: false,
+            stopRequested: false,
+            currentTest: null,
+            testTimers: {},
+            startTime: null,
+            
+            // Run all tests
+            runAll: async function() {
+                this.running = true;
+                this.stopRequested = false;
+                
+                // Reset test results
+                const groups = testRegistry.groups;
+                Object.keys(groups).forEach(groupName => {
+                    groups[groupName].tests.forEach(test => {
+                        test.result = null;
+                    });
+                });
+                
+                // Update UI
+                updateSummary();
+                renderTestGroups();
+                
+                // Start timer
+                this.startTime = performance.now();
+                updateTimer(this.startTime);
+                const timerInterval = setInterval(() => updateTimer(this.startTime), 100);
+                
+                try {
+                    // Run tests in each group
+                    for (const groupName of Object.keys(groups)) {
+                        if (this.stopRequested) break;
+                        
+                        await this.runGroup(groupName);
+                    }
+                } finally {
+                    this.running = false;
+                    clearInterval(timerInterval);
+                    updateSummary();
+                    // Enable report download after tests are run
+                    document.getElementById('downloadReport').disabled = false;
+                }
+            },
+            
+            // Run tests in a specific group
+            runGroup: async function(groupName) {
+                if (!testRegistry.groups[groupName]) return;
+                
+                const group = testRegistry.groups[groupName];
+                const groupElement = document.querySelector(`.test-group[data-group="${groupName}"]`);
+                
+                if (groupElement) {
+                    groupElement.classList.add('running');
+                }
+                
+                try {
+                    // Run each test in the group
+                    for (const test of group.tests) {
+                        if (this.stopRequested) break;
+                        
+                        this.currentTest = {
+                            group: groupName,
+                            test: test
+                        };
+                        
+                        await this.runTest(test);
+                        
+                        // Update UI after each test
+                        updateSummary();
+                        renderTestGroups();
+                        
+                        // Check if we should stop on first failure
+                        if (document.getElementById('stopOnFail').checked && 
+                            test.result && 
+                            test.result.result === 'failed') {
+                            break;
+                        }
+                    }
+                } finally {
+                    this.currentTest = null;
+                    
+                    if (groupElement) {
+                        groupElement.classList.remove('running');
+                    }
+                }
+            },
+            
+            // Run a single test
+            runTest: async function(test) {
+                // Create a unique ID for the test
+                const testId = `${this.currentTest.group}__${test.name}`;
+                
+                // Start timer for the test
+                const startTime = performance.now();
+                
+                try {
+                    // Run the test
+                    await test.fn();
+                    
+                    // Record success
+                    const duration = performance.now() - startTime;
+                    test.result = {
+                        result: 'passed',
+                        duration: duration
+                    };
+                } catch (error) {
+                    // Record failure
+                    const duration = performance.now() - startTime;
+                    test.result = {
+                        result: 'failed',
+                        duration: duration,
+                        error: error
+                    };
+                }
+            },
+            
+            // Stop running tests
+            stop: function() {
+                this.stopRequested = true;
+            },
+            
+            // Generate PDF report
+            generatePDFReport: function() {
+                // Load jsPDF if not already loaded
+                if (typeof jspdf === 'undefined' || typeof jspdf.jsPDF === 'undefined') {
+                    alert('PDF generation library not loaded. Please try again later.');
+                    return;
+                }
+                
+                // Create a new PDF document
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Add title
+                doc.setFontSize(20);
+                doc.setTextColor(255, 105, 180); // Pink color
+                doc.text('Candy AI Clone - Test Report', 20, 20);
+                
+                // Add timestamp
+                const timestamp = new Date().toLocaleString();
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Generated: ${timestamp}`, 20, 30);
+                
+                // Add summary
+                doc.setFontSize(14);
+                doc.setTextColor(0, 0, 0);
+                doc.text('Test Summary', 20, 40);
+                
+                // Get counts
+                let passed = 0;
+                let failed = 0;
+                let skipped = 0;
+                let total = 0;
+                
+                Object.values(testRegistry.groups).forEach(group => {
+                    group.tests.forEach(test => {
+                        total++;
+                        
+                        if (test.result) {
+                            if (test.result.result === 'passed') {
+                                passed++;
+                            } else if (test.result.result === 'failed') {
+                                failed++;
+                            }
+                        } else {
+                            skipped++;
+                        }
+                    });
+                });
+                
+                // Add summary stats
+                doc.setFontSize(12);
+                doc.text(`Passed: ${passed}`, 30, 50);
+                doc.text(`Failed: ${failed}`, 30, 60);
+                doc.text(`Skipped: ${skipped}`, 30, 70);
+                doc.text(`Total: ${total}`, 30, 80);
+                
+                const elapsedTime = ((performance.now() - this.startTime) / 1000).toFixed(2);
+                doc.text(`Time Elapsed: ${elapsedTime}s`, 30, 90);
+                
+                // Add detailed results
+                doc.setFontSize(14);
+                doc.text('Detailed Results', 20, 105);
+                
+                // Prepare table data
+                const tableData = [];
+                
+                Object.keys(testRegistry.groups).forEach(groupName => {
+                    const group = testRegistry.groups[groupName];
+                    
+                    // Add group header
+                    tableData.push([{content: groupName, colSpan: 3, styles: {fontStyle: 'bold', fillColor: [240, 240, 240]}}]);
+                    
+                    // Add tests
+                    group.tests.forEach(test => {
+                        let status = 'Skipped';
+                        let statusColor = [255, 193, 7]; // Yellow for skipped
+                        
+                        if (test.result) {
+                            if (test.result.result === 'passed') {
+                                status = 'Passed';
+                                statusColor = [40, 167, 69]; // Green for passed
+                            } else if (test.result.result === 'failed') {
+                                status = 'Failed';
+                                statusColor = [220, 53, 69]; // Red for failed
+                            }
+                        }
+                        
+                        const duration = test.result ? (test.result.duration / 1000).toFixed(3) + 's' : 'N/A';
+                        
+                        tableData.push([
+                            test.name,
+                            {content: status, styles: {fillColor: statusColor, textColor: [255, 255, 255], fontStyle: 'bold'}},
+                            duration
+                        ]);
+                        
+                        // Add error message for failed tests
+                        if (test.result && test.result.result === 'failed' && test.result.error) {
+                            tableData.push([
+                                {
+                                    content: `Error: ${test.result.error.message || test.result.error}`,
+                                    colSpan: 3,
+                                    styles: {
+                                        fontStyle: 'italic',
+                                        textColor: [150, 50, 50]
+                                    }
+                                }
+                            ]);
+                        }
+                    });
+                });
+                
+                // Add table to document
+                doc.autoTable({
+                    startY: 110,
+                    head: [['Test', 'Status', 'Duration']],
+                    body: tableData,
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [255, 105, 180], // Pink color
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold'
+                    },
+                    columnStyles: {
+                        0: {cellWidth: 100},
+                        1: {cellWidth: 40},
+                        2: {cellWidth: 30}
+                    },
+                    margin: {top: 110}
+                });
+                
+                // Save the PDF
+                doc.save('candy-ai-test-report.pdf');
+            }
+        };
+        
+        // UI functions
+        function updateSummary() {
+            // Count test results
+            let passed = 0;
+            let failed = 0;
+            let skipped = 0;
+            let total = 0;
+            
+            Object.values(testRegistry.groups).forEach(group => {
+                group.tests.forEach(test => {
+                    total++;
+                    
+                    if (test.result) {
+                        if (test.result.result === 'passed') {
+                            passed++;
+                        } else if (test.result.result === 'failed') {
+                            failed++;
+                        }
+                    } else {
+                        skipped++;
+                    }
+                });
+            });
+            
+            // Update summary UI
+            document.getElementById('passedCount').textContent = passed;
+            document.getElementById('failedCount').textContent = failed;
+            document.getElementById('skippedCount').textContent = skipped;
+            document.getElementById('totalCount').textContent = total;
+        }
+        
+        function updateTimer(startTime) {
+            const elapsed = (performance.now() - startTime) / 1000;
+            document.getElementById('timeElapsed').textContent = elapsed.toFixed(2) + 's';
+        }
+        
+        function renderTestGroups() {
+            const showPassed = document.getElementById('showPassedTests').checked;
+            const container = document.getElementById('testGroups');
+            const groups = testRegistry.groups;
+            
+            container.innerHTML = '';
+            
+            Object.keys(groups).forEach(groupName => {
+                const group = groups[groupName];
+                
+                // Count group stats
+                let passed = 0;
+                let failed = 0;
+                let skipped = 0;
+                
+                group.tests.forEach(test => {
+                    if (test.result) {
+                        if (test.result.result === 'passed') {
+                            passed++;
+                        } else if (test.result.result === 'failed') {
+                            failed++;
+                        }
+                    } else {
+                        skipped++;
+                    }
+                });
+                
+                // Create group element
+                const groupElement = document.createElement('div');
+                groupElement.className = 'test-group';
+                groupElement.dataset.group = groupName;
+                
+                const headerElement = document.createElement('div');
+                headerElement.className = 'group-header';
+                headerElement.innerHTML = `
+                    <div class="group-title">${groupName}</div>
+                    <div class="group-stats">
+                        <div class="group-stat badge-success">${passed} passed</div>
+                        <div class="group-stat badge-danger">${failed} failed</div>
+                        <div class="group-stat badge-warning">${skipped} skipped</div>
+                    </div>
+                `;
+                
+                const testsElement = document.createElement('div');
+                testsElement.className = 'group-tests';
+                
+                // Add tests to the group
+                group.tests.forEach(test => {
+                    // Skip passed tests if not showing them
+                    if (!showPassed && test.result && test.result.result === 'passed') {
+                        return;
+                    }
+                    
+                    const testElement = document.createElement('div');
+                    let testClass = 'test-item';
+                    
+                    if (test.result) {
+                        testClass += test.result.result === 'passed' ? ' test-passed' : ' test-failed';
+                    } else {
+                        testClass += ' test-skipped';
+                    }
+                    
+                    testElement.className = testClass;
+                    
+                    let badgeHtml = '';
+                    if (test.result) {
+                        const badgeClass = test.result.result === 'passed' ? 'badge-success' : 'badge-danger';
+                        badgeHtml = `<span class="badge ${badgeClass}">${test.result.result}</span>`;
+                    } else {
+                        badgeHtml = '<span class="badge badge-warning">skipped</span>';
+                    }
+                    
+                    let durationHtml = '';
+                    if (test.result && test.result.duration) {
+                        durationHtml = `<span class="test-duration">${(test.result.duration / 1000).toFixed(3)}s</span>`;
+                    }
+                    
+                    let errorHtml = '';
+                    if (test.result && test.result.error) {
+                        errorHtml = `<div class="test-error">${test.result.error.message || test.result.error}</div>`;
+                    }
+                    
+                    testElement.innerHTML = `
+                        <div class="test-name">
+                            ${test.name} ${badgeHtml}
+                            ${durationHtml}
+                        </div>
+                        ${errorHtml}
+                    `;
+                    
+                    testsElement.appendChild(testElement);
+                });
+                
+                // Add event listener to toggle group expansion
+                headerElement.addEventListener('click', () => {
+                    testsElement.classList.toggle('expanded');
+                });
+                
+                // Add to group
+                groupElement.appendChild(headerElement);
+                groupElement.appendChild(testsElement);
+                
+                // Add to container
+                container.appendChild(groupElement);
+            });
+        }
+        
+        // Event listeners
+        document.getElementById('runAllTests').addEventListener('click', async () => {
+            if (testRunner.running) return;
+            await testRunner.runAll();
+        });
+        
+        document.getElementById('runSelectedGroup').addEventListener('click', async () => {
+            if (testRunner.running) return;
+            
+            // Find expanded group
+            const expandedGroup = document.querySelector('.group-tests.expanded');
+            if (expandedGroup) {
+                const groupName = expandedGroup.parentElement.dataset.group;
+                testRunner.running = true;
+                
+                // Start timer
+                testRunner.startTime = performance.now();
+                updateTimer(testRunner.startTime);
+                const timerInterval = setInterval(() => updateTimer(testRunner.startTime), 100);
+                
+                try {
+                    await testRunner.runGroup(groupName);
+                } finally {
+                    testRunner.running = false;
+                    clearInterval(timerInterval);
+                    updateSummary();
+                    // Enable report download after tests are run
+                    document.getElementById('downloadReport').disabled = false;
+                }
+            } else {
+                alert('Please expand a test group first');
+            }
+        });
+        
+        document.getElementById('stopTests').addEventListener('click', () => {
+            if (testRunner.running) {
+                testRunner.stop();
+            }
+        });
+        
+        document.getElementById('showPassedTests').addEventListener('change', () => {
+            renderTestGroups();
+        });
+        
+        document.getElementById('downloadReport').addEventListener('click', () => {
+            // Check if jsPDF library is available
+            if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+                alert('PDF generování není dostupné. Knihovna jsPDF není načtena. Zkuste obnovit stránku nebo použijte jiný prohlížeč.');
+                return;
+            }
+            testRunner.generatePDFReport();
+        });
+        
+        // Initialize the test suite
+        function initTests() {
+            // Define test groups and tests
+            
+            // Logger Module Tests
+            testRegistry.registerTest('Logger Module', 'should create logger instance', async function() {
+                const logger = window.logger || (typeof Logger !== 'undefined' ? Logger.createLogger('test') : null);
+                if (!logger) throw new Error('Logger should be available');
+                
+                // Basic check to ensure logger has expected methods
+                if (!logger.info || !logger.error || !logger.warn || !logger.debug) {
+                    throw new Error('Logger instance missing required methods');
+                }
+            });
+            
+            testRegistry.registerTest('Logger Module', 'should log messages', async function() {
+                const logger = window.logger || (typeof Logger !== 'undefined' ? Logger.createLogger('test') : null);
+                if (!logger) throw new Error('Logger should be available');
+                
+                // Temporarily override console.log to capture output
+                const originalLog = console.log;
+                let logCalled = false;
+                
+                console.log = function() {
+                    logCalled = true;
+                    // Restore original immediately to avoid interfering with other tests
+                    console.log = originalLog;
+                };
+                
+                logger.info('Test message');
+                
+                // Restore in case it wasn't already
+                console.log = originalLog;
+                
+                if (!logCalled) {
+                    throw new Error('Logger did not call console.log');
+                }
+            });
+            
+            testRegistry.registerTest('Logger Module', 'should handle log levels', async function() {
+                const logger = window.logger || (typeof Logger !== 'undefined' ? Logger.createLogger('test') : null);
+                if (!logger) throw new Error('Logger should be available');
+                
+                // Check that different log levels work
+                logger.debug('Debug message');
+                logger.info('Info message');
+                logger.warn('Warning message');
+                logger.error('Error message');
+                
+                // This test just verifies that calling these methods doesn't throw errors
+            });
+            
+            // Config Loader Tests
+            testRegistry.registerTest('Config Loader Module', 'should load configuration', async function() {
+                const ConfigLoader = window.ConfigLoader || (typeof require !== 'undefined' ? require('../utils/config-loader').ConfigLoader : null);
+                if (!ConfigLoader) throw new Error('ConfigLoader is not a constructor');
+                
+                // Create a test instance
+                const config = new ConfigLoader({
+                    defaults: { test: true, version: '1.0.0' }
+                });
+                
+                // Check that it has the default values
+                if (config.get('test') !== true) {
+                    throw new Error('Failed to load default configuration');
+                }
+            });
+            
+            testRegistry.registerTest('Config Loader Module', 'should get configuration values', async function() {
+                const ConfigLoader = window.ConfigLoader;
+                if (!ConfigLoader) throw new Error('ConfigLoader should be available');
+                
+                // Check instance method
+                const value = ConfigLoader.instance.get('version');
+                if (!value || typeof value !== 'string') {
+                    throw new Error('Failed to get configuration value');
+                }
+                
+                // Check static method
+                const staticValue = ConfigLoader.get('version');
+                if (!staticValue || typeof staticValue !== 'string') {
+                    throw new Error('Failed to get configuration value using static method');
+                }
+            });
+            
+            testRegistry.registerTest('Config Loader Module', 'should validate configuration', async function() {
+                const ConfigLoader = window.ConfigLoader;
+                if (!ConfigLoader) throw new Error('ConfigLoader should be available');
+                
+                try {
+                    // Create a new instance with a schema
+                    const config = ConfigLoader.create({
+                        schema: {
+                            test: {
+                                type: 'boolean',
+                                required: true
+                            }
+                        },
+                        defaults: {
+                            test: true
+                        }
+                    });
+                    
+                    // Modify the value
+                    config.set('test', false);
+                    
+                    // Try to set an invalid value (should throw)
+                    let threw = false;
+                    try {
+                        config.set('test', 'not a boolean');
+                    } catch (e) {
+                        threw = true;
+                    }
+                    
+                    if (!threw) {
+                        throw new Error('Validation did not prevent invalid value');
+                    }
+                } catch (error) {
+                    throw new Error(`Validation test failed: ${error.message}`);
+                }
+            });
+            
+            // Error Handler Tests
+            testRegistry.registerTest('Error Handler Module', 'should create error instances', async function() {
+                const ErrorHandler = window.ErrorHandler || (typeof require !== 'undefined' ? require('../utils/error-handler') : null);
+                if (!ErrorHandler) throw new Error('ErrorHandler should be available');
+                
+                // Create a test error
+                const error = new ErrorHandler.InstallerError('Test error');
+                
+                // Check that it has the expected properties
+                if (!error.message || error.message !== 'Test error') {
+                    throw new Error('Error instance missing expected properties');
+                }
+            });
+            
+            testRegistry.registerTest('Error Handler Module', 'should handle different error types', async function() {
+                const ErrorHandler = window.ErrorHandler || (typeof require !== 'undefined' ? require('../utils/error-handler') : null);
+                if (!ErrorHandler) throw new Error('ErrorHandler should be available');
+                
+                // Create different error types
+                const validationError = new ErrorHandler.ValidationError('Invalid value');
+                const configError = new ErrorHandler.ConfigurationError('Bad config');
+                const installerError = new ErrorHandler.InstallerError('Install failed');
+                
+                // Check error inheritance
+                if (!(validationError instanceof Error)) {
+                    throw new Error('ValidationError should inherit from Error');
+                }
+                
+                if (!(configError instanceof ErrorHandler.InstallerError)) {
+                    throw new Error('ConfigurationError should inherit from InstallerError');
+                }
+            });
+            
+            testRegistry.registerTest('Error Handler Module', 'should provide user-friendly error messages', async function() {
+                const ErrorHandler = window.ErrorHandler || (typeof require !== 'undefined' ? require('../utils/error-handler') : null);
+                if (!ErrorHandler) throw new Error('ErrorHandler should be available');
+                
+                // Create an error
+                const error = new ErrorHandler.InstallerError('Technical error', {
+                    userMessage: 'Something went wrong'
+                });
+                
+                // Check that it has a user-friendly message
+                if (!error.userMessage || error.userMessage !== 'Something went wrong') {
+                    throw new Error('Error should have a user-friendly message');
+                }
+            });
+            
+            // Integration Tests
+            testRegistry.registerTest('Integration Tests', 'should integrate logger with error handler', async function() {
+                const ErrorHandler = window.ErrorHandler || (typeof require !== 'undefined' ? require('../utils/error-handler') : null);
+                const logger = window.logger || (typeof Logger !== 'undefined' ? Logger.createLogger('test') : null);
+                
+                if (!ErrorHandler) throw new Error('ErrorHandler should be available');
+                if (!logger) throw new Error('Logger should be available');
+                
+                // Create an error and log it
+                const error = new ErrorHandler.InstallerError('Test error');
+                logger.error('An error occurred', error);
+                
+                // This test just verifies that these operations don't throw errors
+            });
+            
+            testRegistry.registerTest('Integration Tests', 'should integrate config with logger', async function() {
+                const ConfigLoader = window.ConfigLoader;
+                const logger = window.logger || (typeof Logger !== 'undefined' ? Logger.createLogger('test') : null);
+                
+                if (!ConfigLoader) throw new Error('ConfigLoader should be available');
+                if (!logger) throw new Error('Logger should be available');
+                
+                // Get a config value and log it
+                const value = ConfigLoader.instance.get('version');
+                logger.info('Config version', value);
+                
+                // This test just verifies that these operations don't throw errors
+            });
+            
+            // Performance Tests
+            testRegistry.registerTest('Performance Tests', 'should log messages efficiently', async function() {
+                const logger = window.logger || (typeof Logger !== 'undefined' ? Logger.createLogger('test') : null);
+                if (!logger) throw new Error('Logger should be available');
+                
+                const start = performance.now();
+                
+                // Log multiple messages
+                for (let i = 0; i < 100; i++) {
+                    logger.info(`Test message ${i}`);
+                }
+                
+                const duration = performance.now() - start;
+                
+                // Check that logging is reasonably fast
+                if (duration > 1000) {
+                    throw new Error(`Logging is too slow: ${duration}ms for 100 messages`);
+                }
+            });
+            
+            testRegistry.registerTest('Performance Tests', 'should handle configuration efficiently', async function() {
+                const ConfigLoader = window.ConfigLoader;
+                if (!ConfigLoader) throw new Error('ConfigLoader should be available');
+                
+                const start = performance.now();
+                
+                // Get multiple config values
+                for (let i = 0; i < 1000; i++) {
+                    ConfigLoader.get('version');
+                }
+                
+                const duration = performance.now() - start;
+                
+                // Check that config access is reasonably fast
+                if (duration > 100) {
+                    throw new Error(`Config access is too slow: ${duration}ms for 1000 accesses`);
+                }
+            });
+            
+            // Initialize UI
+            updateSummary();
+            renderTestGroups();
+            
+            // Enable download button by default (user can download empty report)
+            document.getElementById('downloadReport').disabled = false;
+        }
+        
+        // Run initialization when the page loads
+        window.addEventListener('DOMContentLoaded', initTests);
+    </script>
+</body>
+</html>

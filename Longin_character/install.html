@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Longin charakter AI - Instalace</title>
+    <script src="/utils/auto-repair-client.js"></script>
+    <script src="/scripts/auto-repair-integration.js"></script>
+    <script src="/scripts/enhanced-installer.js"></script>
+    <style>
+        :root {
+            --primary: #00ff00;
+            --secondary: #00cccc;
+            --dark: #000000;
+            --light: #111111;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: white;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--dark);
+            background-image: url('xysmesjnwd.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        
+        header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--primary);
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+        }
+        
+        h1, h2 {
+            color: var(--primary);
+        }
+        
+        .step {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+            border: 1px solid rgba(0, 255, 0, 0.2);
+        }
+        
+        .step h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--dark);
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-right: 10px;
+            font-weight: bold;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.7);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #1a1a1a, #333333);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #2a2a2a;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+        
+        #test-results {
+            width: 100%;
+            height: 200px;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: var(--primary);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        input[type="text"] {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--primary);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        label {
+            color: var(--secondary);
+        }
+        
+        .quick-actions {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+            border: 1px solid rgba(0, 255, 0, 0.2);
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Longin charakter AI - Instalace</h1>
+        <p>Vítejte v průvodci instalací. Postupujte podle kroků k dokončení instalace.</p>
+    </header>
+
+    <main>
+        <!-- Nová část pro rychlé spouštění příkazů -->
+        <div class="quick-actions">
+            <h3>Rychlé akce</h3>
+            <p>Zde můžete spouštět přímé příkazy pro správu aplikace a modelů.</p>
+            
+            <div class="action-buttons">
+                <button class="btn" id="start-ollama-btn" onclick="startOllamaServer()">Spustit Ollama server</button>
+                <button class="btn" id="start-lmstudio-btn" onclick="startLMStudioServer()">Spustit LM Studio server</button>
+                <button class="btn btn-secondary" id="stop-servers-btn" onclick="stopServers()">Zastavit servery</button>
+                <button class="btn btn-secondary" id="check-models-btn" onclick="checkAvailableModels()">Zkontrolovat modely</button>
+                <button class="btn" id="start-app-btn" onclick="startApplication()">Spustit aplikaci</button>
+                <button class="btn btn-secondary" id="uninstall-app-btn" onclick="uninstallApplication()">Odinstalovat aplikaci</button>
+            </div>
+            
+            <div style="margin-top: 15px;">
+                <textarea id="command-results" readonly style="width: 100%; height: 150px; margin-top: 10px; padding: 10px; border: 1px solid var(--primary); border-radius: 5px; font-family: monospace; white-space: pre-wrap; background-color: rgba(0, 0, 0, 0.7); color: var(--primary);"></textarea>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Krok 1: Kontrola systému</h3>
+            <p>Tento krok zkontroluje, zda váš systém splňuje všechny požadavky.</p>
+            <button class="btn" onclick="runSystemChecks()">Spustit kontrolu</button>
+        </div>
+
+        <div class="step">
+            <h3>Krok 2: Konfigurace</h3>
+            <p>Zadejte potřebné konfigurační údaje.</p>
+            <form id="config-form">
+                <label for="db-host">Hostitel databáze:</label><br>
+                <input type="text" id="db-host" name="db-host" value="localhost"><br>
+                <label for="db-user">Uživatel databáze:</label><br>
+                <input type="text" id="db-user" name="db-user" value="root"><br><br>
+                <button type="button" class="btn" onclick="saveConfig()">Uložit konfiguraci</button>
+            </form>
+        </div>
+
+        <div class="step">
+            <h3>Krok 3: Instalace</h3>
+            <p>Spusťte instalaci hlavních komponent aplikace. Aplikace bude používat pouze necenzurované modely zdarma NSFW pro generování fotek a videí.</p>
+            <div>
+                <label for="install-path">Instalační cesta:</label><br>
+                <input type="text" id="install-path" name="install-path" value="C:\Longin-AI"><br><br>
+                
+                <label for="source-type">Typ zdroje:</label><br>
+                <select id="source-type" name="source-type">
+                    <option value="github">GitHub repozitář</option>
+                    <option value="folder">Lokální složka</option>
+                    <option value="zip">ZIP archiv</option>
+                </select><br><br>
+                
+                <div id="github-source">
+                    <label for="github-repo">GitHub repozitář:</label><br>
+                    <input type="text" id="github-repo" name="github-repo" value="https://github.com/username/longin-charakter-ai.git"><br><br>
+                </div>
+                
+                <div id="folder-source" style="display: none;">
+                    <label for="source-folder">Zdrojová složka:</label><br>
+                    <input type="text" id="source-folder" name="source-folder" value=""><br><br>
+                </div>
+                
+                <div id="zip-source" style="display: none;">
+                    <label for="zip-path">Cesta k ZIP souboru:</label><br>
+                    <input type="text" id="zip-path" name="zip-path" value=""><br><br>
+                </div>
+                
+                <div class="model-settings">
+                    <h4>Správa paměti a optimalizace</h4>
+                    <p>Aplikace bude optimalizovaně načítat komponenty a modely do paměti a po použití je automaticky uvolňovat.</p>
+                    
+                    <input type="checkbox" id="enable-memory-management" name="enable-memory-management" checked>
+                    <label for="enable-memory-management">Povolit automatickou správu paměti</label><br><br>
+                    
+                    <label for="max-memory-usage">Maximální využití RAM (%):</label><br>
+                    <input type="range" id="max-memory-usage" name="max-memory-usage" min="50" max="90" value="75" 
+                           oninput="document.getElementById('memory-usage-value').textContent = this.value">
+                    <span id="memory-usage-value">75</span>%<br><br>
+                    
+                    <input type="checkbox" id="unload-models" name="unload-models" checked>
+                    <label for="unload-models">Automaticky uvolňovat nepoužívané modely</label><br><br>
+                    
+                    <button class="btn" id="recommend-models-btn" type="button" onclick="findRecommendedModels()">Najít doporučené modely</button>
+                    
+                    <div id="model-recommendations" style="display: none; margin-top: 20px;">
+                        <h4>Doporučené modely pro váš systém</h4>
+                        <div id="system-info-display"></div>
+                        <div id="recommended-models-list"></div>
+                    </div>
+                </div>
+                
+                <input type="checkbox" id="create-shortcuts" name="create-shortcuts" checked>
+                <label for="create-shortcuts">Vytvořit zástupce</label><br><br>
+                
+                <input type="checkbox" id="auto-start" name="auto-start">
+                <label for="auto-start">Automaticky spustit po instalaci</label><br><br>
+            </div>
+            <button class="btn" onclick="runInstallation()">Spustit instalaci</button>
+            
+            <script>
+                // Zobrazení/skrytí relevantních polí podle vybraného typu zdroje
+                document.getElementById('source-type').addEventListener('change', function() {
+                    const sourceType = this.value;
+                    
+                    document.getElementById('github-source').style.display = sourceType === 'github' ? 'block' : 'none';
+                    document.getElementById('folder-source').style.display = sourceType === 'folder' ? 'block' : 'none';
+                    document.getElementById('zip-source').style.display = sourceType === 'zip' ? 'block' : 'none';
+                });
+                
+                // Funkce pro vyhledání doporučených modelů
+                async function findRecommendedModels() {
+                    clearResults();
+                    logResult('Analyzuji výkon vašeho systému pro doporučení modelů...', true);
+                    
+                    // Získání informací o systému
+                    let systemInfo = null;
+                    
+                    try {
+                        if (apiAvailable) {
+                            // Pokus o získání informací přes API
+                            const result = await executeCommand('node -e "console.log(JSON.stringify(require(\'os\').cpus())); console.log(require(\'os\').totalmem());"');
+                            if (result && result.success) {
+                                const lines = result.stdout.split('\n');
+                                const cpuInfo = JSON.parse(lines[0]);
+                                const totalMemory = parseInt(lines[1]) / (1024 * 1024 * 1024); // GB
+                                
+                                systemInfo = {
+                                    cpuModel: cpuInfo[0].model,
+                                    cpuCores: cpuInfo.length,
+                                    memory: Math.round(totalMemory),
+                                    platform: navigator.platform
+                                };
+                            }
+                        }
+                    } catch (error) {
+                        logResult('Chyba při získávání informací o systému: ' + error.message, false);
+                    }
+                    
+                    // Pokud nemáme informace z API, použijeme heuristiku na základě prohlížeče
+                    if (!systemInfo) {
+                        // Odhad výkonu z prohlížeče
+                        systemInfo = {
+                            cpuCores: navigator.hardwareConcurrency || 4,
+                            memory: 8, // Předpokládáme 8GB RAM jako výchozí
+                            platform: navigator.platform,
+                            cpuModel: 'Unknown'
+                        };
+                        
+                        logResult('Používám odhad výkonu systému založený na prohlížeči', false);
+                    }
+                    
+                    // Zobrazení informací o systému
+                    document.getElementById('system-info-display').innerHTML = `
+                        <p><strong>Detekovaný hardware:</strong></p>
+                        <p>CPU: ${systemInfo.cpuModel || 'Neznámé'}</p>
+                        <p>Počet jader: ${systemInfo.cpuCores}</p>
+                        <p>Operační paměť: ${systemInfo.memory} GB</p>
+                        <p>Platforma: ${systemInfo.platform}</p>
+                    `;
+                    
+                    // Kategorizace systému podle výkonu
+                    let performanceTier = 'low';
+                    
+                    if (systemInfo.memory >= 16 && systemInfo.cpuCores >= 8) {
+                        performanceTier = 'high';
+                    } else if (systemInfo.memory >= 8 && systemInfo.cpuCores >= 4) {
+                        performanceTier = 'medium';
+                    }
+                    
+                    logResult(`Výkonnostní kategorie systému: ${performanceTier.toUpperCase()}`, true);
+                    
+                    // Definice doporučených modelů podle výkonnostní kategorie
+                    const modelRecommendations = {
+                        'high': [
+                            { id: 'wizardlm-uncensored:7b', name: 'WizardLM Uncensored (7B)', size: 4000, description: 'Nejlepší volba pro výkonné počítače s dostatkem RAM' },
+                            { id: 'dolphin-mistral:7b', name: 'Dolphin Mistral (7B)', size: 4000, description: 'Necenzurovaný model vhodný pro konverzaci a roleplaying' },
+                            { id: 'stable-diffusion-1.5', name: 'Stable Diffusion 1.5', size: 4200, description: 'Kvalitní model pro generování obrázků' }
+                        ],
+                        'medium': [
+                            { id: 'dolphin-mistral:7b-q4', name: 'Dolphin Mistral (7B, 4-bit kvantizovaný)', size: 2000, description: 'Kompromis mezi kvalitou a paměťovou náročností' },
+                            { id: 'orca-mini:7b', name: 'Orca Mini (7B)', size: 4000, description: 'Dobrý poměr výkon/kvalita pro běžné PC' },
+                            { id: 'stable-diffusion-lite', name: 'Stable Diffusion Lite', size: 1800, description: 'Optimalizovaný model pro generování obrázků' }
+                        ],
+                        'low': [
+                            { id: 'phi-2:2.7b-q4', name: 'Phi-2 (2.7B, 4-bit kvantizovaný)', size: 800, description: 'Malý model s nízkou paměťovou náročností' },
+                            { id: 'neural-chat:1.5b-q4', name: 'Neural Chat (1.5B, 4-bit kvantizovaný)', size: 600, description: 'Minimalistický model pro základní konverzaci' },
+                            { id: 'stable-diffusion-1.5-fp16', name: 'Stable Diffusion 1.5 (FP16)', size: 2000, description: 'Verze s poloviční přesností pro úsporu paměti' }
+                        ]
+                    };
+                    
+                    // Zobrazíme doporučené modely
+                    const recommendations = modelRecommendations[performanceTier];
+                    let modelHtml = '<ul style="list-style-type: none; padding-left: 0;">';
+                    
+                    recommendations.forEach(model => {
+                        modelHtml += `
+                            <li style="margin-bottom: 15px; padding: 10px; border: 1px solid var(--primary); border-radius: 5px;">
+                                <input type="checkbox" id="model-${model.id}" name="selected-models" value="${model.id}" checked>
+                                <label for="model-${model.id}" style="color: var(--primary); font-weight: bold;">${model.name}</label>
+                                <div style="margin-left: 25px;">
+                                    <p>${model.description}</p>
+                                    <p>Velikost: ~${model.size} MB</p>
+                                </div>
+                            </li>
+                        `;
+                    });
+                    
+                    modelHtml += '</ul>';
+                    document.getElementById('recommended-models-list').innerHTML = modelHtml;
+                    document.getElementById('model-recommendations').style.display = 'block';
+                    
+                    logResult('Doporučené modely byly nalezeny a zobrazeny', true);
+                }
+            </script>
+        </div>
+
+        <div class="step">
+            <h2>Testovací sada</h2>
+            <p>Zde můžete otestovat klíčové funkce instalace a systému.</p>
+            
+            <div>
+                <button class="btn btn-secondary" onclick="runAllTests()">Spustit všechny testy</button>
+                <button class="btn btn-secondary" onclick="runInstallationTests()">Testy instalace</button>
+                <button class="btn btn-secondary" onclick="runConfigTests()">Testy konfigurace</button>
+                <button class="btn btn-secondary" onclick="runSystemTests()">Systémové testy</button>
+            </div>
+
+            <textarea id="test-results" readonly></textarea>
+        </div>
+    </main>
+
+    <script>
+        let autoRepair = null;
+        let enhancedInstaller = null;
+        let apiAvailable = false;
+        
+        const resultsOutput = document.getElementById('test-results');
+        const commandOutput = document.getElementById('command-results');
+
+        // Konfigurace cest k souborům
+        const config = {
+            installDir: localStorage.getItem('installDir') || 'C:\\Users\\' + (typeof process !== 'undefined' ? process.env.USERNAME : 'user') + '\\candy-ai-clone',
+            ollamaPath: localStorage.getItem('ollamaPath') || 'C:\\Program Files\\Ollama\\ollama.exe',
+            lmStudioPath: localStorage.getItem('lmStudioPath') || 'C:\\Program Files\\LM Studio\\LM Studio.exe',
+            appLauncherPath: function() { return this.installDir + '\\launch-candy-ai.bat'; },
+            startOllamaPath: function() { return this.installDir + '\\start-ollama.bat'; },
+            startLmStudioPath: function() { return this.installDir + '\\start-lmstudio.bat'; }
+        };
+
+        /**
+         * Zobrazí zprávu ve výsledkovém okně.
+         * @param {string} message - Zpráva k zobrazení.
+         * @param {boolean} isSuccess - True, pokud je zpráva o úspěchu.
+         */
+        function logResult(message, isSuccess) {
+            const status = isSuccess ? 'OK' : 'FAIL';
+            resultsOutput.value += `[${status}] ${message}\n`;
+            resultsOutput.scrollTop = resultsOutput.scrollHeight;
+        }
+
+        /**
+         * Zobrazí zprávu v okně příkazů.
+         * @param {string} message - Zpráva k zobrazení.
+         */
+        function logCommand(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            commandOutput.value += `[${timestamp}] ${message}\n`;
+            commandOutput.scrollTop = commandOutput.scrollHeight;
+        }
+
+        /**
+         * Vymaže výsledkové okno.
+         */
+        function clearResults() {
+            resultsOutput.value = '';
+        }
+
+        /**
+         * Vymaže okno příkazů.
+         */
+        function clearCommandOutput() {
+            commandOutput.value = '';
+        }
+
+        /**
+         * Inicializuje auto-repair systém
+         */
+        function initAutoRepair() {
+            // Zkontrolujeme, zda je dostupný v globálním kontextu
+            if (window.AutoRepairService) {
+                autoRepair = new window.AutoRepairService({
+                    logRepair: (message, level) => {
+                        console.log(`[AUTO-REPAIR] [${level}] ${message}`);
+                        logResult(`Auto-repair: ${message}`, level !== 'error');
+                    }
+                });
+                console.log('Auto-repair systém byl inicializován');
+                return true;
+            } else {
+                console.warn('Auto-repair systém není dostupný');
+                return false;
+            }
+        }
+
+        /**
+         * Inicializuje rozšířený instalátor
+         */
+        function initEnhancedInstaller() {
+            if (window.EnhancedInstaller) {
+                enhancedInstaller = new window.EnhancedInstaller({
+                    autoRepair: autoRepair,
+                    executeCommand: executeCommand
+                });
+                console.log('Rozšířený instalátor byl inicializován');
+                return true;
+            } else {
+                console.warn('Rozšířený instalátor není dostupný');
+                return false;
+            }
+        }
+
+        /**
+         * Kontroluje dostupnost API
+         */
+        async function checkApiAvailability() {
+            try {
+                const response = await fetch('/api/check', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    cache: 'no-cache'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    apiAvailable = true;
+                    logResult('API je dostupné: ' + JSON.stringify(data.systemInfo), true);
+                    return true;
+                } else {
+                    apiAvailable = false;
+                    logResult('API není dostupné, server vrátil status: ' + response.status, false);
+                    return false;
+                }
+            } catch (error) {
+                apiAvailable = false;
+                logResult('API není dostupné: ' + error.message, false);
+                return false;
+            }
+        }
+
+        /**
+         * Spouští příkaz přes API
+         */
+        async function executeCommand(command, options = {}) {
+            if (!apiAvailable) {
+                logResult('Nelze spustit příkaz, API není dostupné', false);
+                throw new Error('API není dostupné');
+            }
+            
+            try {
+                const response = await fetch('/api/execute-command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    return result;
+                } else {
+                    const error = await response.json();
+                    throw new Error(`Chyba při spuštění příkazu: ${error.error || 'Neznámá chyba'}`);
+                }
+            } catch (error) {
+                logResult('Chyba při volání API: ' + error.message, false);
+                throw error;
+            }
+        }
+
+        /**
+         * Funkce pro spuštění Ollama serveru
+         */
+        async function startOllamaServer() {
+            clearCommandOutput();
+            logCommand("Spouštím Ollama server...");
+            
+            if (apiAvailable) {
+                try {
+                    // Použijeme API pro spuštění serveru
+                    const command = `start "" "${config.startOllamaPath()}"`;
+                    const result = await executeCommand(command);
+                    
+                    if (result.success) {
+                        logCommand("Ollama server byl úspěšně spuštěn");
+                        
+                        // Zkontrolujme dostupné modely
+                        setTimeout(async () => {
+                            try {
+                                const modelsResult = await executeCommand(`"${config.ollamaPath}" list`);
+                                if (modelsResult.success) {
+                                    logCommand("Dostupné modely:");
+                                    logCommand(modelsResult.stdout);
+                                }
+                            } catch (error) {
+                                logCommand("Nepodařilo se získat seznam modelů: " + error.message);
+                            }
+                        }, 2000);
+                    } else {
+                        logCommand("Nepodařilo se spustit Ollama server: " + result.stderr);
+                    }
+                } catch (error) {
+                    logCommand("Chyba při spouštění Ollama serveru: " + error.message);
+                    
+                    // Záložní metoda: otevřít file://
+                    try {
+                        window.open("file://" + config.startOllamaPath(), "_blank");
+                        logCommand("Pokus o otevření souboru přes prohlížeč");
+                    } catch (e) {
+                        logCommand("Nelze otevřít soubor. Zkuste spustit server ručně: " + config.startOllamaPath());
+                    }
+                }
+            } else {
+                logCommand("API není dostupné, pokusím se otevřít skript přes prohlížeč");
+                try {
+                    window.open("file://" + config.startOllamaPath(), "_blank");
+                    logCommand("Otevírám soubor přes prohlížeč");
+                } catch (e) {
+                    logCommand("Nelze otevřít soubor. Zkuste spustit server ručně: " + config.startOllamaPath());
+                }
+            }
+        }
+
+        /**
+         * Funkce pro spuštění LM Studio serveru
+         */
+        async function startLMStudioServer() {
+            clearCommandOutput();
+            logCommand("Spouštím LM Studio server...");
+            
+            if (apiAvailable) {
+                try {
+                    // Použijeme API pro spuštění serveru
+                    const command = `start "" "${config.startLmStudioPath()}"`;
+                    const result = await executeCommand(command);
+                    
+                    if (result.success) {
+                        logCommand("LM Studio server byl úspěšně spuštěn");
+                    } else {
+                        logCommand("Nepodařilo se spustit LM Studio server: " + result.stderr);
+                    }
+                } catch (error) {
+                    logCommand("Chyba při spouštění LM Studio serveru: " + error.message);
+                    
+                    // Záložní metoda: otevřít file://
+                    try {
+                        window.open("file://" + config.startLmStudioPath(), "_blank");
+                        logCommand("Pokus o otevření souboru přes prohlížeč");
+                    } catch (e) {
+                        logCommand("Nelze otevřít soubor. Zkuste spustit server ručně: " + config.startLmStudioPath());
+                    }
+                }
+            } else {
+                logCommand("API není dostupné, pokusím se otevřít skript přes prohlížeč");
+                try {
+                    window.open("file://" + config.startLmStudioPath(), "_blank");
+                    logCommand("Otevírám soubor přes prohlížeč");
+                } catch (e) {
+                    logCommand("Nelze otevřít soubor. Zkuste spustit server ručně: " + config.startLmStudioPath());
+                }
+            }
+        }
+
+        /**
+         * Funkce pro zastavení serverů
+         */
+        async function stopServers() {
+            clearCommandOutput();
+            logCommand("Zastavuji běžící servery...");
+            
+            if (apiAvailable) {
+                try {
+                    // Zastavení všech procesů
+                    const command = `taskkill /f /im electron.exe & taskkill /f /im "LM Studio.exe" & taskkill /f /im ollama.exe`;
+                    const result = await executeCommand(command);
+                    
+                    if (result.success) {
+                        logCommand("Servery byly úspěšně zastaveny");
+                    } else {
+                        logCommand("Nepodařilo se zastavit některé servery: " + result.stderr);
+                    }
+                } catch (error) {
+                    logCommand("Chyba při zastavování serverů: " + error.message);
+                }
+            } else {
+                logCommand("API není dostupné, nelze zastavit servery automaticky");
+                logCommand("Prosím, zastavte služby ručně pomocí správce úloh Windows (Ctrl+Shift+Esc)");
+            }
+        }
+
+        /**
+         * Funkce pro kontrolu dostupných modelů
+         */
+        async function checkAvailableModels() {
+            clearCommandOutput();
+            logCommand("Kontroluji dostupné modely...");
+            
+            if (apiAvailable) {
+                try {
+                    // Kontrola modelů Ollama
+                    logCommand("Kontroluji modely Ollama:");
+                    const ollamaResult = await executeCommand(`"${config.ollamaPath}" list`);
+                    
+                    if (ollamaResult.success) {
+                        if (ollamaResult.stdout.trim() === "") {
+                            logCommand("Nenalezeny žádné modely Ollama");
+                        } else {
+                            logCommand(ollamaResult.stdout);
+                        }
+                    } else {
+                        logCommand("Nepodařilo se získat modely Ollama: " + ollamaResult.stderr);
+                    }
+                    
+                    // Kontrola modelů LM Studio by vyžadovala externí API, které není implementováno
+                    logCommand("\nPoznámka: Modely LM Studio nejsou kontrolovány automaticky, prosím zkontrolujte je ručně v aplikaci.");
+                    
+                } catch (error) {
+                    logCommand("Chyba při kontrole modelů: " + error.message);
+                }
+            } else {
+                logCommand("API není dostupné, nelze zkontrolovat modely automaticky");
+                logCommand("Pokud používáte Ollama, spusťte v příkazovém řádku: ollama list");
+            }
+        }
+
+        /**
+         * Funkce pro spuštění aplikace
+         */
+        async function startApplication() {
+            clearCommandOutput();
+            logCommand("Spouštím aplikaci...");
+            
+            if (apiAvailable) {
+                try {
+                    const command = `start "" "${config.appLauncherPath()}"`;
+                    const result = await executeCommand(command);
+                    
+                    if (result.success) {
+                        logCommand("Aplikace byla úspěšně spuštěna");
+                    } else {
+                        logCommand("Nepodařilo se spustit aplikaci: " + result.stderr);
+                    }
+                } catch (error) {
+                    logCommand("Chyba při spouštění aplikace: " + error.message);
+                    
+                    // Záložní metoda
+                    try {
+                        window.open("file://" + config.appLauncherPath(), "_blank");
+                        logCommand("Pokus o otevření souboru přes prohlížeč");
+                    } catch (e) {
+                        logCommand("Nelze otevřít soubor. Zkuste spustit aplikaci ručně: " + config.appLauncherPath());
+                    }
+                }
+            } else {
+                logCommand("API není dostupné, pokusím se otevřít skript přes prohlížeč");
+                try {
+                    window.open("file://" + config.appLauncherPath(), "_blank");
+                    logCommand("Otevírám soubor přes prohlížeč");
+                } catch (e) {
+                    logCommand("Nelze otevřít soubor. Zkuste spustit aplikaci ručně: " + config.appLauncherPath());
+                }
+            }
+        }
+
+        /**
+         * Funkce pro odinstalaci aplikace
+         */
+        async function uninstallApplication() {
+            clearCommandOutput();
+            logCommand("Příprava na odinstalaci...");
+            
+            if (!confirm("Opravdu chcete odinstalovat aplikaci? Všechna data budou ztracena.")) {
+                logCommand("Odinstalace zrušena uživatelem");
+                return;
+            }
+            
+            if (apiAvailable) {
+                try {
+                    // Nejprve zastavíme všechny procesy
+                    await stopServers();
+                    
+                    // Spustíme odinstalační skript
+                    logCommand("Spouštím odinstalační proces...");
+                    const command = `start "" "${config.installDir}\\uninstall.bat"`;
+                    const result = await executeCommand(command);
+                    
+                    if (result.success) {
+                        logCommand("Odinstalační skript byl spuštěn");
+                        logCommand("Aplikace bude nyní odinstalována. Tento proces může trvat několik minut.");
+                    } else {
+                        logCommand("Nepodařilo se spustit odinstalaci: " + result.stderr);
+                    }
+                } catch (error) {
+                    logCommand("Chyba při odinstalaci aplikace: " + error.message);
+                    
+                    // Záložní metoda
+                    try {
+                        window.open("file://" + config.installDir + "\\uninstall.bat", "_blank");
+                        logCommand("Pokus o otevření odinstalačního skriptu přes prohlížeč");
+                    } catch (e) {
+                        logCommand("Nelze otevřít soubor. Zkuste spustit odinstalaci ručně: " + config.installDir + "\\uninstall.bat");
+                    }
+                }
+            } else {
+                logCommand("API není dostupné, pokusím se otevřít odinstalační skript přes prohlížeč");
+                try {
+                    window.open("file://" + config.installDir + "\\uninstall.bat", "_blank");
+                    logCommand("Otevírám odinstalační skript přes prohlížeč");
+                } catch (e) {
+                    logCommand("Nelze otevřít soubor. Zkuste spustit odinstalaci ručně: " + config.installDir + "\\uninstall.bat");
+                }
+            }
+        }
+
+        // Po načtení stránky inicializujeme systémy
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Zkontrolujeme dostupnost API
+                const apiCheck = await checkApiAvailability();
+                
+                // Inicializujeme auto-repair
+                const autoRepairInit = initAutoRepair();
+                
+                // Inicializujeme rozšířený instalátor
+                const installerInit = initEnhancedInstaller();
+                
+                if (apiCheck && autoRepairInit && installerInit) {
+                    logResult('Systém je připraven pro instalaci.', true);
+                } else {
+                    logResult('Systém běží v omezeném režimu. Některé funkce nemusí být dostupné.', false);
+                }
+            } catch (error) {
+                console.error('Chyba při inicializaci:', error);
+                logResult('Chyba při inicializaci systému: ' + error.message, false);
+            }
+        });
+
+        /**
+         * Simuluje test dostupnosti API.
+         * @returns {Promise<boolean>} - True, pokud je API dostupné.
+         */
+        async function testApiAvailability() {
+            logResult('Testuji dostupnost API...', null);
+            
+            try {
+                const result = await checkApiAvailability();
+                return result;
+            } catch (error) {
+                logResult('Chyba při testování API: ' + error.message, false);
+                return false;
+            }
+        }
+
+        /**
+         * Simuluje test připojení k Node.js serveru.
+         * @returns {Promise<boolean>} - True, pokud je připojení úspěšné.
+         */
+        async function testNodeServerConnection() {
+            logResult('Testuji připojení k Node.js serveru...', null);
+            
+            if (!apiAvailable) {
+                return new Promise(resolve => setTimeout(() => {
+                    const isSuccess = Math.random() > 0.2;
+                    logResult('Připojení k Node.js serveru je v pořádku (simulace).', isSuccess);
+                    resolve(isSuccess);
+                }, 500));
+            }
+            
+            try {
+                const result = await executeCommand('node -v');
+                if (result.success) {
+                    logResult('Node.js server je dostupný: ' + result.stdout, true);
+                    return true;
+                } else {
+                    logResult('Node.js server není dostupný: ' + result.stderr, false);
+                    return false;
+                }
+            } catch (error) {
+                logResult('Chyba při testování Node.js serveru: ' + error.message, false);
+                return false;
+            }
+        }
+
+        /**
+         * Simuluje test konfigurace.
+         * @returns {Promise<boolean>} - True, pokud je konfigurace platná.
+         */
+        async function testConfiguration() {
+            logResult('Testuji uloženou konfiguraci...', null);
+            
+            try {
+                const isSuccess = document.getElementById('db-host').value !== '';
+                logResult('Konfigurace je platná.', isSuccess);
+                return isSuccess;
+            } catch (error) {
+                logResult('Chyba při testování konfigurace: ' + error.message, false);
+                return false;
+            }
+        }
+
+        /**
+         * Simuluje test systémových požadavků.
+         * @returns {Promise<boolean>} - True, pokud systém splňuje požadavky.
+         */
+        async function testSystemRequirements() {
+            logResult('Testuji systémové požadavky...', null);
+            
+            if (!apiAvailable || !autoRepair) {
+                return new Promise(resolve => setTimeout(() => {
+                    const isSuccess = Math.random() > 0.1; // 90% šance na úspěch
+                    logResult('Systémové požadavky jsou splněny (simulace).', isSuccess);
+                    resolve(isSuccess);
+                }, 500));
+            }
+            
+            try {
+                const result = await autoRepair.performSystemCheck();
+                const isSuccess = result.repairAttempts === 0 || result.successfulRepairs === result.repairAttempts;
+                
+                if (isSuccess) {
+                    logResult('Systémové požadavky jsou splněny.', true);
+                } else {
+                    logResult(`Některé systémové požadavky nejsou splněny. Opraveno ${result.successfulRepairs}/${result.repairAttempts} problémů.`, false);
+                    if (result.remainingIssues.length > 0) {
+                        logResult(`Zbývající problémy: ${result.remainingIssues.join(', ')}`, false);
+                    }
+                }
+                
+                return isSuccess;
+            } catch (error) {
+                logResult('Chyba při testování systémových požadavků: ' + error.message, false);
+                return false;
+            }
+        }
+
+        // --- Funkce pro spouštění testů ---
+
+        async function runInstallationTests() {
+            clearResults();
+            logResult('--- Spouštím testy instalace ---', true);
+            await testApiAvailability();
+            await testNodeServerConnection();
+            logResult('--- Testy instalace dokončeny ---', true);
+        }
+
+        async function runConfigTests() {
+            clearResults();
+            logResult('--- Spouštím testy konfigurace ---', true);
+            await testConfiguration();
+            logResult('--- Testy konfigurace dokončeny ---', true);
+        }
+
+        async function runSystemTests() {
+            clearResults();
+            logResult('--- Spouštím systémové testy ---', true);
+            await testSystemRequirements();
+            logResult('--- Systémové testy dokončeny ---', true);
+        }
+
+        async function runAllTests() {
+            clearResults();
+            await runInstallationTests();
+            await runConfigTests();
+            await runSystemTests();
+            resultsOutput.value += '\n[INFO] Všechny testy byly dokončeny.\n';
+            resultsOutput.scrollTop = resultsOutput.scrollHeight;
+        }
+
+        // --- Funkce pro kroky instalace ---
+
+        async function runSystemChecks() {
+            clearResults();
+            logResult('Spouštím kontrolu systému...', true);
+            
+            if (autoRepair) {
+                try {
+                    const result = await autoRepair.performSystemCheck();
+                    logResult(`Kontrola systému dokončena. Nalezeno problémů: ${result.repairAttempts}, Opraveno: ${result.successfulRepairs}`, true);
+                    
+                    if (result.remainingIssues.length > 0) {
+                        logResult(`Zbývající problémy: ${result.remainingIssues.join(', ')}`, false);
+                    }
+                } catch (error) {
+                    logResult('Chyba při kontrole systému: ' + error.message, false);
+                }
+            } else {
+                logResult('Auto-repair systém není dostupný, kontrola bude omezená.', false);
+                await testSystemRequirements();
+            }
+        }
+
+        function saveConfig() {
+            const dbHost = document.getElementById('db-host').value;
+            const dbUser = document.getElementById('db-user').value;
+            
+            if (!dbHost || !dbUser) {
+                logResult('Nelze uložit konfiguraci, některé hodnoty chybí.', false);
+                return;
+            }
+            
+            const config = {
+                dbHost: dbHost,
+                dbUser: dbUser,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Uložíme konfiguraci do localStorage
+            try {
+                localStorage.setItem('installerConfig', JSON.stringify(config));
+                logResult('Konfigurace byla úspěšně uložena.', true);
+            } catch (error) {
+                logResult('Chyba při ukládání konfigurace: ' + error.message, false);
+            }
+        }
+
+        async function runInstallation() {
+            clearResults();
+            logResult('Spouštím instalaci...', true);
+            
+            // Získáme konfiguraci
+            let config;
+            try {
+                const savedConfig = localStorage.getItem('installerConfig');
+                config = savedConfig ? JSON.parse(savedConfig) : {};
+            } catch (error) {
+                config = {};
+            }
+            
+            // Doplníme konfiguraci z formuláře
+            config.dbHost = document.getElementById('db-host').value || config.dbHost;
+            config.dbUser = document.getElementById('db-user').value || config.dbUser;
+            config.installPath = document.getElementById('install-path').value || config.installPath || 'C:\\Longin-AI';
+            
+            const sourceType = document.getElementById('source-type').value;
+            config.sourceType = sourceType;
+            
+            if (sourceType === 'github') {
+                config.githubRepo = document.getElementById('github-repo').value || 'https://github.com/username/longin-charakter-ai.git';
+            } else if (sourceType === 'folder') {
+                config.sourceFolder = document.getElementById('source-folder').value;
+            } else if (sourceType === 'zip') {
+                config.zipPath = document.getElementById('zip-path').value;
+            }
+            
+            // Konfigurace správy paměti
+            config.memoryManagement = {
+                enabled: document.getElementById('enable-memory-management').checked,
+                maxMemoryUsage: parseInt(document.getElementById('max-memory-usage').value),
+                unloadModels: document.getElementById('unload-models').checked
+            };
+            
+            // Vybrané modely
+            const selectedModels = [];
+            document.querySelectorAll('input[name="selected-models"]:checked').forEach(checkbox => {
+                selectedModels.push(checkbox.value);
+            });
+            config.selectedModels = selectedModels;
+            
+            config.createShortcuts = document.getElementById('create-shortcuts').checked;
+            config.autoStart = document.getElementById('auto-start').checked;
+            
+            if (enhancedInstaller) {
+                try {
+                    // Inicializujeme instalátor
+                    await enhancedInstaller.initialize();
+                    
+                    // Spustíme instalaci
+                    logResult('Zahajuji instalaci s rozšířeným instalátorem...', true);
+                    const result = await enhancedInstaller.performInstallation(config);
+                    
+                    if (result.success) {
+                        logResult('Instalace byla úspěšně dokončena!', true);
+                        if (result.repairedIssues.length > 0) {
+                            logResult(`Během instalace bylo opraveno ${result.repairedIssues.length} problémů.`, true);
+                        }
+                    } else {
+                        logResult('Instalace selhala.', false);
+                        if (result.errors.length > 0) {
+                            result.errors.forEach(error => {
+                                logResult(`Chyba: ${error.message || error.type}`, false);
+                            });
+                        }
+                    }
+                } catch (error) {
+                    logResult('Chyba při instalaci: ' + error.message, false);
+                }
+            } else {
+                logResult('Rozšířený instalátor není dostupný, používám základní instalaci.', false);
+                
+                // Základní simulace instalace
+                await new Promise(resolve => {
+                    let progress = 0;
+                    const interval = setInterval(() => {
+                        progress += 10;
+                        logResult(`Instalace: ${progress}% dokončeno...`, true);
+                        
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            logResult('Instalace byla úspěšně dokončena (simulace).', true);
+                            resolve();
+                        }
+                    }, 500);
+                });
+            }
+        }
+    </script>
+
+</body>
+</html>

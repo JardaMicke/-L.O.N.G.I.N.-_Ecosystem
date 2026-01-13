@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAN-over-Internet Connector</title>
+    <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="popup-container">
+        <header class="popup-header">
+            <div class="logo">
+                <i class="fas fa-network-wired"></i>
+                <h1>LAN-over-Internet</h1>
+            </div>
+        </header>
+
+        <main class="popup-content">
+            <!-- Connection Status -->
+            <div class="connection-status">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <span id="statusText">Nepřipojeno k lokální aplikaci</span>
+            </div>
+
+            <!-- Connection Form -->
+            <div class="connection-form" id="connectionForm">
+                <div class="input-group">
+                    <label for="clientName">Název počítače:</label>
+                    <input type="text" id="clientName" placeholder="Můj počítač" maxlength="50">
+                </div>
+                
+                <div class="input-group">
+                    <label for="pinCode">PIN kód:</label>
+                    <input type="password" id="pinCode" placeholder="••••" maxlength="4">
+                </div>
+                
+                <button class="btn btn-primary" id="connectBtn">
+                    <i class="fas fa-plug"></i>
+                    Připojit se
+                </button>
+            </div>
+
+            <!-- Connected View -->
+            <div class="connected-view" id="connectedView" style="display: none;">
+                <div class="info-item">
+                    <span class="label">Název:</span>
+                    <span class="value" id="clientNameDisplay">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">ID:</span>
+                    <span class="value" id="clientIdDisplay">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Stav:</span>
+                    <span class="value status-online" id="clientStatusDisplay">Online</span>
+                </div>
+                
+                <button class="btn btn-danger" id="disconnectBtn">
+                    <i class="fas fa-unlink"></i>
+                    Odpojit
+                </button>
+            </div>
+        </main>
+
+        <footer class="popup-footer">
+            <span>LAN-over-Internet Connector v1.0.0</span>
+        </footer>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

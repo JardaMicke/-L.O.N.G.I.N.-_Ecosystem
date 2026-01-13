@@ -1,0 +1,2865 @@
+# ✅ LONGIN HOSTING - COMPLETE TODO LIST FOR ALL PHASES
+
+**Verze:** 2.0 - COMPLETE ALL PHASES  
+**Datum:** Březen 2025  
+**Status:** READY FOR COMPLETE IMPLEMENTATION  
+**Target:** AI Agent (Claude/Cursor) - Vibe Coding  
+**Total Tasks:** 30+ elementárních úkolů  
+**Total Phases:** 6 fází (40-45 týdnů)  
+
+---
+
+## 📋 OBSAH
+
+1. [PHASE 1: Foundation (2-3 týdny)](#phase-1-foundation) - Tasks 1.1-1.6
+2. [PHASE 2: Authentication & Core API (2-3 týdny)](#phase-2-authentication--core-api) - Tasks 2.1-2.6
+3. [PHASE 3: Docker Integration (2 týdny)](#phase-3-docker-integration) - Tasks 3.1-3.5
+4. [PHASE 4: Real-time & WebSocket (2 týdny)](#phase-4-real-time--websocket) - Tasks 4.1-4.4
+5. [PHASE 5: Frontend (3-4 týdny)](#phase-5-frontend) - Tasks 5.1-5.8
+6. [PHASE 6: Monitoring & Deployment (3 týdny)](#phase-6-monitoring--deployment) - Tasks 6.1-6.5
+7. [Testing, Security & Finalization](#testing-security--finalization)
+
+---
+
+## 🏗️ PHASE 1: FOUNDATION (2-3 týdny)
+
+### PHASE OVERVIEW
+
+Vytvoření kompletní project struktury, konfigurace a setup toolů.
+
+**Po skončení Phase 1:**
+- ✅ Project na GitHub
+- ✅ Všechny tools nakonfigurované
+- ✅ Dev prostředí funguje
+- ✅ CI/CD pipeline nastavený
+- ✅ Docker & Docker Compose běží
+
+**Timeline:** 10-15 dní  
+**Team:** 1-2 developers  
+
+---
+
+## 🔴 TASK 1.1: Project Initialization & Monorepo Setup
+
+**Nástroje:** pnpm, TypeScript, Node.js 20  
+**Vstup:** GitHub repo (empty)  
+**Výstup:** Complete project structure + workspace config  
+**Doba:** 4-6 hodin  
+**Priorita:** 🔴 CRITICAL  
+**Závislosti:** None (starting task)  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+**Co dělat:**
+
+1. **Vytvoř root package.json**
+   ```json
+   {
+     "name": "longin-hosting-server",
+     "version": "1.0.0",
+     "private": true,
+     "description": "Distributed hosting platform for Docker applications",
+     "scripts": {
+       "dev": "pnpm -r --parallel dev",
+       "build": "pnpm -r build",
+       "test": "pnpm -r test",
+       "test:coverage": "pnpm -r test -- --coverage",
+       "lint": "pnpm -r lint",
+       "format": "pnpm -r format",
+       "clean": "pnpm -r clean && rm -rf node_modules"
+     },
+     "devDependencies": {
+       "typescript": "^5.3.0",
+       "@types/node": "^20.10.0",
+       "eslint": "^8.54.0",
+       "prettier": "^3.1.0",
+       "husky": "^8.0.3",
+       "lint-staged": "^15.2.0"
+     }
+   }
+   ```
+
+2. **Vytvoř pnpm-workspace.yaml**
+   ```yaml
+   packages:
+     - 'services/longin-core'
+     - 'services/longin-ui'
+     - 'services/database'
+   ```
+
+3. **Vytvoř root tsconfig.json**
+   ```json
+   {
+     "compilerOptions": {
+       "target": "ES2020",
+       "module": "ESNext",
+       "lib": ["ES2020"],
+       "moduleResolution": "node",
+       "strict": true,
+       "esModuleInterop": true,
+       "skipLibCheck": true,
+       "forceConsistentCasingInFileNames": true,
+       "resolveJsonModule": true,
+       "baseUrl": ".",
+       "paths": {
+         "@core/*": ["./services/longin-core/src/*"],
+         "@ui/*": ["./services/longin-ui/src/*"],
+         "@shared/*": ["./services/shared/src/*"]
+       }
+     },
+     "include": ["services"],
+     "exclude": ["node_modules"]
+   }
+   ```
+
+4. **Vytvoř ESLint & Prettier config**
+   - Copy `.eslintrc.json` z longin-config-files.md
+   - Copy `.prettierrc.json` z longin-config-files.md
+
+5. **Vytvoř directory struktura** (vytvoř všechny složky + .keep files)
+   ```
+   longin-hosting-server/
+   ├── services/
+   │   ├── longin-core/
+   │   ├── longin-ui/
+   │   └── database/
+   ├── config/
+   ├── scripts/
+   ├── docs/
+   └── tests/
+   ```
+
+6. **Setup .env.example**
+   - Copy z longin-config-files.md
+   - Všechny environment variables
+   - Detailní comments
+
+7. **Setup docker-compose.yml (skeleton)**
+   - Copy z longin-config-files.md
+   - Všechny 10 services
+
+8. **Setup GitHub Actions workflows**
+   - Create `.github/workflows/build.yml`
+   - Create `.github/workflows/test.yml`
+   - Create `.github/workflows/lint.yml`
+
+9. **Vytvoř README.md (root)**
+   ```markdown
+   # Longin Hosting Server
+   
+   Distributed hosting platform for Docker applications.
+   
+   ## Quick Start
+   
+   1. Clone: `git clone ...`
+   2. Setup: `cp .env.example .env`
+   3. Install: `pnpm install`
+   4. Dev: `docker-compose up -d && pnpm dev`
+   
+   ## Architecture
+   
+   - Frontend: React 18 + TypeScript + Tailwind
+   - Backend: Node.js + Express + TypeORM
+   - Database: PostgreSQL + PgVector + Redis
+   - Monitoring: Prometheus + Grafana + ELK
+   ```
+
+### ✨ TIPS
+
+- `pnpm` je lepší než npm/yarn pro monorepo
+- TypeScript strict mode = prevence bugů
+- ESLint = code quality
+- GitHub Actions = automatizace
+
+### 📋 TESTING PŘÍSTUP
+
+```bash
+# Verify package.json is valid
+node -e "console.log(require('./package.json').name)"
+
+# Verify workspaces defined
+grep -A3 "packages" pnpm-workspace.yaml
+
+# Verify all config files exist
+ls -la .eslintrc.json .prettierrc.json tsconfig.json
+
+# Verify directories exist
+ls -la services/longin-core services/longin-ui services/database
+```
+
+### ✅ CHECKLIST
+
+- [ ] Root package.json created with workspaces + scripts
+- [ ] pnpm-workspace.yaml created
+- [ ] Root tsconfig.json with path aliases
+- [ ] .eslintrc.json created
+- [ ] .prettierrc.json created
+- [ ] .env.example created with ALL variables
+- [ ] docker-compose.yml created
+- [ ] GitHub Actions workflows created
+- [ ] .gitignore & .dockerignore created
+- [ ] README.md created
+- [ ] All config files validate (no syntax errors)
+- [ ] Git initialized & committed
+
+---
+
+## 🟠 TASK 1.2: Backend Service Setup (longin-core)
+
+**Nástroje:** Express, TypeScript, TypeORM  
+**Vstup:** Project structure z Task 1.1  
+**Výstup:** Ready-to-code backend service folder  
+**Doba:** 3-4 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 1.1  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Vytvořit kompletní backend workspace:
+
+1. **services/longin-core/package.json** (copy z longin-config-files.md)
+   - All Express dependencies
+   - All TypeORM dependencies
+   - All testing tools
+
+2. **services/longin-core/tsconfig.json**
+   - Extends root tsconfig
+   - outDir: "./dist"
+   - rootDir: "./src"
+
+3. **Folder struktura**
+   ```
+   services/longin-core/
+   ├── src/
+   │   ├── config/
+   │   │   ├── database.ts
+   │   │   ├── redis.ts
+   │   │   └── constants.ts
+   │   ├── middleware/
+   │   │   ├── index.ts
+   │   │   └── .keep
+   │   ├── routes/
+   │   │   ├── index.ts
+   │   │   └── .keep
+   │   ├── services/
+   │   │   └── .keep
+   │   ├── websocket/
+   │   │   └── .keep
+   │   ├── utils/
+   │   │   └── .keep
+   │   ├── entities/
+   │   │   └── .keep
+   │   ├── dtos/
+   │   │   └── .keep
+   │   └── app.ts
+   ├── tests/
+   │   └── .keep
+   ├── Dockerfile
+   ├── .dockerignore
+   ├── jest.config.js
+   ├── .env.example
+   └── README.md
+   ```
+
+4. **src/app.ts** (basic express setup)
+   ```typescript
+   import express from 'express';
+   import helmet from 'helmet';
+   import cors from 'cors';
+   
+   const app = express();
+   const PORT = process.env.LONGIN_CORE_API_PORT || 3001;
+   
+   app.use(helmet());
+   app.use(cors());
+   app.use(express.json());
+   
+   app.get('/health', (req, res) => {
+     res.json({ status: 'ok', timestamp: new Date() });
+   });
+   
+   app.use((err, req, res, next) => {
+     console.error(err);
+     res.status(500).json({ error: 'Internal server error' });
+   });
+   
+   app.listen(PORT, () => {
+     console.log(`✅ API Server running on port ${PORT}`);
+   });
+   
+   export default app;
+   ```
+
+5. **Dockerfile** (copy z longin-config-files.md)
+6. **jest.config.js** (testing setup)
+7. **.dockerignore** (optimization)
+
+### ✅ CHECKLIST
+
+- [ ] services/longin-core/package.json created
+- [ ] services/longin-core/tsconfig.json created
+- [ ] Folder struktura complete
+- [ ] src/app.ts basic server works
+- [ ] Dockerfile created
+- [ ] jest.config.js created
+- [ ] README.md created
+
+---
+
+## 🟠 TASK 1.3: Frontend Service Setup (longin-ui)
+
+**Nástroje:** React 18, Vite, TypeScript, Tailwind CSS  
+**Vstup:** Project structure z Task 1.1  
+**Výstup:** Ready-to-code React service folder  
+**Doba:** 3-4 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 1.1  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Vytvořit kompletní frontend workspace:
+
+1. **services/longin-ui/package.json** (copy z longin-config-files.md)
+2. **services/longin-ui/vite.config.ts** (Vite + API proxy)
+3. **services/longin-ui/tailwind.config.js** (Tailwind theme)
+4. **Folder struktura**
+   ```
+   services/longin-ui/
+   ├── src/
+   │   ├── pages/
+   │   ├── components/
+   │   ├── hooks/
+   │   ├── services/
+   │   ├── store/
+   │   ├── utils/
+   │   ├── types/
+   │   ├── styles/
+   │   ├── main.tsx
+   │   └── App.tsx
+   ├── public/
+   ├── tests/
+   ├── Dockerfile
+   ├── tsconfig.json
+   ├── .dockerignore
+   └── README.md
+   ```
+
+5. **public/index.html**
+   ```html
+   <!DOCTYPE html>
+   <html lang="en">
+   <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Longin Hosting</title>
+   </head>
+   <body>
+     <div id="root"></div>
+     <script type="module" src="/src/main.tsx"></script>
+   </body>
+   </html>
+   ```
+
+6. **src/App.tsx** (basic component)
+7. **src/main.tsx** (React entry)
+8. **Dockerfile** (multi-stage build)
+
+### ✅ CHECKLIST
+
+- [ ] services/longin-ui/package.json created
+- [ ] vite.config.ts created with API proxy
+- [ ] tailwind.config.js created
+- [ ] Folder struktura complete
+- [ ] public/index.html created
+- [ ] src/App.tsx works
+- [ ] Dockerfile created
+
+---
+
+## 🟠 TASK 1.4: Database Service Setup
+
+**Nástroje:** PostgreSQL, SQL  
+**Vstup:** Project structure z Task 1.1  
+**Výstup:** Database folder se schema templates  
+**Doba:** 2-3 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 1.1  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Folder struktura**
+   ```
+   services/database/
+   ├── init-db.sql
+   ├── pgvector-init.sql
+   ├── migrations/
+   ├── seeds/
+   └── README.md
+   ```
+
+2. **init-db.sql** (template)
+   - Extensions (uuid-ossp, pgcrypto)
+   - Users table (basic)
+   - Comments pro všechny ostatní tabulky
+   - Index placeholders
+
+3. **pgvector-init.sql** (template)
+   - pgvector extension
+   - Embeddings table (placeholder)
+
+### ✅ CHECKLIST
+
+- [ ] services/database/ folder created
+- [ ] init-db.sql template created
+- [ ] pgvector-init.sql created
+- [ ] migrations/ folder ready
+- [ ] seeds/ folder ready
+- [ ] README.md created
+
+---
+
+## 🟠 TASK 1.5: Docker Compose Development Setup
+
+**Nástroje:** Docker, Docker Compose  
+**Vstup:** All service folders z Tasks 1.1-1.4  
+**Výstup:** Working docker-compose.yml pro development  
+**Doba:** 2-3 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 1.1, 1.2, 1.3, 1.4  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Update docker-compose.yml** (z longin-config-files.md)
+   - All 10 services defined
+   - All environment variables
+   - All health checks
+   - All volume mounts
+   - All networks
+
+2. **Test each service**
+   ```bash
+   docker-compose up -d longin-postgres
+   docker-compose logs longin-postgres
+   docker-compose ps
+   ```
+
+3. **Verify health checks**
+   ```bash
+   docker-compose ps  # All should show "healthy"
+   ```
+
+### ✅ CHECKLIST
+
+- [ ] docker-compose.yml complete
+- [ ] All 10 services defined
+- [ ] Environment variables set
+- [ ] Health checks working
+- [ ] Volume mounts configured
+- [ ] Networks properly defined
+- [ ] docker-compose up -d succeeds
+- [ ] All services reach "healthy" state
+
+---
+
+## 🟡 TASK 1.6: GitHub Actions CI/CD Setup
+
+**Nástroje:** GitHub Actions  
+**Vstup:** Project on GitHub  
+**Výstup:** Working CI/CD workflows  
+**Doba:** 2-3 hodin  
+**Priorita:** 🟡 MEDIUM  
+**Závislosti:** TASK 1.1  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create .github/workflows/build.yml**
+   ```yaml
+   name: Build Docker Images
+   
+   on:
+     push:
+       branches: [main, develop]
+     pull_request:
+       branches: [main, develop]
+   
+   jobs:
+     build:
+       runs-on: ubuntu-latest
+       steps:
+         - uses: actions/checkout@v3
+         - name: Build backend
+           run: docker build -f services/longin-core/Dockerfile -t longin-core:latest .
+         - name: Build frontend
+           run: docker build -f services/longin-ui/Dockerfile -t longin-ui:latest .
+   ```
+
+2. **Create .github/workflows/test.yml**
+   - Run Jest unit tests
+   - Run Supertest API tests
+   - Generate coverage report
+   - Check coverage threshold (>80%)
+
+3. **Create .github/workflows/lint.yml**
+   - Run ESLint
+   - Run Prettier check
+   - Run TypeScript type check
+
+### ✅ CHECKLIST
+
+- [ ] .github/workflows/build.yml created
+- [ ] .github/workflows/test.yml created
+- [ ] .github/workflows/lint.yml created
+- [ ] All workflows have proper triggers
+- [ ] Workflows run successfully
+
+---
+
+## 📊 PHASE 2: AUTHENTICATION & CORE API (2-3 týdny)
+
+### PHASE OVERVIEW
+
+Implementace user authentication, JWT tokens, REST API, middleware.
+
+**Po skončení Phase 2:**
+- ✅ User registration & login working
+- ✅ JWT token management working
+- ✅ Password hashing (bcryptjs)
+- ✅ REST API struktura complete
+- ✅ Middleware stack implemented
+- ✅ Comprehensive tests
+
+**Timeline:** 12-18 dní  
+**Týmové role:** 1-2 backend developers  
+
+---
+
+## 🔴 TASK 2.1: Database Schema Complete Implementation
+
+**Nástroje:** PostgreSQL, SQL, TypeORM  
+**Vstup:** init-db.sql template z Task 1.4  
+**Výstup:** Complete database schema + 7 TypeORM entities  
+**Doba:** 6-8 hodin  
+**Priorita:** 🔴 CRITICAL  
+**Závislosti:** TASK 1.4  
+**Chunk Size:** EXTRA LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+**Reference:** longin-full-prd.md (Database Schema Section)
+
+1. **Complete services/database/init-db.sql** s 7 tabulkami:
+   - `users` (10 fields, 3 indexes)
+   - `applications` (18 fields, 4 indexes)
+   - `containers` (10 fields, 3 indexes)
+   - `deployments` (13 fields, 3 indexes)
+   - `metrics` (8 fields, 1 index)
+   - `github_webhooks` (6 fields, 3 indexes)
+   - `api_logs` (9 fields, 3 indexes)
+
+2. **Create TypeORM entities** v `services/longin-core/src/entities/`:
+   - `User.ts` (všechny fields + relationships)
+   - `Application.ts` (všechny fields + relationships)
+   - `Container.ts`
+   - `Deployment.ts`
+   - `Metrics.ts`
+   - `GitHubWebhook.ts`
+   - `ApiLog.ts`
+
+3. **Configure TypeORM** (src/config/database.ts)
+   - DataSource configuration
+   - Connection pooling
+   - Logging
+   - Migrations setup
+
+4. **Create database migration** (TypeORM)
+   ```typescript
+   // Example: migrations/1710000000000-CreateUsersTable.ts
+   ```
+
+5. **Test database connection**
+   ```bash
+   docker-compose up -d longin-postgres
+   # Verify init-db.sql runs successfully
+   docker exec longin-postgres psql -U longin_user -d longin_db -c "\\dt"
+   ```
+
+### ✅ CHECKLIST
+
+- [ ] All 7 tables created in init-db.sql
+- [ ] All indexes created with proper names
+- [ ] All foreign keys with ON DELETE CASCADE
+- [ ] All 7 TypeORM entities created
+- [ ] TypeORM migration system configured
+- [ ] Database initializes without errors
+- [ ] All tables accessible via TypeORM
+
+---
+
+## 🔴 TASK 2.2: Redis Configuration & Utilities
+
+**Nástroje:** Redis, ioredis  
+**Vstup:** src/config folder structure z Task 1.2  
+**Výstup:** Redis client + helper functions  
+**Doba:** 3-4 hodin  
+**Priorita:** 🔴 CRITICAL  
+**Závislosti:** TASK 1.2  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create src/config/redis.ts**
+   ```typescript
+   import Redis from 'ioredis';
+   
+   const redis = new Redis({
+     host: process.env.REDIS_HOST || 'localhost',
+     port: parseInt(process.env.REDIS_PORT || '6379'),
+     password: process.env.REDIS_PASSWORD,
+     retryStrategy: (times) => Math.min(times * 50, 2000),
+     enableReadyCheck: false,
+     enableOfflineQueue: false,
+   });
+   
+   redis.on('connect', () => {
+     console.log('✅ Redis connected');
+   });
+   
+   redis.on('error', (err) => {
+     console.error('❌ Redis error:', err);
+   });
+   
+   export default redis;
+   ```
+
+2. **Create src/utils/redis.ts** (helpers)
+   ```typescript
+   import redis from '@core/config/redis';
+   
+   export const getSession = (sessionId: string) => redis.get(sessionId);
+   export const setSession = (sessionId: string, data: string) => 
+     redis.setex(sessionId, 86400, data);
+   export const invalidateCache = (key: string) => redis.del(key);
+   export const publishEvent = (channel: string, data: any) =>
+     redis.publish(channel, JSON.stringify(data));
+   ```
+
+3. **Create unit tests** (tests/redis.test.ts)
+
+4. **Test connection**
+   ```bash
+   docker-compose up -d longin-redis
+   # Run health check from app
+   ```
+
+### ✅ CHECKLIST
+
+- [ ] src/config/redis.ts created
+- [ ] src/utils/redis.ts created
+- [ ] All helper functions working
+- [ ] Error handling comprehensive
+- [ ] Unit tests passing
+- [ ] Health check working
+
+---
+
+## 🔴 TASK 2.3: Authentication Service & Utilities
+
+**Nástroje:** JWT, bcryptjs, TypeORM  
+**Vstup:** src/services folder + entities z Task 2.1  
+**Výstup:** Complete auth service + helpers + DTOs  
+**Doba:** 8-10 hodin  
+**Priorita:** 🔴 CRITICAL  
+**Závislosti:** TASK 2.1, 2.2  
+**Chunk Size:** EXTRA LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+**Reference:** longin-ai-prompts.md PROMPT 3
+
+1. **Create src/utils/jwt.ts**
+   ```typescript
+   import jwt from 'jsonwebtoken';
+   
+   interface TokenPayload {
+     userId: string;
+     role: 'admin' | 'user';
+     iat: number;
+     exp: number;
+   }
+   
+   export const generateAccessToken = (userId: string, role: string): string => {
+     return jwt.sign(
+       { userId, role },
+       process.env.JWT_SECRET!,
+       { expiresIn: process.env.JWT_ACCESS_EXPIRY || '3600' }
+     );
+   };
+   
+   export const generateRefreshToken = (userId: string): string => {
+     return jwt.sign(
+       { userId, type: 'refresh' },
+       process.env.JWT_REFRESH_SECRET!,
+       { expiresIn: process.env.JWT_REFRESH_EXPIRY || '604800' }
+     );
+   };
+   
+   export const verifyAccessToken = (token: string): TokenPayload => {
+     return jwt.verify(token, process.env.JWT_SECRET!) as TokenPayload;
+   };
+   ```
+
+2. **Create src/utils/password.ts**
+   ```typescript
+   import bcrypt from 'bcryptjs';
+   
+   export const hashPassword = (plaintext: string): Promise<string> => {
+     return bcrypt.hash(plaintext, 10);
+   };
+   
+   export const comparePassword = (plaintext: string, hash: string): Promise<boolean> => {
+     return bcrypt.compare(plaintext, hash);
+   };
+   
+   export const validatePasswordStrength = (password: string): boolean => {
+     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+     return regex.test(password);
+   };
+   ```
+
+3. **Create src/dtos/auth.dto.ts**
+   ```typescript
+   import { IsEmail, IsString, MinLength } from 'class-validator';
+   
+   export class RegisterDto {
+     @IsString()
+     @MinLength(3)
+     username!: string;
+     
+     @IsEmail()
+     email!: string;
+     
+     @IsString()
+     @MinLength(8)
+     password!: string;
+   }
+   
+   export class LoginDto {
+     @IsString()
+     username!: string;
+     
+     @IsString()
+     password!: string;
+   }
+   ```
+
+4. **Create src/services/auth.service.ts**
+   ```typescript
+   import { Repository } from 'typeorm';
+   import { User } from '@core/entities/User';
+   import { AppDataSource } from '@core/config/database';
+   import { hashPassword, comparePassword } from '@core/utils/password';
+   import { generateAccessToken, generateRefreshToken } from '@core/utils/jwt';
+   
+   export class AuthService {
+     private userRepository: Repository<User> = AppDataSource.getRepository(User);
+     
+     async register(username: string, email: string, password: string) {
+       const hashedPassword = await hashPassword(password);
+       const user = this.userRepository.create({
+         username,
+         email,
+         password_hash: hashedPassword,
+       });
+       
+       const savedUser = await this.userRepository.save(user);
+       
+       return {
+         user: { id: savedUser.id, username, email },
+         accessToken: generateAccessToken(savedUser.id, savedUser.role),
+         refreshToken: generateRefreshToken(savedUser.id),
+       };
+     }
+     
+     async login(username: string, password: string) {
+       const user = await this.userRepository.findOne({
+         where: { username },
+       });
+       
+       if (!user || !(await comparePassword(password, user.password_hash))) {
+         throw new Error('Invalid credentials');
+       }
+       
+       return {
+         user: { id: user.id, username: user.username, email: user.email, role: user.role },
+         accessToken: generateAccessToken(user.id, user.role),
+         refreshToken: generateRefreshToken(user.id),
+       };
+     }
+     
+     async getMe(userId: string) {
+       const user = await this.userRepository.findOne({
+         where: { id: userId },
+       });
+       
+       if (!user) throw new Error('User not found');
+       
+       return {
+         id: user.id,
+         username: user.username,
+         email: user.email,
+         role: user.role,
+         theme: user.theme,
+       };
+     }
+   }
+   ```
+
+5. **Create comprehensive tests**
+   - tests/auth.service.test.ts
+   - tests/jwt.utils.test.ts
+   - tests/password.utils.test.ts
+
+### ✅ CHECKLIST
+
+- [ ] All JWT utilities created & tested
+- [ ] All password utilities created & tested
+- [ ] Auth service with all methods
+- [ ] All DTOs with validators
+- [ ] Comprehensive unit tests (80%+ coverage)
+- [ ] All tests passing
+
+---
+
+## 🟠 TASK 2.4: Middleware Stack Implementation
+
+**Nástroje:** Express middleware, TypeScript  
+**Vstup:** src/middleware folder z Task 1.2  
+**Výstup:** Complete middleware suite (6 middlewares)  
+**Doba:** 6-8 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 2.3  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Create 6 middleware files v `src/middleware/`:
+
+1. **auth.middleware.ts**
+   ```typescript
+   import { Request, Response, NextFunction } from 'express';
+   import { verifyAccessToken } from '@core/utils/jwt';
+   
+   export interface AuthRequest extends Request {
+     user?: { userId: string; role: string };
+   }
+   
+   export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+     const token = req.headers.authorization?.split(' ')[1];
+     
+     if (!token) {
+       return res.status(401).json({ error: 'Unauthorized' });
+     }
+     
+     try {
+       const payload = verifyAccessToken(token);
+       req.user = { userId: payload.userId, role: payload.role };
+       next();
+     } catch (err) {
+       res.status(401).json({ error: 'Invalid token' });
+     }
+   };
+   ```
+
+2. **auth-guard.middleware.ts**
+   ```typescript
+   export const requireRole = (roles: string[]) => {
+     return (req: AuthRequest, res: Response, next: NextFunction) => {
+       if (!req.user || !roles.includes(req.user.role)) {
+         return res.status(403).json({ error: 'Forbidden' });
+       }
+       next();
+     };
+   };
+   ```
+
+3. **validation.middleware.ts**
+   ```typescript
+   import { plainToClass } from 'class-transformer';
+   import { validate } from 'class-validator';
+   
+   export const validateDto = (dtoClass: any) => {
+     return async (req: Request, res: Response, next: NextFunction) => {
+       const dto = plainToClass(dtoClass, req.body);
+       const errors = await validate(dto);
+       
+       if (errors.length > 0) {
+         return res.status(400).json({ errors });
+       }
+       
+       next();
+     };
+   };
+   ```
+
+4. **error-handler.middleware.ts**
+   ```typescript
+   export const errorHandler = (
+     err: any,
+     req: Request,
+     res: Response,
+     next: NextFunction
+   ) => {
+     console.error(err);
+     res.status(err.status || 500).json({
+       error: err.message || 'Internal server error',
+     });
+   };
+   ```
+
+5. **logging.middleware.ts**
+   ```typescript
+   import winston from 'winston';
+   
+   const logger = winston.createLogger({
+     level: 'info',
+     format: winston.format.json(),
+     transports: [new winston.transports.File({ filename: 'logs/api.log' })],
+   });
+   
+   export const loggingMiddleware = (req: Request, res: Response, next: NextFunction) => {
+     const start = Date.now();
+     
+     res.on('finish', () => {
+       const duration = Date.now() - start;
+       logger.info({
+         method: req.method,
+         path: req.path,
+         status: res.statusCode,
+         duration,
+       });
+     });
+     
+     next();
+   };
+   ```
+
+6. **rate-limit.middleware.ts**
+   ```typescript
+   import redis from '@core/config/redis';
+   
+   export const rateLimit = (maxRequests: number, windowMs: number) => {
+     return async (req: Request, res: Response, next: NextFunction) => {
+       const key = `ratelimit:${req.ip}`;
+       const count = await redis.incr(key);
+       
+       if (count === 1) {
+         await redis.expire(key, Math.ceil(windowMs / 1000));
+       }
+       
+       if (count > maxRequests) {
+         return res.status(429).json({ error: 'Too many requests' });
+       }
+       
+       next();
+     };
+   };
+   ```
+
+7. **src/middleware/index.ts** (export all)
+
+### ✅ CHECKLIST
+
+- [ ] All 6 middleware created
+- [ ] Error responses consistent format
+- [ ] All logging working
+- [ ] Rate limiting working
+- [ ] Comprehensive unit tests
+- [ ] All tests passing
+
+---
+
+## 🟠 TASK 2.5: Auth Routes & Endpoints
+
+**Nástroje:** Express routes, Supertest  
+**Vstup:** src/routes folder + auth.service z Task 2.3  
+**Výstup:** 7 working authentication endpoints  
+**Doba:** 4-6 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 2.3, 2.4  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Create 7 endpoints v `src/routes/auth.routes.ts`:
+
+1. **POST /api/auth/register**
+   ```typescript
+   router.post('/register', validateDto(RegisterDto), async (req: Request, res: Response) => {
+     const { username, email, password } = req.body;
+     const result = await authService.register(username, email, password);
+     res.status(201).json(result);
+   });
+   ```
+
+2. **POST /api/auth/login**
+3. **POST /api/auth/refresh**
+4. **POST /api/auth/logout**
+5. **GET /api/auth/me** (requires auth)
+6. **GET /health** (no auth)
+7. **GET /api/system/status** (admin only)
+
+Create integration tests using Supertest:
+```typescript
+// tests/auth.routes.test.ts
+describe('Auth Routes', () => {
+  it('POST /api/auth/register - should create user', async () => {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'Test123!@',
+      });
+    
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty('accessToken');
+  });
+});
+```
+
+### ✅ CHECKLIST
+
+- [ ] All 7 endpoints working
+- [ ] Validation working correctly
+- [ ] Error handling proper
+- [ ] Integration tests passing (>80% coverage)
+- [ ] Postman collection created
+
+---
+
+## 🟠 TASK 2.6: App Express Server Setup & Integration
+
+**Nástroje:** Express, middleware stack  
+**Vstup:** All middleware + routes z Tasks 2.4-2.5  
+**Výstup:** Production-ready Express app  
+**Doba:** 3-4 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 2.4, 2.5  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Update `src/app.ts` s kompletní app setup:
+
+```typescript
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import 'reflect-metadata';
+import { AppDataSource } from './config/database';
+import authRoutes from './routes/auth.routes';
+import {
+  authMiddleware,
+  loggingMiddleware,
+  errorHandler,
+  rateLimit,
+} from './middleware';
+
+const app = express();
+const PORT = process.env.LONGIN_CORE_API_PORT || 3001;
+
+// Security
+app.use(helmet());
+app.use(cors());
+
+// Parsing
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Logging
+app.use(loggingMiddleware);
+
+// Rate limiting
+app.use(rateLimit(100, 60000)); // 100 req/min
+
+// Health check (no auth)
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date() });
+});
+
+// Routes
+app.use('/api/auth', authRoutes);
+
+// Error handler (must be last)
+app.use(errorHandler);
+
+// Initialize database & start server
+async function startServer() {
+  try {
+    await AppDataSource.initialize();
+    console.log('✅ Database connected');
+    
+    app.listen(PORT, () => {
+      console.log(`✅ API Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('❌ Error starting server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
+
+export default app;
+```
+
+### ✅ CHECKLIST
+
+- [ ] src/app.ts complete
+- [ ] All middleware applied in correct order
+- [ ] All routes registered
+- [ ] Server starts without errors
+- [ ] /health endpoint working
+- [ ] Proper error handling
+- [ ] Database connection working
+
+---
+
+## 🎯 END OF PHASE 2
+
+**After Task 2.6, test:**
+```bash
+# Start backend
+pnpm --filter longin-core dev
+
+# Test endpoints
+curl http://localhost:3001/health  
+# Should return: {"status":"ok","timestamp":"..."}
+
+curl -X POST http://localhost:3001/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test","email":"test@example.com","password":"Test123!@"}'
+# Should return: {"user":{...},"accessToken":"...","refreshToken":"..."}
+
+curl -X GET http://localhost:3001/api/auth/me \
+  -H "Authorization: Bearer {token}"
+# Should return: {"id":"...","username":"test",...}
+```
+
+✅ **Backend Phase Complete!**
+
+---
+
+## 🐳 PHASE 3: DOCKER INTEGRATION (2 týdny)
+
+### PHASE OVERVIEW
+
+Integrace Docker SDK, správa kontejnerů, lifecycle management, port allocation.
+
+**Po skončení Phase 3:**
+- ✅ Docker SDK integration working
+- ✅ Container creation/start/stop endpoints
+- ✅ Port allocation system
+- ✅ Instance limiting (max 2 per app)
+- ✅ Container status tracking
+- ✅ Integration with database
+
+**Timeline:** 10-14 dní  
+**Role:** 1-2 backend developers  
+
+---
+
+## 🔴 TASK 3.1: Docker SDK Wrapper Service
+
+**Nástroje:** dockerode (Docker SDK), TypeScript  
+**Vstup:** src/services folder  
+**Výstup:** Docker service wrapper  
+**Doba:** 4-6 hodin  
+**Priorita:** 🔴 CRITICAL  
+**Závislosti:** TASK 2.1  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Create `src/services/docker.service.ts`:
+
+```typescript
+import Docker from 'dockerode';
+
+export class DockerService {
+  private docker: Docker;
+  
+  constructor() {
+    this.docker = new Docker({
+      socketPath: process.env.DOCKER_SOCKET || '/var/run/docker.sock',
+    });
+  }
+  
+  // Get container list
+  async listContainers(filters?: any) {
+    return this.docker.listContainers({ filters });
+  }
+  
+  // Create container
+  async createContainer(options: Docker.ContainerCreateOptions) {
+    return this.docker.createContainer(options);
+  }
+  
+  // Start container
+  async startContainer(containerId: string) {
+    const container = this.docker.getContainer(containerId);
+    return container.start();
+  }
+  
+  // Stop container
+  async stopContainer(containerId: string) {
+    const container = this.docker.getContainer(containerId);
+    return container.stop({ t: 10 }); // 10 sec timeout
+  }
+  
+  // Remove container
+  async removeContainer(containerId: string) {
+    const container = this.docker.getContainer(containerId);
+    return container.remove({ force: true });
+  }
+  
+  // Get container stats
+  async getContainerStats(containerId: string) {
+    const container = this.docker.getContainer(containerId);
+    return container.stats({ stream: false });
+  }
+  
+  // Pull image
+  async pullImage(imageName: string) {
+    return this.docker.pull(imageName);
+  }
+  
+  // Get image
+  async getImage(imageName: string) {
+    return this.docker.getImage(imageName);
+  }
+  
+  // Health check
+  async healthCheck(): Promise<boolean> {
+    try {
+      await this.docker.ping();
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+}
+
+export const dockerService = new DockerService();
+```
+
+### ✅ CHECKLIST
+
+- [ ] src/services/docker.service.ts created
+- [ ] All methods implemented
+- [ ] Error handling comprehensive
+- [ ] Health check working
+- [ ] Unit tests created
+- [ ] Tests passing
+
+---
+
+## 🔴 TASK 3.2: Port Allocation System
+
+**Nástroje:** TypeORM, Redis  
+**Vstup:** Database schema + Docker service  
+**Výstup:** Port allocation service  
+**Doba:** 3-4 hodin  
+**Priorita:** 🔴 CRITICAL  
+**Závislosti:** TASK 3.1  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Create `src/services/port.service.ts`:
+
+```typescript
+import { AppDataSource } from '@core/config/database';
+import { Container } from '@core/entities/Container';
+
+const PORT_RANGE_START = 4000;
+const PORT_RANGE_END = 5000;
+
+export class PortService {
+  private containerRepository = AppDataSource.getRepository(Container);
+  
+  async allocatePort(): Promise<number> {
+    for (let port = PORT_RANGE_START; port <= PORT_RANGE_END; port++) {
+      const existing = await this.containerRepository.findOne({
+        where: { port_assigned: port },
+      });
+      
+      if (!existing) {
+        return port;
+      }
+    }
+    
+    throw new Error('No available ports');
+  }
+  
+  async releasePort(port: number): Promise<void> {
+    // Just mark container as stopped, port is freed automatically
+  }
+  
+  async getAllocatedPorts(): Promise<number[]> {
+    const containers = await this.containerRepository.find({
+      where: { status: 'running' },
+    });
+    
+    return containers.map((c) => c.port_assigned);
+  }
+}
+
+export const portService = new PortService();
+```
+
+### ✅ CHECKLIST
+
+- [ ] src/services/port.service.ts created
+- [ ] Port allocation algorithm working
+- [ ] Port release working
+- [ ] No port conflicts
+- [ ] Unit tests passing
+
+---
+
+## 🔴 TASK 3.3: Application Management Service
+
+**Nástroje:** TypeORM, Docker service  
+**Vstup:** Database schema + Docker service  
+**Výstup:** App management service  
+**Doba:** 6-8 hodin  
+**Priorita:** 🔴 CRITICAL  
+**Závislosti:** TASK 3.1, 3.2, 2.1  
+**Chunk Size:** EXTRA LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Create `src/services/app.service.ts`:
+
+```typescript
+import { Repository } from 'typeorm';
+import { AppDataSource } from '@core/config/database';
+import { Application } from '@core/entities/Application';
+import { Container } from '@core/entities/Container';
+import { dockerService } from './docker.service';
+import { portService } from './port.service';
+
+export class AppService {
+  private appRepository: Repository<Application> = AppDataSource.getRepository(Application);
+  private containerRepository: Repository<Container> = AppDataSource.getRepository(Container);
+  
+  async getAllApps(userId?: string) {
+    const query = this.appRepository.createQueryBuilder('app');
+    
+    if (userId) {
+      query.where('app.owner_id = :userId', { userId });
+    } else {
+      query.where('app.is_public = true');
+    }
+    
+    return query.getMany();
+  }
+  
+  async getAppById(appId: string) {
+    return this.appRepository.findOne({
+      where: { id: appId },
+      relations: ['owner', 'containers'],
+    });
+  }
+  
+  async startApp(appId: string): Promise<Container> {
+    const app = await this.getAppById(appId);
+    if (!app) throw new Error('App not found');
+    
+    // Check max instances
+    const runningCount = app.containers.filter((c) => c.status === 'running').length;
+    if (runningCount >= app.max_instances) {
+      throw new Error('Max instances reached');
+    }
+    
+    // Allocate port
+    const port = await portService.allocatePort();
+    
+    // Pull image if needed
+    const image = await dockerService.getImage(app.docker_image);
+    if (!image) {
+      await dockerService.pullImage(app.docker_image);
+    }
+    
+    // Create container
+    const container = await dockerService.createContainer({
+      Image: app.docker_image,
+      ExposedPorts: {
+        [`${app.port_internal}/tcp`]: {},
+      },
+      HostConfig: {
+        PortBindings: {
+          [`${app.port_internal}/tcp`]: [{ HostPort: port.toString() }],
+        },
+        CpuShares: parseInt(app.cpu_limit || '1024'),
+        Memory: parseInt(app.memory_limit || '536870912'), // 512MB default
+      },
+      Env: Object.entries(app.env_vars || {}).map(([k, v]) => `${k}=${v}`),
+    });
+    
+    // Start container
+    await dockerService.startContainer(container.id);
+    
+    // Create database record
+    const dbContainer = this.containerRepository.create({
+      app_id: appId,
+      container_id: container.id,
+      port_assigned: port,
+      status: 'running',
+      started_at: new Date(),
+    });
+    
+    await this.containerRepository.save(dbContainer);
+    
+    // Update app status
+    app.current_instances = runningCount + 1;
+    app.last_started = new Date();
+    await this.appRepository.save(app);
+    
+    return dbContainer;
+  }
+  
+  async stopApp(appId: string): Promise<void> {
+    const app = await this.getAppById(appId);
+    if (!app) throw new Error('App not found');
+    
+    // Stop all containers
+    for (const container of app.containers.filter((c) => c.status === 'running')) {
+      await dockerService.stopContainer(container.container_id);
+      container.status = 'stopped';
+      container.exited_at = new Date();
+      await this.containerRepository.save(container);
+    }
+    
+    app.current_instances = 0;
+    app.last_stopped = new Date();
+    await this.appRepository.save(app);
+  }
+}
+
+export const appService = new AppService();
+```
+
+### ✅ CHECKLIST
+
+- [ ] src/services/app.service.ts created
+- [ ] startApp method implemented
+- [ ] stopApp method implemented
+- [ ] Instance limiting working
+- [ ] Port allocation working
+- [ ] Error handling comprehensive
+- [ ] Integration tests passing
+
+---
+
+## 🟠 TASK 3.4: App Management Endpoints
+
+**Nástroje:** Express routes, Supertest  
+**Vstup:** app.service + auth middleware  
+**Výstup:** Working app management endpoints  
+**Doba:** 4-5 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 3.3  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Create `src/routes/apps.routes.ts` with endpoints:
+
+1. **GET /api/apps** - List all apps (optionally owned by user)
+2. **GET /api/apps/:id** - Get app details
+3. **POST /api/apps/:id/start** - Start app
+4. **POST /api/apps/:id/stop** - Stop app
+5. **GET /api/apps/:id/logs** - Get app logs
+6. **GET /api/apps/:id/metrics** - Get app metrics
+
+Integration tests using Supertest for each endpoint.
+
+### ✅ CHECKLIST
+
+- [ ] All endpoints working
+- [ ] Permissions checking working
+- [ ] Error handling proper
+- [ ] Integration tests passing
+- [ ] Response format consistent
+
+---
+
+## 🟠 TASK 3.5: Container Monitoring Service
+
+**Nástroje:** Docker stats, TypeORM  
+**Vstup:** Docker service + database schema  
+**Výstup:** Metrics collection service  
+**Doba:** 3-4 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 3.1, 2.1  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Create `src/services/monitoring.service.ts`:
+
+```typescript
+import { Repository } from 'typeorm';
+import { AppDataSource } from '@core/config/database';
+import { Metrics } from '@core/entities/Metrics';
+import { Container } from '@core/entities/Container';
+import { dockerService } from './docker.service';
+
+export class MonitoringService {
+  private metricsRepository: Repository<Metrics> = AppDataSource.getRepository(Metrics);
+  private containerRepository: Repository<Container> = AppDataSource.getRepository(Container);
+  
+  async collectMetrics(): Promise<void> {
+    const containers = await this.containerRepository.find({
+      where: { status: 'running' },
+    });
+    
+    for (const container of containers) {
+      try {
+        const stats = await dockerService.getContainerStats(container.container_id);
+        
+        // Parse docker stats and calculate percentages
+        const cpuPercent = this.calculateCpuPercent(stats);
+        const memPercent = (stats.memory_stats.usage / stats.memory_stats.limit) * 100;
+        
+        const metrics = this.metricsRepository.create({
+          container_id: container.id,
+          cpu_percent: cpuPercent,
+          memory_bytes: stats.memory_stats.usage,
+          memory_percent: memPercent,
+          net_in_bytes: stats.networks.eth0.rx_bytes,
+          net_out_bytes: stats.networks.eth0.tx_bytes,
+          block_read_bytes: stats.blkio_stats.io_service_bytes_recursive[0].value,
+          block_write_bytes: stats.blkio_stats.io_service_bytes_recursive[1].value,
+          pids_current: stats.pids_stats.current,
+        });
+        
+        await this.metricsRepository.save(metrics);
+      } catch (err) {
+        console.error(`Error collecting metrics for ${container.id}:`, err);
+      }
+    }
+  }
+  
+  private calculateCpuPercent(stats: any): number {
+    const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - 
+                     stats.precpu_stats.cpu_usage.total_usage;
+    const systemDelta = stats.cpu_stats.system_cpu_usage - 
+                        stats.precpu_stats.system_cpu_usage;
+    const cpuPercent = (cpuDelta / systemDelta) * 100;
+    return Math.round(cpuPercent * 100) / 100;
+  }
+  
+  async getMetrics(containerId: string, hours: number = 24) {
+    const since = new Date(Date.now() - hours * 3600000);
+    
+    return this.metricsRepository.find({
+      where: {
+        container_id: containerId,
+        recorded_at: { ">": since },
+      },
+      order: { recorded_at: 'ASC' },
+    });
+  }
+}
+
+export const monitoringService = new MonitoringService();
+```
+
+Set up interval to collect metrics every 5 seconds:
+```typescript
+// In app.ts startup
+setInterval(() => {
+  monitoringService.collectMetrics();
+}, 5000);
+```
+
+### ✅ CHECKLIST
+
+- [ ] src/services/monitoring.service.ts created
+- [ ] Metrics collection working
+- [ ] CPU % calculation correct
+- [ ] Memory % calculation correct
+- [ ] Data stored in database
+- [ ] Interval running every 5 seconds
+
+---
+
+## 🎯 END OF PHASE 3
+
+**After Task 3.5, test:**
+```bash
+# Start app
+curl -X POST http://localhost:3001/api/apps/{appId}/start \
+  -H "Authorization: Bearer {token}"
+# Should return: {"id":"...","status":"running","port_assigned":4000,...}
+
+# Get metrics
+curl -X GET http://localhost:3001/api/apps/{appId}/metrics \
+  -H "Authorization: Bearer {token}"
+# Should return: {"metrics":[{"cpu_percent":45,"memory_percent":50,...}]}
+```
+
+✅ **Docker Integration Phase Complete!**
+
+---
+
+## 🔌 PHASE 4: REAL-TIME & WEBSOCKET (2 týdny)
+
+### PHASE OVERVIEW
+
+Socket.io setup, real-time metrics broadcasting, log streaming.
+
+**Po skončení Phase 4:**
+- ✅ Socket.io server working
+- ✅ Authenticated WebSocket connections
+- ✅ Event namespaces (/apps, /monitoring, /logs)
+- ✅ Real-time metric updates (5 sec interval)
+- ✅ Log streaming to connected clients
+- ✅ Frontend able to receive events
+
+**Timeline:** 10-14 dní  
+**Role:** 1 backend + 1 frontend developer  
+
+---
+
+## 🔴 TASK 4.1: Socket.io Server Setup
+
+**Nástroje:** Socket.io, Express integration  
+**Vstup:** Express app z Task 2.6  
+**Výstup:** Socket.io server + authentication  
+**Doba:** 3-4 hodin  
+**Priorita:** 🔴 CRITICAL  
+**Závislosti:** TASK 2.6  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Create `src/websocket/server.ts`:
+
+```typescript
+import { Server } from 'socket.io';
+import { Server as HTTPServer } from 'http';
+import { verifyAccessToken } from '@core/utils/jwt';
+
+export const initializeWebSocket = (httpServer: HTTPServer): Server => {
+  const io = new Server(httpServer, {
+    cors: {
+      origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
+      credentials: true,
+    },
+  });
+  
+  // Authentication middleware
+  io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    
+    if (!token) {
+      return next(new Error('Unauthorized'));
+    }
+    
+    try {
+      const payload = verifyAccessToken(token);
+      socket.data.user = { userId: payload.userId, role: payload.role };
+      next();
+    } catch (err) {
+      next(new Error('Invalid token'));
+    }
+  });
+  
+  // Connection handler
+  io.on('connection', (socket) => {
+    console.log(`User ${socket.data.user.userId} connected`);
+    
+    socket.on('disconnect', () => {
+      console.log(`User ${socket.data.user.userId} disconnected`);
+    });
+  });
+  
+  return io;
+};
+```
+
+Update `src/app.ts`:
+```typescript
+import http from 'http';
+import { initializeWebSocket } from './websocket/server';
+
+const httpServer = http.createServer(app);
+const io = initializeWebSocket(httpServer);
+
+// Store io in app for use in other services
+app.set('io', io);
+
+httpServer.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
+```
+
+### ✅ CHECKLIST
+
+- [ ] Socket.io server created
+- [ ] Authentication working
+- [ ] CORS configured
+- [ ] Connection/disconnection handlers
+- [ ] io object accessible throughout app
+
+---
+
+## 🟠 TASK 4.2: Event Namespaces & Broadcasting
+
+**Nástroje:** Socket.io namespaces  
+**Vstup:** Socket.io server z Task 4.1  
+**Výstup:** Event namespaces + broadcasting logic  
+**Doba:** 4-5 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 4.1  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Create `src/websocket/events.ts`:
+
+```typescript
+import { Server } from 'socket.io';
+
+export const setupEventHandlers = (io: Server) => {
+  // Namespace: /apps
+  const appsNamespace = io.of('/apps');
+  appsNamespace.on('connection', (socket) => {
+    console.log(`App namespace: ${socket.data.user.userId} connected`);
+    
+    // Join app-specific room
+    socket.on('subscribe-app', (appId: string) => {
+      socket.join(`app:${appId}`);
+    });
+    
+    socket.on('unsubscribe-app', (appId: string) => {
+      socket.leave(`app:${appId}`);
+    });
+  });
+  
+  // Namespace: /monitoring
+  const monitoringNamespace = io.of('/monitoring');
+  monitoringNamespace.on('connection', (socket) => {
+    socket.on('subscribe-metrics', (appId: string) => {
+      socket.join(`metrics:${appId}`);
+    });
+  });
+  
+  // Namespace: /logs
+  const logsNamespace = io.of('/logs');
+  logsNamespace.on('connection', (socket) => {
+    socket.on('subscribe-logs', (appId: string) => {
+      socket.join(`logs:${appId}`);
+    });
+  });
+};
+
+// Helper functions for broadcasting
+export const broadcastAppStatus = (io: Server, appId: string, status: any) => {
+  io.of('/apps').to(`app:${appId}`).emit('status-changed', { appId, status });
+};
+
+export const broadcastMetrics = (io: Server, appId: string, metrics: any) => {
+  io.of('/monitoring').to(`metrics:${appId}`).emit('metrics', { appId, metrics });
+};
+
+export const broadcastLog = (io: Server, appId: string, log: any) => {
+  io.of('/logs').to(`logs:${appId}`).emit('log-entry', { appId, log });
+};
+```
+
+Integrate into services:
+```typescript
+// In app.service.ts startApp method:
+const io = app.get('io');
+broadcastAppStatus(io, appId, 'running');
+
+// In monitoring.service.ts collectMetrics:
+const io = app.get('io');
+broadcastMetrics(io, container.app_id, metrics);
+```
+
+### ✅ CHECKLIST
+
+- [ ] /apps namespace created
+- [ ] /monitoring namespace created
+- [ ] /logs namespace created
+- [ ] Broadcasting functions working
+- [ ] Integration with services complete
+- [ ] Events firing on state changes
+
+---
+
+## 🟠 TASK 4.3: Log Streaming Service
+
+**Nástroje:** Docker logs API, Socket.io  
+**Vstup:** Docker service + Socket.io  
+**Výstup:** Log streaming service  
+**Doba:** 3-4 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 3.1, 4.2  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Create `src/services/logs.service.ts`:
+
+```typescript
+import Docker from 'dockerode';
+import { Server } from 'socket.io';
+
+export class LogsService {
+  private docker: Docker;
+  private activeStreams: Map<string, NodeJS.ReadableStream> = new Map();
+  
+  constructor(docker: Docker) {
+    this.docker = docker;
+  }
+  
+  async streamLogs(containerId: string, appId: string, io: Server): Promise<void> {
+    if (this.activeStreams.has(containerId)) {
+      return; // Already streaming
+    }
+    
+    const container = this.docker.getContainer(containerId);
+    
+    const stream = await container.logs({
+      stdout: true,
+      stderr: true,
+      follow: true,
+      timestamps: true,
+    });
+    
+    this.activeStreams.set(containerId, stream);
+    
+    stream.on('data', (chunk: Buffer) => {
+      const log = chunk.toString();
+      io.of('/logs').to(`logs:${appId}`).emit('log-entry', {
+        appId,
+        timestamp: new Date(),
+        message: log,
+      });
+    });
+    
+    stream.on('error', (err) => {
+      console.error(`Error streaming logs for ${containerId}:`, err);
+      this.activeStreams.delete(containerId);
+    });
+    
+    stream.on('end', () => {
+      this.activeStreams.delete(containerId);
+    });
+  }
+  
+  stopStreaming(containerId: string): void {
+    const stream = this.activeStreams.get(containerId);
+    if (stream) {
+      stream.destroy();
+      this.activeStreams.delete(containerId);
+    }
+  }
+}
+```
+
+### ✅ CHECKLIST
+
+- [ ] LogsService created
+- [ ] Log streaming working
+- [ ] Socket.io integration complete
+- [ ] Error handling proper
+
+---
+
+## 🟠 TASK 4.4: Real-time Metrics Broadcasting
+
+**Nástroje:** Socket.io, Monitoring service  
+**Vstup:** Monitoring service z Task 3.5  
+**Výstup:** Real-time metrics broadcast  
+**Doba:** 2-3 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 3.5, 4.2  
+**Chunk Size:** SMALL  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+Update `src/services/monitoring.service.ts`:
+
+```typescript
+// In collectMetrics method, after saving metrics:
+const io = app.get('io');
+broadcastMetrics(io, container.app_id, {
+  cpu_percent: cpuPercent,
+  memory_percent: memPercent,
+  net_in_bytes,
+  net_out_bytes,
+  timestamp: new Date(),
+});
+```
+
+This broadcasts metrics to all connected clients subscribed to that app's metrics.
+
+### ✅ CHECKLIST
+
+- [ ] Metrics broadcasting integrated
+- [ ] Real-time updates working
+- [ ] 5-second interval correct
+- [ ] Client receives updates
+
+---
+
+## 🎯 END OF PHASE 4
+
+**After Task 4.4, test with frontend:**
+
+```javascript
+// Frontend test code
+const socket = io('http://localhost:3002', {
+  auth: { token: accessToken },
+});
+
+socket.of('/monitoring').emit('subscribe-metrics', appId);
+
+socket.of('/monitoring').on('metrics', (data) => {
+  console.log('Received metrics:', data);
+  // Update UI with data
+});
+```
+
+✅ **Real-time Phase Complete!**
+
+---
+
+## 🎨 PHASE 5: FRONTEND (3-4 týdny)
+
+### PHASE OVERVIEW
+
+React UI, components, API integration, state management, responsive design.
+
+**Po skončení Phase 5:**
+- ✅ Login/Register pages working
+- ✅ Dashboard with app browser
+- ✅ App details page with controls
+- ✅ Admin panel
+- ✅ Real-time metrics visualization
+- ✅ Log viewer
+- ✅ Settings page
+- ✅ Socket.io integration complete
+
+**Timeline:** 15-20 dní  
+**Role:** 2 frontend developers (can run PARALLEL with Phase 3-4)  
+
+---
+
+## 🟠 TASK 5.1: Project Setup & Store Configuration
+
+**Nástroje:** React, Redux Toolkit, TypeScript  
+**Vstup:** services/longin-ui folder z Task 1.3  
+**Výstup:** Redux store + project structure  
+**Doba:** 3-4 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 1.3  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create Redux store** (src/store/index.ts):
+   ```typescript
+   import { configureStore } from '@reduxjs/toolkit';
+   import authReducer from './auth.slice';
+   import appsReducer from './apps.slice';
+   import uiReducer from './ui.slice';
+   
+   export const store = configureStore({
+     reducer: {
+       auth: authReducer,
+       apps: appsReducer,
+       ui: uiReducer,
+     },
+   });
+   ```
+
+2. **Create slices**:
+   - src/store/auth.slice.ts
+   - src/store/apps.slice.ts
+   - src/store/ui.slice.ts
+
+3. **Create hooks**:
+   - src/hooks/useAuth.ts
+   - src/hooks/useApps.ts
+   - src/hooks/useWebSocket.ts
+
+4. **Create API service** (src/services/api.ts):
+   ```typescript
+   import axios from 'axios';
+   
+   const api = axios.create({
+     baseURL: process.env.VITE_API_URL,
+   });
+   
+   // Add auth token to all requests
+   api.interceptors.request.use((config) => {
+     const token = localStorage.getItem('accessToken');
+     if (token) {
+       config.headers.Authorization = `Bearer ${token}`;
+     }
+     return config;
+   });
+   
+   export default api;
+   ```
+
+### ✅ CHECKLIST
+
+- [ ] Redux store configured
+- [ ] All slices created
+- [ ] Hooks created
+- [ ] API service created
+- [ ] TypeScript types defined
+
+---
+
+## 🟡 TASK 5.2: Auth Pages (Login & Register)
+
+**Nástroje:** React, React Router, Tailwind CSS  
+**Vstup:** Store + API service z Task 5.1  
+**Výstup:** Login & Register pages  
+**Doba:** 4-5 hodin  
+**Priorita:** 🟡 HIGH  
+**Závislosti:** TASK 5.1  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create src/pages/Auth/Login.tsx**
+   - Form with username + password
+   - Validation
+   - Submit handler (POST /api/auth/login)
+   - Store token in localStorage
+   - Redirect to dashboard
+
+2. **Create src/pages/Auth/Register.tsx**
+   - Form with username + email + password + confirm password
+   - Validation
+   - Submit handler (POST /api/auth/register)
+   - Store token
+   - Redirect to dashboard
+
+3. **Create src/components/ProtectedRoute.tsx**
+   - Check if user authenticated
+   - Redirect to login if not
+
+4. **Create src/components/Common/Header.tsx**
+   - Logo
+   - User menu (profile, logout)
+   - Navigation links
+
+5. **Styling with Tailwind CSS**
+
+### ✅ CHECKLIST
+
+- [ ] Login page working
+- [ ] Register page working
+- [ ] Form validation working
+- [ ] Token storage working
+- [ ] Redirect logic working
+- [ ] Header component created
+
+---
+
+## 🟡 TASK 5.3: Dashboard & App Browser
+
+**Nástroje:** React, Redux, API  
+**Vstup:** Pages + components structure  
+**Výstup:** Dashboard with app listings  
+**Doba:** 5-6 hodin  
+**Priorita:** 🟡 HIGH  
+**Závislosti:** TASK 5.2  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create src/pages/Dashboard/Dashboard.tsx**
+   - Fetch apps list (GET /api/apps)
+   - Tabbed interface: My Applications | Available Applications
+   - Search & filter
+
+2. **Create src/components/AppCard.tsx**
+   - App icon
+   - App name & description
+   - Status badge (running/stopped)
+   - Metrics preview (CPU, Memory)
+   - Action buttons (START/STOP/INFO)
+
+3. **Create src/components/AppList.tsx**
+   - Grid of app cards
+   - Loading states
+   - Error states
+
+4. **Create src/components/AppFilters.tsx**
+   - Search by name
+   - Filter by status
+   - Filter by owner
+
+### ✅ CHECKLIST
+
+- [ ] Dashboard page created
+- [ ] AppCard component working
+- [ ] AppList component working
+- [ ] Filters working
+- [ ] API integration complete
+
+---
+
+## 🟡 TASK 5.4: App Detail Page
+
+**Nástroje:** React, Socket.io, Recharts (charts)  
+**Vstup:** Dashboard + API service  
+**Výstup:** App detail page with controls + real-time data  
+**Doba:** 6-7 hodin  
+**Priorita:** 🟡 HIGH  
+**Závislости:** TASK 5.3  
+**Chunk Size:** EXTRA LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create src/pages/Dashboard/AppDetail.tsx**
+   - App information (name, version, owner, description)
+   - Control buttons (START, STOP, RESTART, DOWNLOAD CLIENT)
+   - Tabs: Info | Metrics | Logs
+
+2. **Create src/components/MetricsPanel.tsx**
+   - Real-time chart component (Recharts)
+   - CPU % chart (line chart)
+   - Memory usage chart
+   - Network I/O chart
+   - Subscribe to WebSocket metrics updates
+
+3. **Create src/components/LogsPanel.tsx**
+   - Log viewer with scroll
+   - Real-time log entries
+   - Subscribe to WebSocket logs
+   - Log filtering
+
+4. **Create src/components/ControlButtons.tsx**
+   - START button (POST /api/apps/{id}/start)
+   - STOP button (POST /api/apps/{id}/stop)
+   - RESTART button
+   - DOWNLOAD CLIENT button
+   - Show loading/status
+
+### ✅ CHECKLIST
+
+- [ ] App detail page created
+- [ ] MetricsPanel with charts
+- [ ] LogsPanel with real-time logs
+- [ ] Control buttons working
+- [ ] WebSocket subscriptions active
+- [ ] Real-time updates working
+
+---
+
+## 🟡 TASK 5.5: Admin Panel - System Status
+
+**Nástroje:** React, Recharts  
+**Vstup:** API service + store  
+**Výstup:** Admin dashboard  
+**Doba:** 4-5 hodin  
+**Priorita:** 🟡 MEDIUM  
+**Závislosti:** TASK 5.1  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create src/pages/Admin/AdminPanel.tsx**
+   - Navigation: System Status | Users | Deployments | Settings
+
+2. **Create src/pages/Admin/SystemStatus.tsx** (default tab)
+   - System health badge
+   - Docker Swarm status
+   - Services status (PostgreSQL, Redis, Elasticsearch, etc.)
+   - Resource charts (CPU, Memory, Disk)
+   - Application overview (total, running, stopped, error)
+   - Recent alerts
+
+3. **Create src/components/Admin/SystemMetrics.tsx**
+   - Resource usage charts
+   - Service status cards
+
+### ✅ CHECKLIST
+
+- [ ] Admin panel layout created
+- [ ] System status page working
+- [ ] Metrics displaying correctly
+- [ ] Service status showing
+
+---
+
+## 🟡 TASK 5.6: Admin Panel - User Management
+
+**Nástroje:** React, API  
+**Vstup:** Admin panel z Task 5.5  
+**Výstup:** User management interface  
+**Doba:** 3-4 hodin  
+**Priorita:** 🟡 MEDIUM  
+**Závislosti:** TASK 5.5  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create src/pages/Admin/UserManagement.tsx**
+   - User table (username, email, role, status)
+   - Search & filter
+   - Action buttons: EDIT, DELETE, RESET PASSWORD
+
+2. **Create src/components/Admin/UserTable.tsx**
+   - Paginated table
+   - Sort by username/email/role
+
+3. **Create src/components/Admin/UserModal.tsx**
+   - Edit user form
+   - Create new user form
+
+### ✅ CHECKLIST
+
+- [ ] User management page created
+- [ ] User table displaying correctly
+- [ ] CRUD operations working
+- [ ] Modal for add/edit working
+
+---
+
+## 🟡 TASK 5.7: Settings Page
+
+**Nástroje:** React, API  
+**Vstup:** Dashboard z Task 5.3  
+**Výstup:** User settings page  
+**Doba:** 2-3 hodin  
+**Priorita:** 🟡 MEDIUM  
+**Závislości:** TASK 5.2  
+**Chunk Size:** SMALL  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create src/pages/Dashboard/Settings.tsx**
+   - Profile information
+   - Theme selector (dark/light)
+   - Notification preferences
+   - Download client button
+
+2. **Create src/components/ThemeToggle.tsx**
+   - Toggle between dark/light theme
+   - Store preference in localStorage
+
+### ✅ CHECKLIST
+
+- [ ] Settings page created
+- [ ] Theme toggle working
+- [ ] User preferences saving
+
+---
+
+## 🟠 TASK 5.8: Responsive Design & Polish
+
+**Nástroje:** Tailwind CSS, React  
+**Vstup:** All pages + components  
+**Výstup:** Responsive, polished UI  
+**Doba:** 4-5 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** All Task 5 tasks  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Mobile responsiveness**
+   - Test on mobile devices
+   - Adjust breakpoints
+   - Mobile menu
+
+2. **Dark mode theming**
+   - Apply dark theme throughout
+   - Light theme option
+
+3. **Loading states**
+   - Skeleton loaders
+   - Spinner components
+
+4. **Error handling**
+   - Toast notifications
+   - Error modals
+
+5. **Accessibility**
+   - Keyboard navigation
+   - ARIA labels
+   - Color contrast
+
+### ✅ CHECKLIST
+
+- [ ] Responsive design working
+- [ ] Mobile layout optimized
+- [ ] Dark/light theme toggle working
+- [ ] Loading states implemented
+- [ ] Error notifications working
+- [ ] Accessibility compliant
+
+---
+
+## 🎯 END OF PHASE 5
+
+**After Task 5.8, test complete flow:**
+```bash
+1. Load http://localhost:3000
+2. Register new account
+3. Login
+4. Browse apps
+5. Start an app
+6. Watch metrics update in real-time
+7. View logs streaming
+8. Navigate admin panel
+9. Access settings
+```
+
+✅ **Frontend Phase Complete!**
+
+---
+
+## 📊 PHASE 6: MONITORING & DEPLOYMENT (3 týdny)
+
+### PHASE OVERVIEW
+
+Prometheus metrics, Grafana dashboards, ELK logging, Traefik reverse proxy, production deployment, health checks, alerting.
+
+**Po skončení Phase 6:**
+- ✅ Prometheus metrics collection working
+- ✅ Grafana dashboards displaying metrics
+- ✅ ELK stack collecting & indexing logs
+- ✅ Kibana log visualization
+- ✅ Traefik reverse proxy routing
+- ✅ Health checks on all services
+- ✅ Alert rules configured
+- ✅ Production deployment ready
+- ✅ Docker Swarm optional setup
+
+**Timeline:** 14-21 dní  
+**Role:** 1 DevOps engineer  
+
+---
+
+## 🔴 TASK 6.1: Prometheus Setup & Metrics Collection
+
+**Nástroje:** Prometheus, Grafana  
+**Vstup:** docker-compose.yml z Task 1.5  
+**Výstup:** Working Prometheus + metrics scraping  
+**Doba:** 4-5 hodin  
+**Priorita:** 🔴 CRITICAL  
+**Závislości:** TASK 1.5  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create services/monitoring/prometheus.yml**
+   ```yaml
+   global:
+     scrape_interval: 15s
+     evaluation_interval: 15s
+   
+   scrape_configs:
+     - job_name: 'longin-core'
+       static_configs:
+         - targets: ['localhost:3001']
+     
+     - job_name: 'docker'
+       static_configs:
+         - targets: ['localhost:9323']
+   ```
+
+2. **Add metrics endpoint** to longin-core (src/routes/metrics.routes.ts)
+   ```typescript
+   import promClient from 'prom-client';
+   
+   export const metricsRouter = Router();
+   
+   metricsRouter.get('/metrics', (req, res) => {
+     res.set('Content-Type', promClient.register.contentType);
+     res.end(promClient.register.metrics());
+   });
+   ```
+
+3. **Test Prometheus**
+   ```bash
+   docker-compose up -d longin-prometheus
+   # Access http://localhost:9090
+   ```
+
+### ✅ CHECKLIST
+
+- [ ] prometheus.yml created
+- [ ] Metrics endpoint working
+- [ ] Prometheus scraping metrics
+- [ ] Data visible in Prometheus UI
+
+---
+
+## 🟠 TASK 6.2: Grafana Dashboards
+
+**Nástroje:** Grafana  
+**Vstup:** Prometheus z Task 6.1  
+**Výstup:** 3 Grafana dashboards  
+**Doba:** 5-6 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislosti:** TASK 6.1  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Dashboard 1: System Overview**
+   - CPU usage
+   - Memory usage
+   - Disk usage
+   - Network I/O
+   - Active containers count
+
+2. **Dashboard 2: Per-App Metrics**
+   - CPU per app
+   - Memory per app
+   - Request count
+   - Response time
+
+3. **Dashboard 3: Docker Swarm Status** (if using swarm)
+   - Node status
+   - Service status
+   - Container count per node
+
+Create dashboard JSON files:
+- services/monitoring/grafana/provisioning/dashboards/system-overview.json
+- services/monitoring/grafana/provisioning/dashboards/per-app-metrics.json
+
+### ✅ CHECKLIST
+
+- [ ] All 3 dashboards created
+- [ ] Panels displaying correctly
+- [ ] Data source configured (Prometheus)
+- [ ] Dashboards provisioned automatically
+
+---
+
+## 🟠 TASK 6.3: ELK Stack Setup (Elasticsearch, Logstash, Kibana)
+
+**Nástroje:** Elasticsearch, Logstash, Kibana  
+**Vstup:** docker-compose.yml z Task 1.5  
+**Výstup:** Working ELK stack  
+**Doba:** 4-5 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislости:** TASK 1.5  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create services/logging/logstash.conf**
+   ```
+   input {
+     tcp {
+       port => 5044
+       codec => json
+     }
+   }
+   
+   filter {
+     if [type] == "app-logs" {
+       grok {
+         match => { "message" => "%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:level} %{DATA:logger} %{GREEDYDATA:msg}" }
+       }
+     }
+   }
+   
+   output {
+     elasticsearch {
+       hosts => ["elasticsearch:9200"]
+       index => "logs-%{+YYYY.MM.dd}"
+     }
+   }
+   ```
+
+2. **Integration with application logging**
+   - Setup Winston to send logs to Logstash
+   - Update src/utils/logger.ts
+
+3. **Test ELK**
+   ```bash
+   docker-compose up -d longin-elasticsearch longin-kibana
+   # Access http://localhost:5601
+   # Create index pattern: logs-*
+   ```
+
+### ✅ CHECKLIST
+
+- [ ] logstash.conf created
+- [ ] Elasticsearch running
+- [ ] Logstash receiving logs
+- [ ] Kibana displaying logs
+- [ ] Index patterns configured
+
+---
+
+## 🟠 TASK 6.4: Traefik Reverse Proxy Setup
+
+**Nástroje:** Traefik  
+**Vstup:** docker-compose.yml z Task 1.5  
+**Výstup:** Working reverse proxy  
+**Doba:** 3-4 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislości:** TASK 1.5  
+**Chunk Size:** MEDIUM  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create services/traefik/traefik.yml**
+   ```yaml
+   global:
+     checkNewVersion: true
+     sendAnonymousUsage: false
+   
+   entryPoints:
+     web:
+       address: ":80"
+     websecure:
+       address: ":443"
+   
+   api:
+     insecure: true
+     dashboard: true
+   
+   providers:
+     docker:
+       endpoint: "unix:///var/run/docker.sock"
+       exposedByDefault: true
+       network: longin-network
+   ```
+
+2. **Add service labels** to docker-compose.yml
+   ```yaml
+   labels:
+     - "traefik.enable=true"
+     - "traefik.http.routers.longin-ui.rule=Host(`localhost`)"
+     - "traefik.http.routers.longin-ui.entrypoints=web"
+     - "traefik.http.services.longin-ui.loadbalancer.server.port=3000"
+   ```
+
+3. **Test Traefik**
+   ```bash
+   # Access http://localhost/   # Routes to longin-ui
+   # Access http://localhost:8080  # Traefik dashboard
+   ```
+
+### ✅ CHECKLIST
+
+- [ ] traefik.yml created
+- [ ] Service labels configured
+- [ ] Routing working
+- [ ] Dashboard accessible
+
+---
+
+## 🟠 TASK 6.5: Production Deployment & Health Checks
+
+**Nástroje:** Docker, Bash scripts  
+**Vstup:** All services + configurations  
+**Výstup:** Production-ready deployment  
+**Doba:** 4-5 hodin  
+**Priorita:** 🟠 HIGH  
+**Závislości:** All previous tasks  
+**Chunk Size:** LARGE  
+
+### 📝 DETAILNÍ INSTRUKCE
+
+1. **Create scripts/health-check.sh**
+   ```bash
+   #!/bin/bash
+   
+   echo "Checking service health..."
+   
+   # Check API
+   curl -f http://localhost:3001/health || exit 1
+   
+   # Check Database
+   docker exec longin-postgres pg_isready || exit 1
+   
+   # Check Redis
+   docker exec longin-redis redis-cli ping || exit 1
+   
+   # Check Elasticsearch
+   curl -f http://localhost:9200/_cluster/health || exit 1
+   
+   echo "✅ All services healthy"
+   ```
+
+2. **Create docker-compose.prod.yml** (overrides)
+   ```yaml
+   version: '3.9'
+   
+   services:
+     longin-core:
+       restart: always
+       environment:
+         NODE_ENV: production
+     
+     postgres:
+       restart: always
+       volumes:
+         - postgres_data_prod:/var/lib/postgresql/data
+   
+   # Override other services similarly
+   ```
+
+3. **Create deployment guide** (docs/DEPLOYMENT.md)
+
+4. **Test production deployment**
+   ```bash
+   docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+   ./scripts/health-check.sh
+   ```
+
+### ✅ CHECKLIST
+
+- [ ] health-check.sh created & working
+- [ ] docker-compose.prod.yml created
+- [ ] All services restart on failure
+- [ ] Health checks on all services
+- [ ] Deployment guide written
+- [ ] Production deployment successful
+
+---
+
+## 🎯 END OF PHASE 6
+
+**After Task 6.5, verify complete system:**
+
+```bash
+# 1. Start all services
+docker-compose up -d
+
+# 2. Check health
+./scripts/health-check.sh
+
+# 3. Verify monitoring
+curl http://localhost:9090/api/v1/query?query=up
+curl http://localhost:3003  # Grafana
+
+# 4. Verify logging
+curl http://localhost:5601  # Kibana
+
+# 5. Verify app
+curl http://localhost:3000  # Frontend
+curl http://localhost:3001/health  # Backend
+
+# 6. Full flow test
+# - Register user
+# - Start app
+# - Watch metrics in Grafana
+# - View logs in Kibana
+# - Monitor in Prometheus
+```
+
+✅ **Production Deployment Phase Complete!**
+
+---
+
+## ✅ TESTING & QUALITY ASSURANCE
+
+### UNIT TESTING (Phase throughout)
+
+**Backend:**
+- Jest 80%+ code coverage
+- Tests for services, utils, middleware
+- Run: `pnpm --filter longin-core test:coverage`
+
+**Frontend:**
+- Vitest 70%+ code coverage
+- Tests for components, hooks, store
+- Run: `pnpm --filter longin-ui test:coverage`
+
+### INTEGRATION TESTING
+
+**API Integration (Supertest):**
+- All endpoints tested
+- Success & error paths
+- Auth & authorization
+
+**WebSocket Integration:**
+- Connection/disconnection
+- Event broadcasting
+- Real-time updates
+
+### E2E TESTING (Optional)
+
+**Cypress tests:**
+- User registration flow
+- Login flow
+- App launch flow
+- Real-time metrics viewing
+
+### LOAD TESTING (Optional)
+
+**k6 load test:**
+```javascript
+// Test 100 concurrent users
+import http from 'k6/http';
+
+export let options = {
+  vus: 100,
+  duration: '60s',
+};
+
+export default function() {
+  http.get('http://localhost:3001/health');
+}
+```
+
+Run: `k6 run load-test.js`
+
+---
+
+## 🔐 SECURITY & PRODUCTION HARDENING
+
+### PHASE THROUGHOUT - Security Checklist
+
+- [ ] All inputs validated
+- [ ] SQL injection prevented (TypeORM)
+- [ ] XSS prevention (React escaping + CSP headers)
+- [ ] CSRF tokens implemented
+- [ ] Rate limiting configured
+- [ ] JWT tokens secure (httpOnly cookies)
+- [ ] Passwords hashed (bcryptjs)
+- [ ] HTTPS enabled (Traefik + Let's Encrypt ready)
+- [ ] Secrets not in code (.env files)
+- [ ] Dependencies regularly updated
+- [ ] Security audit passed
+
+---
+
+## 🎉 PROJECT COMPLETION CHECKLIST
+
+### FINAL VERIFICATION
+
+- [x] Phase 1: Foundation ✅
+- [x] Phase 2: Auth & API ✅
+- [x] Phase 3: Docker Integration ✅
+- [x] Phase 4: Real-time & WebSocket ✅
+- [x] Phase 5: Frontend ✅
+- [x] Phase 6: Monitoring & Deployment ✅
+
+### QUALITY STANDARDS
+
+- [ ] All tests passing (>80% backend, >70% frontend)
+- [ ] Code style consistent (ESLint + Prettier)
+- [ ] TypeScript strict mode enabled
+- [ ] Documentation complete
+- [ ] Security audit passed
+- [ ] Performance optimized
+- [ ] Accessibility compliant
+- [ ] Production deployment ready
+
+### DELIVERABLES
+
+- [ ] Source code on GitHub
+- [ ] Docker images buildable
+- [ ] docker-compose.yml working
+- [ ] .env.example complete
+- [ ] README.md with setup guide
+- [ ] API documentation (Swagger/OpenAPI)
+- [ ] Deployment guide
+- [ ] Architecture diagram
+- [ ] Database schema documentation
+- [ ] Test coverage reports
+
+---
+
+## 📈 PROJECT STATISTICS
+
+| Metric | Value |
+|--------|-------|
+| Total Phases | 6 |
+| Total Tasks | 30+ |
+| Estimated Duration | 40-45 weeks |
+| Single Developer | ~10-11 months |
+| Team (2-3 devs) | ~4-6 months |
+| Lines of Code (estimated) | 20,000+ |
+| Test Coverage | 80%+ |
+| API Endpoints | 20+ |
+| Database Tables | 7 |
+| Microservices | 12-15 |
+| Docker Services | 10 |
+
+---
+
+## 🚀 NEXT STEPS AFTER COMPLETION
+
+1. **Production Deployment**
+   - Setup server infrastructure
+   - Configure DNS
+   - Enable HTTPS with Let's Encrypt
+   - Setup backup strategy
+
+2. **Monitoring & Maintenance**
+   - Setup alerting rules
+   - Setup log rotation
+   - Schedule database backups
+   - Monitor performance metrics
+
+3. **CI/CD Pipeline**
+   - Setup GitHub Actions for deployments
+   - Implement blue-green deployments
+   - Setup automated testing
+
+4. **Scaling**
+   - Setup Docker Swarm or Kubernetes
+   - Configure load balancing
+   - Implement auto-scaling
+
+5. **Features for Phase 2**
+   - OAuth2 integration
+   - 2FA authentication
+   - Team/organization support
+   - Advanced analytics
+   - Custom domains
+   - Backup & restore
+   - API keys & webhooks
+
+---
+
+## 📚 SUPPORTING DOCUMENTS
+
+- `longin-full-prd.md` - Complete PRD with all specifications
+- `longin-architecture.md` - System architecture & diagrams
+- `longin-ai-prompts.md` - AI prompts for each phase
+- `longin-config-files.md` - Configuration templates
+- This document: `longin-todo-list.md` - Complete TODO with all phases
+
+---
+
+**Document Version:** 2.0 - COMPLETE ALL PHASES  
+**Last Updated:** Březen 2025  
+**Status:** READY FOR COMPLETE IMPLEMENTATION  
+**Total Pages:** 30+ (full specification)  
+**Estimated Implementation:** 40-45 weeks  
+
+✅ **EVERYTHING IS READY TO START BUILDING!**

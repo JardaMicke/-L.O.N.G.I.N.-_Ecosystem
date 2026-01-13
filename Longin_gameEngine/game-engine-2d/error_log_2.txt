@@ -1,0 +1,13 @@
+ FAIL  tests/final-integration.test.ts
+  ÔŚĆ Test suite failed to run
+
+    src/editor/tools/asset-packager.ts:3:24 - error TS2307: Cannot find module '../utils/logger' or its corresponding type declarations.
+
+    3 import { Logger } from '../utils/logger';
+                             ~~~~~~~~~~~~~~~~~
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        4.502 s
+Ran all test suites matching tests/final-integration.test.ts.

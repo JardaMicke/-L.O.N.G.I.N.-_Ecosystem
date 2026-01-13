@@ -1,0 +1,2898 @@
+# 📋 LONGIN HOSTING SERVER - PRODUCT REQUIREMENTS DOCUMENT
+
+**Verze:** 1.0  
+**Datum:** Březen 2025  
+**Jazyk:** [translate:Čeština]  
+**Cílová platforma:** Windows (Docker Desktop)
+
+---
+
+## 📑 OBSAH DOKUMENTU
+
+1. [Executive Summary](#executive-summary)
+2. [Architektura & Teknologický Stack](#architektura--technologický-stack)
+3. [Specifikace Mikroservis](#specifikace-mikroservis)
+4. [Uživatelské Role & Permise](#uživatelské-role--permise)
+5. [Datová Schémata](#datová-schémata)
+6. [API Specifikace](#api-specifikace)
+7. [UI/UX Design & Komponenty](#uiux-design--komponenty)
+8. [Datové & Uživatelské Toky](#datové--uživatelské-toky)
+9. [Konfigurace & Deployment](#konfigurace--deployment)
+10. [Implementační Plán (TODO)](#implementační-plán)
+
+---
+
+## 🎯 EXECUTIVE SUMMARY
+
+**Longin Hosting Server** je distributed hosting platforma umožňující uživatelům:
+- ✅ Registraci a přihlášení
+- ✅ Procházení dostupných aplikací
+- ✅ Stažení klienta aplikace
+- ✅ Spuštění aplikace s kontrolou zátěže (max 2 simultánně)
+- ✅ Sledování stavu běžících aplikací (metriky, logy, uptime)
+- ✅ Admin panel pro management, monitoring a deployment
+
+**Klíčové vlastnosti:**
+- Mikroservis architektura (12-15 nezávislých služeb)
+- Multi-machine deployment přes síť (Docker Swarm)
+- PostgreSQL + PgVector + Redis + SQLite
+- Git-based deployment s webhook automatizací
+- Role-based access (Admin, User)
+- Responsive web UI (React/Vue)
+- Monitoring a logging (Prometheus, ELK stack)
+
+---
+
+## 🏗️ ARCHITEKTURA & TECHNOLOGICKÝ STACK
+
+### TECHNOLOGICKÝ STACK
+
+```yaml
+Frontend:
+  - React 18 + TypeScript
+  - Tailwind CSS
+  - WebSocket (real-time monitoring)
+  - Axios (API komunikace)
+
+Backend (Longin Core):
+  - Node.js + Express
+  - TypeScript
+  - Docker SDK pro správu kontejnerů
+  - JWT authentication
+
+Databáze:
+  - PostgreSQL 16 (user management, apps metadata)
+  - PgVector (pro AI/ML funkce v budoucnosti)
+  - Redis 7 (cache, sessions, real-time data)
+  - SQLite (lokální logging)
+
+DevOps:
+  - Docker & Docker Compose
+  - Docker Swarm (multi-machine orchestration)
+  - Traefik (reverse proxy + routing)
+  - Prometheus (monitoring)
+  - ELK Stack (logging: Elasticsearch, Logstash, Kibana)
+
+Deployment:
+  - GitHub Actions (CI/CD pipeline)
+  - Git webhooks (auto-update)
+  - Health checks
+
+Vývojové nástroje:
+  - Visual Studio Code
+  - Postman (API testing)
+  - Docker Desktop (Windows)
+```
+
+### ARCHITEKTURA MIKROSERVIS
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    LONGIN HOSTING SYSTEM                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌──────────────────┐         ┌──────────────────┐         │
+│  │   Web Browser    │◄───────►│  Longin Web UI   │         │
+│  │   (React App)    │         │  (Port 3000)     │         │
+│  └──────────────────┘         └──────────────────┘         │
+│           │                           │                     │
+│           └───────────────┬───────────┘                     │
+│                           │                                 │
+│                    (WebSocket/HTTP)                         │
+│                           │                                 │
+│  ┌────────────────────────▼─────────────────────────────┐  │
+│  │           LONGIN CORE (Node.js/Express)              │  │
+│  │              (Port 3001)                              │  │
+│  ├─────────────────────────────────────────────────────┤  │
+│  │ • API Gateway & Router                              │  │
+│  │ • JWT Authentication                                │  │
+│  │ • Docker Container Management                       │  │
+│  │ • WebSocket Server (real-time updates)              │  │
+│  │ • Request Validator & Error Handler                 │  │
+│  └────────────────────────────────────────────────────┘  │
+│           │              │           │          │          │
+│           ├──────────────┼───────────┼──────────┤          │
+│           │              │           │          │          │
+│  ┌────────▼──────┐ ┌────▼────┐ ┌──▼─────┐ ┌──▼────┐      │
+│  │   Database    │ │  Cache  │ │Logging │ │Monitor│      │
+│  │  Service      │ │ Service │ │Service │ │Service│      │
+│  │(Port 5432)    │ │(Port    │ │(Port   │ │(Port  │      │
+│  │PostgreSQL     │ │6379)    │ │9200)   │ │9090)  │      │
+│  │+ PgVector     │ │Redis    │ │ELK     │ │Prom   │      │
+│  └───────────────┘ └─────────┘ └────────┘ └───────┘      │
+│           │
+│  ┌────────▼──────────────────────────────────────────┐    │
+│  │   CONTAINER ORCHESTRATION & NETWORKING            │    │
+│  ├────────────────────────────────────────────────────┤   │
+│  │ • Docker Swarm (multi-machine)                    │    │
+│  │ • Traefik Reverse Proxy (routing)                 │    │
+│  │ • Overlay Network (machine-to-machine)            │    │
+│  │ • Service Discovery                               │    │
+│  │ • Load Balancing                                  │    │
+│  └────────────────────────────────────────────────────┘   │
+│           │
+│  ┌────────▼──────────────────────────────────────────┐    │
+│  │      DEPLOYED USER APPLICATIONS                    │    │
+│  ├────────────────────────────────────────────────────┤   │
+│  │ [App 1 Container] [App 2 Container]               │    │
+│  │ (Max 2 simultánně)                                │    │
+│  │ Lze libovolně spouštět/zastavovat                │    │
+│  └────────────────────────────────────────────────────┘   │
+│                                                             │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │           EXTERNAL INTEGRATIONS                       │  │
+│  ├──────────────────────────────────────────────────────┤  │
+│  │ • GitHub API (webhooks, CI/CD)                      │  │
+│  │ • Docker Registry (image pull/push)                 │  │
+│  │ • SMTP (notifications)                              │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### PORTY & KONFIGURACE
+
+```yaml
+# LONGIN CORE SERVICES (Hlavní stroj - Longin Master)
+LONGIN_WEB_UI: 3000          # Frontend React aplikace
+LONGIN_CORE_API: 3001        # Backend API
+LONGIN_CORE_WEBSOCKET: 3002  # WebSocket server (real-time)
+
+# INFRASTRUCTURE SERVICES
+DOCKER_SOCKET: /var/run/docker.sock  # Docker daemon
+TRAEFIK_DASHBOARD: 8080      # Reverse proxy admin
+TRAEFIK_API: 8081            # Traefik API
+
+# DATABÁZE & CACHE
+POSTGRES_PRIMARY: 5432       # PostgreSQL master
+POSTGRES_REPLICA: 5433       # PostgreSQL replica (optional)
+REDIS_MASTER: 6379          # Redis master
+REDIS_REPLICA: 6380         # Redis replica (optional)
+
+# MONITORING & LOGGING
+PROMETHEUS: 9090             # Metrics collector
+PROMETHEUS_PUSHGATEWAY: 9091 # Metrics gateway
+GRAFANA: 3003               # Visualization
+ELASTICSEARCH: 9200         # Log storage
+KIBANA: 5601                # Log UI
+LOGSTASH: 5044              # Log pipeline
+
+# DEPLOYED APPLICATIONS (Dynamické porty)
+APP_BASE_PORT: 4000         # Startovací port pro aplikace
+APP_PORT_RANGE: 4000-5000   # Rozsah portů (max 100 aplikací)
+
+# DOCKER SWARM (Multi-machine)
+SWARM_MANAGER_PORT: 2377    # Swarm manager komunikace
+SWARM_NODE_PORT: 7946       # Swarm node komunikace (TCP)
+SWARM_NODE_UDP_PORT: 7946   # Swarm node komunikace (UDP)
+SWARM_OVERLAY_VXLAN: 4789   # Overlay network
+```
+
+---
+
+## 📦 SPECIFIKACE MIKROSERVIS
+
+### 1. LONGIN CORE (API Gateway & Orchestrator)
+
+**Popis:** Centrální orchestrator všech služeb, komunikace s Docker, API gateway.
+
+**Odpovědnost:**
+- REST API endpoints pro frontend
+- WebSocket server pro real-time updates
+- Docker container lifecycle management
+- JWT token validation
+- Request routing a error handling
+- Health checks
+
+**Port:** 3001  
+**Technologie:** Node.js + Express + TypeScript  
+**Databáze:** PostgreSQL (read), Redis (session)
+
+**Klíčové moduly:**
+```typescript
+src/
+├── config/          # Konfigurace (porty, DB URLs)
+├── middleware/      # Auth, validation, error handling
+├── routes/          # API endpoints
+├── services/        # Business logic
+│   ├── docker.service.ts       # Docker SDK wrapper
+│   ├── auth.service.ts         # JWT, sessions
+│   ├── app.service.ts          # App management
+│   ├── monitoring.service.ts   # Metriky & status
+│   └── deployment.service.ts   # Git & webhooks
+├── websocket/       # Real-time komunikace
+└── utils/           # Helpers, validators
+```
+
+**API Endpoints:**
+- `POST /api/auth/register` - Registrace uživatele
+- `POST /api/auth/login` - Přihlášení
+- `GET /api/auth/me` - Current user info
+- `GET /api/apps` - Seznam všech aplikací
+- `POST /api/apps/:id/start` - Start aplikace
+- `POST /api/apps/:id/stop` - Stop aplikace
+- `GET /api/apps/:id/logs` - Logy aplikace
+- `GET /api/apps/:id/metrics` - Metriky (CPU, RAM)
+- `GET /api/system/status` - Stav celého systému
+- `POST /api/webhooks/github` - GitHub webhook handler
+
+---
+
+### 2. LONGIN WEB UI (Frontend)
+
+**Popis:** Responsive React aplikace pro uživatele a admin panel.
+
+**Port:** 3000  
+**Technologie:** React 18 + TypeScript + Tailwind CSS
+
+**Stránky:**
+- Login/Register
+- Dashboard (přehled aplikací)
+- App Detail (stav, logy, metriky)
+- Admin Panel (user management, monitoring)
+- Settings (preferování, download klienta)
+
+**Komponenty:** Viz sekce [UI/UX Design](#uiux-design--komponenty)
+
+---
+
+### 3. DATABASE SERVICE (PostgreSQL + PgVector)
+
+**Popis:** Primární databáze pro všechna data.
+
+**Port:** 5432  
+**Teknologie:** PostgreSQL 16 + PgVector extension
+
+**Tabulky:**
+- `users` - Uživatelské účty
+- `applications` - Metadata aplikací
+- `deployments` - Historie deploymentů
+- `containers` - Running containers info
+- `metrics` - Historické metriky
+- `logs` - Centralizované logy
+- `github_webhooks` - Webhook logs
+- `api_keys` - API tokeny
+
+**Konfigurace:**
+```yaml
+PostgreSQL:
+  Host: postgres
+  Port: 5432
+  Database: longin_db
+  User: longin_user
+  Password: ${POSTGRES_PASSWORD}  # .env
+  Max Connections: 100
+  SSL: false (dev), true (prod)
+  
+PgVector:
+  Extension: vector
+  Dimensions: 1536  # Pro OpenAI embeddings
+  
+Backups:
+  Schedule: "0 2 * * *"  # Daily 2 AM
+  Retention: 30 days
+```
+
+---
+
+### 4. CACHE SERVICE (Redis)
+
+**Popis:** Cache, sessions, real-time queue.
+
+**Port:** 6379  
+**Technologie:** Redis 7
+
+**Použití:**
+- Session store (JWT refresh tokens)
+- Rate limiting
+- Real-time app status
+- Queue pro async tasks
+- Metrics cache
+
+**Konfigurace:**
+```yaml
+Redis:
+  Host: redis
+  Port: 6379
+  Database: 0
+  Password: ${REDIS_PASSWORD}
+  
+Persistence:
+  Save: "900 1 300 10 60 10000"  # RDB snapshots
+  AOF: true
+  
+Memory Management:
+  Max Memory: 512MB
+  Eviction Policy: "allkeys-lru"
+```
+
+---
+
+### 5. MONITORING SERVICE (Prometheus + Grafana)
+
+**Popis:** Sběr a vizualizace metrik.
+
+**Porty:** 9090 (Prometheus), 3003 (Grafana)  
+**Technologie:** Prometheus + Grafana
+
+**Metriky:**
+- CPU utilizace (container)
+- RAM usage
+- Network bandwidth
+- Disk I/O
+- Container uptime
+- API request latency
+- Database connection pool
+
+**Dashboardy:**
+- System Overview
+- Per-App Metrics
+- Docker Swarm Status
+- Database Performance
+
+---
+
+### 6. LOGGING SERVICE (ELK Stack)
+
+**Popis:** Centralizované logování.
+
+**Porty:** 9200 (Elasticsearch), 5601 (Kibana), 5044 (Logstash)  
+**Technologie:** Elasticsearch + Logstash + Kibana
+
+**Log Sources:**
+- Longin Core (aplikační logy)
+- Docker containers (stdout/stderr)
+- System events
+- API requests
+- Deployment actions
+
+---
+
+### 7. GITHUB INTEGRATION SERVICE
+
+**Popis:** Webhook handling, CI/CD pipeline.
+
+**Odpovědnost:**
+- Přijmout GitHub webhooks
+- Triggerovat deployment
+- Auto-update aplikace
+- Webhook validation
+
+**Port:** Běží na Longin Core (3001)  
+**Technologie:** Node.js
+
+---
+
+### 8. DOCKER SWARM ORCHESTRATOR
+
+**Popis:** Multi-machine deployment a komunikace.
+
+**Odpovědnost:**
+- Node management
+- Service deployment
+- Load balancing
+- Network overlay
+
+**Teknologie:** Docker Swarm (nativní Docker feature)
+
+---
+
+### 9. TRAEFIK REVERSE PROXY
+
+**Popis:** Routing, SSL termination, load balancing.
+
+**Port:** 8080 (dashboard), 80/443 (traffic)  
+**Technologie:** Traefik v3
+
+**Features:**
+- Automatic service discovery
+- Custom URLs pro aplikace
+- SSL/TLS (Let's Encrypt)
+- Rate limiting
+
+---
+
+### 10. AUTHENTICATION SERVICE (JWT + OAuth2)
+
+**Popis:** Centralizovaná autentizace.
+
+**Implementace:** Součást Longin Core  
+**Technologie:** JWT + bcrypt
+
+**Features:**
+- Registration
+- Login
+- Token refresh
+- Password reset
+- 2FA (optional)
+
+---
+
+## 👥 UŽIVATELSKÉ ROLE & PERMISE
+
+### ROLE: ADMIN
+
+**Permise:**
+- ✅ Zobrazit všechny aplikace
+- ✅ Spouštět/zastavovat aplikace
+- ✅ Deployovat nové aplikace (Git push)
+- ✅ Konfigurovat aplikace (porty, URL, env vars)
+- ✅ Spravovat uživatele (CRUD)
+- ✅ Zobrazit system monitoring
+- ✅ Prohlížet logy všech aplikací
+- ✅ Nastavit webhook tokeny
+- ✅ Backup & Restore databáze
+
+**UI Prvky:**
+- Admin Dashboard s grafům
+- User Management tabulka
+- System Settings
+- Deployment Logs
+- Monitoring Dashboard
+
+---
+
+### ROLE: USER
+
+**Permise:**
+- ✅ Zobrazit dostupné aplikace
+- ✅ Spustit aplikaci (pokud není zátěž)
+- ✅ Zastavit vlastní běžící aplikaci
+- ✅ Stáhnout klienta aplikace
+- ✅ Prohlížet logy své aplikace
+- ✅ Prohlížet metriky své aplikace
+- ❌ Deployovat nové aplikace
+- ❌ Spravovat uživatele
+- ❌ Přistupovat k system settings
+
+**UI Prvky:**
+- Application Browser
+- My Applications (běžící)
+- App Details (stav, logy)
+- Download Client
+- Profile Settings
+
+---
+
+## 📊 DATOVÁ SCHÉMATA
+
+### TABULKA: USERS
+
+```sql
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    username VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'user',  -- 'admin', 'user'
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP,
+    
+    -- Preferences
+    theme VARCHAR(50) DEFAULT 'dark',  -- 'dark', 'light'
+    notifications_enabled BOOLEAN DEFAULT true,
+    
+    INDEX idx_username (username),
+    INDEX idx_email (email),
+    INDEX idx_role (role)
+);
+```
+
+### TABULKA: APPLICATIONS
+
+```sql
+CREATE TABLE applications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    version VARCHAR(50),
+    
+    -- Docker Configuration
+    docker_image VARCHAR(255) NOT NULL,  -- 'registry.hub.docker.com/user/app:latest'
+    dockerfile_path VARCHAR(255),  -- Path in repo
+    docker_compose_file TEXT,  -- Full docker-compose.yml
+    docker_network VARCHAR(255),  -- Network name
+    
+    -- GitHub Integration
+    github_repo_url VARCHAR(255),  -- 'https://github.com/user/repo'
+    github_branch VARCHAR(255) DEFAULT 'main',
+    webhook_token VARCHAR(255),  -- GitHub webhook secret
+    
+    -- Application Configuration
+    port_internal INT DEFAULT 8080,  -- Port inside container
+    port_external INT,  -- Assigned port on host (4000-5000)
+    custom_url VARCHAR(255) UNIQUE,  -- 'app-name.longin.local'
+    
+    -- Environment Variables (encrypted JSON)
+    env_vars JSONB,  -- {"KEY": "value", ...}
+    
+    -- Status & Monitoring
+    status VARCHAR(50) DEFAULT 'stopped',  -- 'running', 'stopped', 'error'
+    is_public BOOLEAN DEFAULT false,
+    max_instances INT DEFAULT 2,
+    current_instances INT DEFAULT 0,
+    
+    -- Metadata
+    owner_id UUID REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_started TIMESTAMP,
+    last_stopped TIMESTAMP,
+    
+    -- Auto-update
+    auto_update_enabled BOOLEAN DEFAULT true,
+    auto_update_interval VARCHAR(50) DEFAULT 'daily',  -- 'hourly', 'daily', 'weekly'
+    
+    INDEX idx_owner_id (owner_id),
+    INDEX idx_status (status),
+    INDEX idx_name (name),
+    INDEX idx_github_repo (github_repo_url)
+);
+```
+
+### TABULKA: CONTAINERS
+
+```sql
+CREATE TABLE containers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    container_id VARCHAR(255) UNIQUE NOT NULL,  -- Docker container ID
+    app_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+    
+    -- Resource Allocation
+    cpu_limit VARCHAR(50) DEFAULT '0.5',  -- '0.5' = 50% of 1 CPU
+    memory_limit VARCHAR(50) DEFAULT '512m',
+    
+    -- Network
+    port_assigned INT,  -- 4000-5000 range
+    ip_address VARCHAR(50),
+    
+    -- Status
+    status VARCHAR(50) DEFAULT 'exited',  -- 'running', 'paused', 'exited', 'dead'
+    started_at TIMESTAMP,
+    exited_at TIMESTAMP,
+    
+    -- Node Information (Swarm)
+    node_id VARCHAR(255),  -- Docker Swarm node ID
+    node_name VARCHAR(255),  -- 'manager' or 'worker-1', etc.
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_app_id (app_id),
+    INDEX idx_status (status),
+    INDEX idx_node_id (node_id)
+);
+```
+
+### TABULKA: DEPLOYMENTS
+
+```sql
+CREATE TABLE deployments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    app_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+    
+    -- Deployment Details
+    deployment_type VARCHAR(50) NOT NULL,  -- 'initial', 'update', 'rollback'
+    status VARCHAR(50) DEFAULT 'pending',  -- 'pending', 'in_progress', 'success', 'failed'
+    
+    -- Git Information
+    git_commit_hash VARCHAR(255),
+    git_commit_message TEXT,
+    git_branch VARCHAR(255),
+    deployed_by UUID REFERENCES users(id),  -- Who triggered the deployment
+    
+    -- Image Information
+    docker_image_hash VARCHAR(255),
+    docker_image_size INT,  -- bytes
+    
+    -- Timing
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP,
+    duration_seconds INT,
+    
+    -- Logs & Errors
+    build_log TEXT,  -- Docker build output
+    deployment_error TEXT,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_app_id (app_id),
+    INDEX idx_status (status),
+    INDEX idx_deployed_by (deployed_by)
+);
+```
+
+### TABULKA: METRICS
+
+```sql
+CREATE TABLE metrics (
+    id BIGSERIAL PRIMARY KEY,
+    container_id UUID NOT NULL REFERENCES containers(id) ON DELETE CASCADE,
+    
+    -- Resource Usage
+    cpu_percent FLOAT,  -- 0-100%
+    memory_bytes BIGINT,
+    memory_percent FLOAT,  -- 0-100%
+    
+    -- Network
+    net_in_bytes BIGINT,
+    net_out_bytes BIGINT,
+    
+    -- Disk
+    block_read_bytes BIGINT,
+    block_write_bytes BIGINT,
+    
+    -- Process
+    pids_current INT,
+    
+    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    -- Partition for performance (keep only 30 days)
+    INDEX idx_container_recorded (container_id, recorded_at)
+);
+-- Retention: DELETE WHERE recorded_at < NOW() - INTERVAL '30 days'
+```
+
+### TABULKA: GITHUB_WEBHOOKS
+
+```sql
+CREATE TABLE github_webhooks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    app_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+    
+    -- Webhook Event
+    event_type VARCHAR(50) NOT NULL,  -- 'push', 'pull_request', 'release'
+    webhook_payload JSONB,
+    
+    -- Processing
+    status VARCHAR(50) DEFAULT 'received',  -- 'received', 'processing', 'success', 'failed'
+    processing_log TEXT,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    processed_at TIMESTAMP,
+    
+    INDEX idx_app_id (app_id),
+    INDEX idx_event_type (event_type),
+    INDEX idx_created_at (created_at)
+);
+```
+
+### TABULKA: API_LOGS
+
+```sql
+CREATE TABLE api_logs (
+    id BIGSERIAL PRIMARY KEY,
+    user_id UUID REFERENCES users(id),
+    
+    -- Request Details
+    method VARCHAR(10) NOT NULL,  -- GET, POST, etc.
+    endpoint VARCHAR(255) NOT NULL,
+    status_code INT,
+    
+    -- Performance
+    response_time_ms INT,
+    request_size_bytes INT,
+    response_size_bytes INT,
+    
+    -- Client Info
+    ip_address VARCHAR(50),
+    user_agent TEXT,
+    
+    logged_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_user_id (user_id),
+    INDEX idx_endpoint (endpoint),
+    INDEX idx_logged_at (logged_at)
+);
+```
+
+### REDIS SCHÉMATA
+
+```javascript
+// Sessions
+"session:{sessionId}" => {
+  userId: "uuid",
+  username: "john",
+  role: "admin",
+  expiresAt: 1234567890
+}
+
+// Real-time App Status
+"app:{appId}:status" => {
+  status: "running",
+  containers: 1,
+  lastUpdate: 1234567890,
+  metrics: {
+    cpu: 45.2,
+    memory: 512
+  }
+}
+
+// Container Status Queue
+"containers:running" => [
+  "uuid-container-1",
+  "uuid-container-2"
+]
+
+// Rate Limiting
+"ratelimit:{userId}:{endpoint}" => count
+```
+
+---
+
+## 🔌 API SPECIFIKACE
+
+### BASE URL
+```
+http://localhost:3001/api
+```
+
+### AUTHENTICATION
+
+Všechny requesty (kromě `/auth/register`, `/auth/login`) vyžadují:
+```
+Authorization: Bearer {JWT_TOKEN}
+```
+
+### ENDPOINTS
+
+#### **AUTH ENDPOINTS**
+
+##### `POST /auth/register`
+
+Registrace nového uživatele.
+
+**Request Body:**
+```json
+{
+  "username": "john_doe",
+  "email": "john@example.com",
+  "password": "SecurePassword123!",
+  "confirmPassword": "SecurePassword123!"
+}
+```
+
+**Response 201:**
+```json
+{
+  "success": true,
+  "message": "User registered successfully",
+  "user": {
+    "id": "uuid",
+    "username": "john_doe",
+    "email": "john@example.com",
+    "role": "user",
+    "createdAt": "2025-03-15T10:30:00Z"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Validation Rules:**
+- `username`: 3-32 chars, alphanumeric + underscore
+- `email`: Valid email format
+- `password`: Min 8 chars, 1 uppercase, 1 digit, 1 special char
+- `confirmPassword`: Musi se shodovat s `password`
+
+**Error Responses:**
+```json
+// 400 Bad Request
+{
+  "success": false,
+  "error": "VALIDATION_ERROR",
+  "message": "Validation failed",
+  "details": [
+    { "field": "username", "message": "Username already exists" },
+    { "field": "password", "message": "Password too weak" }
+  ]
+}
+
+// 409 Conflict
+{
+  "success": false,
+  "error": "USER_EXISTS",
+  "message": "User with this email already exists"
+}
+```
+
+---
+
+##### `POST /auth/login`
+
+Přihlášení uživatele.
+
+**Request Body:**
+```json
+{
+  "username": "john_doe",
+  "password": "SecurePassword123!"
+}
+```
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "user": {
+    "id": "uuid",
+    "username": "john_doe",
+    "email": "john@example.com",
+    "role": "user",
+    "theme": "dark"
+  },
+  "tokens": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "expiresIn": 3600
+  }
+}
+```
+
+**Error Responses:**
+```json
+// 401 Unauthorized
+{
+  "success": false,
+  "error": "INVALID_CREDENTIALS",
+  "message": "Invalid username or password"
+}
+
+// 403 Forbidden
+{
+  "success": false,
+  "error": "ACCOUNT_DISABLED",
+  "message": "Your account is disabled"
+}
+```
+
+---
+
+##### `POST /auth/refresh`
+
+Obnovení access tokenu.
+
+**Request Body:**
+```json
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expiresIn": 3600
+}
+```
+
+---
+
+##### `GET /auth/me`
+
+Vrátit informace o přihlášeném uživateli.
+
+**Headers:** `Authorization: Bearer {token}`
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "user": {
+    "id": "uuid",
+    "username": "john_doe",
+    "email": "john@example.com",
+    "role": "admin",
+    "isActive": true,
+    "theme": "dark",
+    "notificationsEnabled": true,
+    "createdAt": "2025-03-15T10:30:00Z",
+    "lastLogin": "2025-03-20T14:22:00Z"
+  }
+}
+```
+
+---
+
+#### **APPLICATION ENDPOINTS**
+
+##### `GET /apps`
+
+Získat seznam všech aplikací (dle role).
+
+**Query Parameters:**
+- `status`: "running", "stopped" (optional)
+- `search`: String pro hledání v názvu (optional)
+- `limit`: 10-100 (default: 20)
+- `offset`: 0-∞ (default: 0)
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "applications": [
+      {
+        "id": "uuid",
+        "name": "My Game",
+        "description": "Awesome multiplayer game",
+        "version": "1.2.3",
+        "status": "running",
+        "dockerImage": "registry.hub.docker.com/user/game:latest",
+        "customUrl": "game.longin.local",
+        "isPublic": true,
+        "owner": {
+          "id": "uuid",
+          "username": "gamedev"
+        },
+        "currentInstances": 1,
+        "maxInstances": 2,
+        "createdAt": "2025-03-10T09:00:00Z",
+        "lastStarted": "2025-03-20T14:00:00Z",
+        "metrics": {
+          "cpu": 45.2,
+          "memory": 512,
+          "uptime": 86400
+        }
+      }
+    ],
+    "pagination": {
+      "total": 15,
+      "limit": 20,
+      "offset": 0,
+      "pages": 1
+    }
+  }
+}
+```
+
+---
+
+##### `GET /apps/:appId`
+
+Detaily konkrétní aplikace.
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "name": "My Game",
+    "description": "Awesome multiplayer game",
+    "version": "1.2.3",
+    "status": "running",
+    "dockerImage": "registry.hub.docker.com/user/game:latest",
+    "customUrl": "game.longin.local",
+    "portInternal": 8080,
+    "portExternal": 4001,
+    "isPublic": true,
+    "autoUpdateEnabled": true,
+    "autoUpdateInterval": "daily",
+    "owner": {
+      "id": "uuid",
+      "username": "gamedev"
+    },
+    "containers": [
+      {
+        "id": "uuid",
+        "containerId": "abc123def456",
+        "status": "running",
+        "cpuLimit": "0.5",
+        "memoryLimit": "512m",
+        "portAssigned": 4001,
+        "ipAddress": "172.17.0.2",
+        "nodeName": "manager",
+        "startedAt": "2025-03-20T14:00:00Z"
+      }
+    ],
+    "latestDeployment": {
+      "id": "uuid",
+      "deploymentType": "update",
+      "status": "success",
+      "gitCommitHash": "abc123def456",
+      "gitCommitMessage": "Fix: memory leak in auth service",
+      "completedAt": "2025-03-20T13:55:00Z",
+      "durationSeconds": 125
+    },
+    "metrics": {
+      "cpu": 45.2,
+      "memory": 512,
+      "networkIn": 1024000,
+      "networkOut": 2048000,
+      "uptime": 86400,
+      "lastUpdate": "2025-03-20T14:22:00Z"
+    },
+    "environmentVariables": {
+      "API_KEY": "***hidden***",
+      "DEBUG": "false"
+    },
+    "createdAt": "2025-03-10T09:00:00Z",
+    "updatedAt": "2025-03-20T13:55:00Z"
+  }
+}
+```
+
+---
+
+##### `POST /apps/:appId/start`
+
+Spustit aplikaci.
+
+**Request Body:**
+```json
+{
+  "waitForReady": true,
+  "timeout": 30
+}
+```
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "message": "Application started successfully",
+  "data": {
+    "status": "running",
+    "containerId": "abc123def456",
+    "portAssigned": 4001,
+    "url": "http://localhost:4001",
+    "startedAt": "2025-03-20T14:22:30Z"
+  }
+}
+```
+
+**Error Responses:**
+```json
+// 409 Conflict - Max instances reached
+{
+  "success": false,
+  "error": "MAX_INSTANCES_REACHED",
+  "message": "Maximum 2 instances already running",
+  "data": {
+    "runningInstances": 2,
+    "maxInstances": 2
+  }
+}
+
+// 503 Service Unavailable - System overloaded
+{
+  "success": false,
+  "error": "SYSTEM_OVERLOADED",
+  "message": "System is at capacity, please try again later",
+  "data": {
+    "systemLoad": 95.5,
+    "availableMemory": 128
+  }
+}
+
+// 403 Forbidden - User doesn't have permission
+{
+  "success": false,
+  "error": "PERMISSION_DENIED",
+  "message": "You don't have permission to start this application"
+}
+```
+
+---
+
+##### `POST /apps/:appId/stop`
+
+Zastavit aplikaci.
+
+**Request Body:**
+```json
+{
+  "force": false,
+  "timeout": 10
+}
+```
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "message": "Application stopped successfully",
+  "data": {
+    "status": "stopped",
+    "stoppedAt": "2025-03-20T14:25:00Z"
+  }
+}
+```
+
+---
+
+##### `GET /apps/:appId/logs`
+
+Získat logy aplikace.
+
+**Query Parameters:**
+- `lines`: 10-1000 (default: 100)
+- `since`: ISO timestamp (optional)
+- `until`: ISO timestamp (optional)
+- `follow`: boolean (optional) - WebSocket stream
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "containerId": "abc123def456",
+    "logs": [
+      {
+        "timestamp": "2025-03-20T14:22:30Z",
+        "level": "INFO",
+        "message": "Server started on port 8080",
+        "source": "stdout"
+      },
+      {
+        "timestamp": "2025-03-20T14:22:31Z",
+        "level": "ERROR",
+        "message": "Cannot connect to database",
+        "source": "stderr"
+      }
+    ],
+    "totalLines": 245,
+    "returnedLines": 2
+  }
+}
+```
+
+---
+
+##### `GET /apps/:appId/metrics`
+
+Historické metriky.
+
+**Query Parameters:**
+- `granularity`: "1m", "5m", "1h", "1d" (default: "5m")
+- `range`: "1h", "6h", "24h", "7d", "30d" (default: "24h")
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "appId": "uuid",
+    "metrics": {
+      "cpu": [
+        { "timestamp": "2025-03-20T14:00:00Z", "value": 23.5 },
+        { "timestamp": "2025-03-20T14:05:00Z", "value": 45.2 },
+        { "timestamp": "2025-03-20T14:10:00Z", "value": 32.1 }
+      ],
+      "memory": [
+        { "timestamp": "2025-03-20T14:00:00Z", "value": 256 },
+        { "timestamp": "2025-03-20T14:05:00Z", "value": 512 },
+        { "timestamp": "2025-03-20T14:10:00Z", "value": 384 }
+      ],
+      "networkIn": [...],
+      "networkOut": [...]
+    },
+    "averages": {
+      "cpuAvg": 33.6,
+      "cpuMax": 45.2,
+      "memoryAvg": 384,
+      "memoryMax": 512
+    }
+  }
+}
+```
+
+---
+
+#### **SYSTEM ENDPOINTS**
+
+##### `GET /system/status`
+
+Stav celého systému (dostupné pouze pro ADMIN).
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "status": "healthy",
+    "uptime": 604800,
+    "swarmStatus": {
+      "state": "active",
+      "managerNodes": 1,
+      "workerNodes": 1,
+      "totalNodes": 2
+    },
+    "docker": {
+      "version": "24.0.0",
+      "apiVersion": "1.43",
+      "osType": "windows",
+      "containerCount": 5,
+      "runningContainers": 2,
+      "stoppedContainers": 3,
+      "images": 12
+    },
+    "resources": {
+      "cpuCores": 4,
+      "cpuUsage": 45.2,
+      "totalMemory": 8589934592,
+      "usedMemory": 4294967296,
+      "memoryPercent": 50.0,
+      "diskTotal": 107374182400,
+      "diskUsed": 53687091200,
+      "diskPercent": 50.0
+    },
+    "services": {
+      "database": {
+        "status": "healthy",
+        "connections": 23,
+        "maxConnections": 100
+      },
+      "cache": {
+        "status": "healthy",
+        "memory": 256000000,
+        "evictions": 0
+      },
+      "monitoring": {
+        "status": "healthy",
+        "metricsCollected": 245000
+      },
+      "logging": {
+        "status": "healthy",
+        "logsIndexed": 1500000
+      }
+    },
+    "applications": {
+      "total": 15,
+      "running": 2,
+      "stopped": 13,
+      "error": 0
+    },
+    "alerts": [
+      {
+        "severity": "warning",
+        "component": "memory",
+        "message": "Memory usage above 70%",
+        "timestamp": "2025-03-20T14:20:00Z"
+      }
+    ]
+  }
+}
+```
+
+---
+
+#### **WEBHOOK ENDPOINTS**
+
+##### `POST /webhooks/github`
+
+GitHub webhook handler (automatické deployment).
+
+**GitHub Webhook Settings:**
+- Payload URL: `http://your-domain.com/api/webhooks/github`
+- Content type: `application/json`
+- Events: Push, Release
+- Secret: Vygenerované heslo
+
+**Request Body (od GitHubu):**
+```json
+{
+  "event": "push",
+  "ref": "refs/heads/main",
+  "repository": {
+    "full_name": "user/app-repo",
+    "clone_url": "https://github.com/user/app-repo.git"
+  },
+  "pusher": {
+    "name": "John Doe"
+  },
+  "commits": [
+    {
+      "id": "abc123def456",
+      "message": "Fix: memory leak",
+      "author": {
+        "name": "John Doe",
+        "email": "john@example.com"
+      }
+    }
+  ]
+}
+```
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "message": "Webhook received, deployment initiated",
+  "data": {
+    "webhookId": "uuid",
+    "deploymentId": "uuid",
+    "appId": "uuid",
+    "status": "queued",
+    "message": "Deployment job queued"
+  }
+}
+```
+
+---
+
+### WEBSOCKET ENDPOINTS
+
+Reálné aktualizace stavu aplikací.
+
+**Connection URL:**
+```
+ws://localhost:3002/
+```
+
+**Authentication:**
+```javascript
+socket.connect({
+  reconnection: true,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+  reconnectionAttempts: 5,
+  query: {
+    token: "{JWT_TOKEN}"
+  }
+});
+```
+
+**Event: `app:status`**
+
+Poslíláno při změně stavu aplikace.
+
+```javascript
+socket.on('app:status', (data) => {
+  // data: {
+  //   appId: "uuid",
+  //   status: "running" | "stopped" | "restarting" | "error",
+  //   metrics: { cpu: 45.2, memory: 512 },
+  //   timestamp: "2025-03-20T14:22:30Z"
+  // }
+});
+```
+
+**Event: `container:metrics`**
+
+Poslíláno každých 5 sekund.
+
+```javascript
+socket.on('container:metrics', (data) => {
+  // data: {
+  //   containerId: "uuid",
+  //   cpu: 45.2,
+  //   memory: 512,
+  //   networkIn: 1024,
+  //   networkOut: 2048,
+  //   timestamp: "2025-03-20T14:22:30Z"
+  // }
+});
+```
+
+**Event: `app:log`**
+
+Nový log záznam.
+
+```javascript
+socket.on('app:log', (data) => {
+  // data: {
+  //   appId: "uuid",
+  //   timestamp: "2025-03-20T14:22:30Z",
+  //   level: "INFO" | "ERROR" | "WARN",
+  //   message: "User connected",
+  //   source: "stdout" | "stderr"
+  // }
+});
+```
+
+**Event: `deployment:status`**
+
+Deployment progress.
+
+```javascript
+socket.on('deployment:status', (data) => {
+  // data: {
+  //   deploymentId: "uuid",
+  //   appId: "uuid",
+  //   status: "pending" | "in_progress" | "success" | "failed",
+  //   progress: 45,  // 0-100%
+  //   message: "Building Docker image...",
+  //   timestamp: "2025-03-20T14:22:30Z"
+  // }
+});
+```
+
+---
+
+## 🎨 UI/UX DESIGN & KOMPONENTY
+
+### LOKÁTOR STRÁNKY
+
+```
+/ (root)
+├── /login              # Login page
+├── /register           # Registration page
+├── /dashboard          # Main dashboard (User)
+│   ├── /apps           # Browse all apps
+│   ├── /apps/:id       # App detail & controls
+│   └── /settings       # User preferences
+├── /admin              # Admin panel (Admin only)
+│   ├── /system         # System monitoring
+│   ├── /users          # User management
+│   ├── /deployments    # Deployment history
+│   └── /settings       # System settings
+└── /download           # Download client page
+```
+
+---
+
+### STRÁNKA: LOGIN
+
+**URL:** `/login`  
+**Přístup:** Veřejné  
+**Role:** Všechny (neregistrované)
+
+#### Layout
+
+```
+┌─────────────────────────────────────────────────────┐
+│                                                     │
+│                  LONGIN HOSTING                     │
+│                Spravujte vaše aplikace              │
+│                                                     │
+│  ┌──────────────────────────────────────────────┐  │
+│  │                                              │  │
+│  │  Username / Email                           │  │
+│  │  [____________________________________]     │  │
+│  │                                              │  │
+│  │  Password                                   │  │
+│  │  [____________________________________]     │  │
+│  │  □ Zapamatovat si mě                        │  │
+│  │                                              │  │
+│  │  [      PŘIHLÁSIT SE      ]                 │  │
+│  │                                              │  │
+│  │  Ještě nemáte účet? [Zaregistrujte se]      │  │
+│  │                                              │  │
+│  └──────────────────────────────────────────────┘  │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+#### Komponenty
+
+| Komponenta | Typ | Popis | Umístění | Velikost |
+|-----------|-----|-------|----------|----------|
+| Logo | Image | Longin logo | Horní střed | 200x100px |
+| Nadpis | H1 | "LONGIN HOSTING" | Nad formulář | 28px |
+| Popis | P | "Spravujte vaše aplikace" | Pod nadpis | 14px, grey |
+| Username Field | TextInput | Uživatelské jméno/email | Formulář | Full width |
+| Password Field | PasswordInput | Heslo | Formulář | Full width |
+| Remember Me | Checkbox | Pamatovat si přihlášení | Pod heslo | Malá |
+| Sign In Button | Button | Přihlášit se | Střed | Full width, primary |
+| Signup Link | Link | Odkaz na registraci | Dole | Text link |
+
+#### Barvy
+
+```css
+Background: #1a1a2e (dark)
+Form Background: #16213e (darker)
+Text: #ffffff
+Input Border: #0f3460 (accent)
+Button Primary: #00d4ff (cyan)
+Button Hover: #00a8cc
+Error Text: #ff6b6b
+```
+
+---
+
+### STRÁNKA: REGISTER
+
+**URL:** `/register`  
+**Přístup:** Veřejné  
+**Role:** Všechny (neregistrované)
+
+#### Layout
+
+```
+┌─────────────────────────────────────────────────────┐
+│                                                     │
+│              VYTVOŘIT ÚČET                          │
+│              Longin Hosting Platform                │
+│                                                     │
+│  ┌──────────────────────────────────────────────┐  │
+│  │                                              │  │
+│  │  Username                                   │  │
+│  │  [____________________________________]     │  │
+│  │  ℹ️ 3-32 znaků, alfanumerické             │  │
+│  │                                              │  │
+│  │  Email                                      │  │
+│  │  [____________________________________]     │  │
+│  │                                              │  │
+│  │  Heslo                                      │  │
+│  │  [____________________________________]     │  │
+│  │  ✓ 8+ znaků, 1 velkému, 1 číslo, 1 spec   │  │
+│  │                                              │  │
+│  │  Potvrdit Heslo                             │  │
+│  │  [____________________________________]     │  │
+│  │                                              │  │
+│  │  [    VYTVOŘIT ÚČET     ]                   │  │
+│  │                                              │  │
+│  │  Máte už účet? [Přihlaste se]               │  │
+│  │                                              │  │
+│  └──────────────────────────────────────────────┘  │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+#### Komponenty
+
+| Komponenta | Typ | Popis | Validace |
+|-----------|-----|-------|----------|
+| Username | TextInput | Uživatelské jméno | Regex: `^[a-zA-Z0-9_]{3,32}$` |
+| Email | EmailInput | Email adresa | Regex: Standard email |
+| Password | PasswordInput | Heslo | Min 8, 1 uppercase, 1 digit, 1 special |
+| Confirm Password | PasswordInput | Potvrzení | Musí se shodovat |
+| Strength Indicator | Progress | Síla hesla | Real-time update |
+| Create Account Button | Button | Registrovat | Disabled pokud invalid |
+| Sign In Link | Link | Přihlášení | Text link |
+
+---
+
+### STRÁNKA: DASHBOARD (User)
+
+**URL:** `/dashboard`  
+**Přístup:** Přihlášení (User role)  
+**Role:** USER, ADMIN
+
+#### Layout
+
+```
+┌───────────────────────────────────────────────────────────────────┐
+│ ☰ LONGIN  [Search...]  👤 john_doe  🔔  ⚙️                       │
+├───────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ┌─ Moje Aplikace ───────────────────────────────────────────┐  │
+│  │  [Všechny]  [Běžící: 1]  [Zastavené]                      │  │
+│  │                                                            │  │
+│  │  ┌──────────────────┐  ┌──────────────────┐              │  │
+│  │  │ My Game          │  │ Chat App         │              │  │
+│  │  │ ●Running         │  │ ⊘ Stopped        │              │  │
+│  │  │ CPU: 45%         │  │ [START] [INFO]   │              │  │
+│  │  │ RAM: 512/512MB   │  │                  │              │  │
+│  │  │ [STOP] [INFO]    │  │                  │              │  │
+│  │  └──────────────────┘  └──────────────────┘              │  │
+│  │                                                            │  │
+│  └────────────────────────────────────────────────────────────┘  │
+│                                                                   │
+│  ┌─ Dostupné Aplikace ───────────────────────────────────────┐  │
+│  │  [Search...] [Filter by tags]                             │  │
+│  │                                                            │  │
+│  │  ┌──────────────────┐  ┌──────────────────┐              │  │
+│  │  │ Web Server       │  │ Database Tool    │              │  │
+│  │  │ 👤 admin         │  │ 👤 devops        │              │  │
+│  │  │ ⭐⭐⭐⭐⭐       │  │ ⭐⭐⭐⭐        │              │  │
+│  │  │ [LAUNCH] [INFO]  │  │ [LAUNCH] [INFO]  │              │  │
+│  │  └──────────────────┘  └──────────────────┘              │  │
+│  │                                                            │  │
+│  └────────────────────────────────────────────────────────────┘  │
+│                                                                   │
+└───────────────────────────────────────────────────────────────────┘
+```
+
+#### Komponenty
+
+| Komponenta | Typ | Popis | Umístění |
+|-----------|-----|-------|----------|
+| Header | Navigation | Logo, search, user menu | Top |
+| Sidebar | Navigation | Moje aplikace, settings | Left (collapsible) |
+| App Card | Component | App info, controls, status | Grid |
+| Status Badge | Badge | Running/Stopped/Error | Top-left corner |
+| Start Button | Button | Spustit aplikaci | Card center |
+| Stop Button | Button | Zastavit aplikaci | Card center |
+| Info Button | Button | Detaily aplikace | Card corner |
+| Search Bar | TextInput | Vyhledávání apps | Top |
+| Filter Chips | Chip | Filtrování (tags, status) | Under search |
+
+---
+
+### STRÁNKA: APP DETAIL
+
+**URL:** `/apps/:appId`  
+**Přístup:** Přihlášení  
+**Role:** USER (vlastník), ADMIN
+
+#### Layout
+
+```
+┌───────────────────────────────────────────────────────────────────┐
+│ ☰ LONGIN  ← Back                                                 │
+├───────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ┌─ My Game ────────────────────────────────────────────────┐   │
+│  │ ● Running  |  Owner: gamedev  |  Version: 1.2.3          │   │
+│  │                                                           │   │
+│  │ Description:                                             │   │
+│  │ Awesome multiplayer game for browser                     │   │
+│  │                                                           │   │
+│  │ [STOP] [RESTART] [DOWNLOAD CLIENT] [OPEN]               │   │
+│  │                                                           │   │
+│  └───────────────────────────────────────────────────────────┘   │
+│                                                                   │
+│  ┌─ INFORMACE ────────┐  ┌─ METRIKY ──────────────────────┐    │
+│  │                    │  │                                │    │
+│  │ URL:               │  │ CPU Usage                      │    │
+│  │ http://localhost:4│  │ ▁▂▃▄▅▆▇█ 45%                  │    │
+│  │ 001               │  │                                │    │
+│  │                    │  │ Memory Usage                   │    │
+│  │ Port: 4001         │  │ ▁▂▃▄▅▆▇█ 512MB / 512MB       │    │
+│  │                    │  │                                │    │
+│  │ Docker Image:      │  │ Network                        │    │
+│  │ user/game:latest   │  │ ↓ 1.2 MB/s  ↑ 0.5 MB/s       │    │
+│  │                    │  │                                │    │
+│  │ Uptime: 2d 3h      │  │ Last Update: Just now         │    │
+│  │                    │  │                                │    │
+│  └────────────────────┘  └────────────────────────────────┘    │
+│                                                                   │
+│  ┌─ LOGY ─────────────────────────────────────────────────┐    │
+│  │ [Ctrl+C to clear] [Download]  [50 lines]  [Follow]    │    │
+│  │                                                         │    │
+│  │ 14:22:30 INFO  Server started on port 8080            │    │
+│  │ 14:22:31 ERROR Cannot connect to database             │    │
+│  │ 14:22:32 WARN  Retrying in 5 seconds...               │    │
+│  │ 14:22:37 INFO  Connected to database                  │    │
+│  │ 14:22:40 INFO  Ready for connections                  │    │
+│  │                                                         │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                                                                   │
+└───────────────────────────────────────────────────────────────────┘
+```
+
+#### Komponenty
+
+| Komponenta | Typ | Popis | Umístění |
+|-----------|-----|-------|----------|
+| App Header | Section | Název, stav, owner | Top |
+| Description | Text | Dlouhý popis aplikace | Pod header |
+| Control Buttons | Button | STOP, RESTART, DOWNLOAD, OPEN | Pod description |
+| Info Section | Panel | URL, Port, Docker Image, Uptime | Left column |
+| Metrics Chart | Chart | CPU, Memory, Network (real-time) | Right column |
+| Logs Panel | Code | Logy aplikace s scroll | Bottom |
+| Tabs | Tab Navigation | Info, Metrics, Logs, Settings | Panel headers |
+
+---
+
+### STRÁNKA: ADMIN PANEL - SYSTEM STATUS
+
+**URL:** `/admin/system`  
+**Přístup:** Přihlášení  
+**Role:** ADMIN ONLY
+
+#### Layout
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ ☰ ADMIN PANEL                    🔔  👤 admin  ⚙️           │
+├──────────────────────────────────────────────────────────────┤
+│ [Dashboard] [Users] [Deployments] [Settings]                 │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│ ◆ SYSTEM HEALTH: ✓ HEALTHY                                  │
+│                                                              │
+│ ┌─ DOCKER SWARM ─────┐  ┌─ RESOURCES ─────────────────┐   │
+│ │                    │  │                             │   │
+│ │ State: Active      │  │ CPU: ▓▓▓░░░░░░ 45.2%       │   │
+│ │ Managers: 1        │  │ Memory: ▓▓▓▓▓░░░░░░ 50%    │   │
+│ │ Workers: 1         │  │ Disk: ▓▓▓░░░░░░░░ 30%      │   │
+│ │ Total Nodes: 2     │  │                             │   │
+│ │                    │  │ Uptime: 720h 5m            │   │
+│ └────────────────────┘  └─────────────────────────────┘   │
+│                                                              │
+│ ┌─ SERVICES STATUS ──────────────────────────────────────┐  │
+│ │                                                         │  │
+│ │ Database      ✓ Healthy  │ 23/100 connections         │  │
+│ │ Cache         ✓ Healthy  │ 256MB used                 │  │
+│ │ Monitoring    ✓ Healthy  │ 245K metrics               │  │
+│ │ Logging       ✓ Healthy  │ 1.5M logs indexed          │  │
+│ │ Docker        ✓ Healthy  │ v24.0.0                    │  │
+│ │                                                         │  │
+│ └─────────────────────────────────────────────────────────┘  │
+│                                                              │
+│ ┌─ APPLICATIONS STATUS ──────────────────────────────────┐  │
+│ │                                                         │  │
+│ │ Total: 15  │  Running: 2  │  Stopped: 13  │  Error: 0 │  │
+│ │                                                         │  │
+│ │ [List of apps with status and resource usage]         │  │
+│ │                                                         │  │
+│ └─────────────────────────────────────────────────────────┘  │
+│                                                              │
+│ ┌─ ALERTS ────────────────────────────────────────────────┐  │
+│ │                                                         │  │
+│ │ ⚠️ WARNING: Memory usage above 70%                     │  │
+│ │ ⓘ INFO: Latest deployment completed successfully      │  │
+│ │                                                         │  │
+│ └─────────────────────────────────────────────────────────┘  │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+```
+
+#### Komponenty
+
+| Komponenta | Typ | Popis |
+|-----------|-----|-------|
+| Health Status | Badge | Overall system status |
+| Swarm Info | Panel | Cluster details |
+| Resources Chart | ProgressBar | CPU, Memory, Disk |
+| Services List | Table | Health, connections |
+| Apps Overview | Card | Running count, error count |
+| Alerts | Alert Box | Warnings, info |
+
+---
+
+### STRÁNKA: ADMIN PANEL - USER MANAGEMENT
+
+**URL:** `/admin/users`  
+**Přístup:** Přihlášení  
+**Role:** ADMIN ONLY
+
+#### Layout
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ ☰ ADMIN PANEL                                               │
+├──────────────────────────────────────────────────────────────┤
+│ [Dashboard] [Users] [Deployments] [Settings]                 │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│ [+ NEW USER] [Search...] [Filter: Active] [Export]         │
+│                                                              │
+│ ┌──────────────────────────────────────────────────────────┐ │
+│ │ Username    │ Email              │ Role  │ Status       │ │
+│ ├──────────────────────────────────────────────────────────┤ │
+│ │ john_doe    │ john@example.com   │ User  │ ✓ Active     │ │
+│ │ admin_user  │ admin@example.com  │ Admin │ ✓ Active     │ │
+│ │ jane_smith  │ jane@example.com   │ User  │ ⊘ Inactive   │ │
+│ │ test_user   │ test@example.com   │ User  │ ✓ Active     │ │
+│ │                                                          │ │
+│ │ [EDIT] [DELETE] [RESET PASSWORD]                        │ │
+│ │                                                          │ │
+│ └──────────────────────────────────────────────────────────┘ │
+│                                                              │
+│ Pagination: [← Prev] 1 2 3 [Next →]                         │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+```
+
+#### Komponenty
+
+| Komponenta | Typ | Popis |
+|-----------|-----|-------|
+| Add User Button | Button | Nový uživatel |
+| Search | TextInput | Vyhledávání |
+| Filter | Dropdown | Active/Inactive |
+| User Table | Table | Username, Email, Role, Status |
+| Edit Button | Button (row action) | Editovat uživatele |
+| Delete Button | Button (row action) | Smazat uživatele |
+| Reset Password | Button (row action) | Reset hesla |
+
+---
+
+## 🔄 DATOVÉ & UŽIVATELSKÉ TOKY
+
+### FLOW: User Login
+
+```
+┌──────────┐
+│  Start   │
+└──────┬───┘
+       │
+       ▼
+  ┌─────────────┐
+  │ User visits │
+  │   /login    │
+  └──────┬──────┘
+         │
+         ▼
+  ┌────────────────────┐
+  │ Render Login Form  │
+  │ (username/password)│
+  └──────┬─────────────┘
+         │
+         ▼
+  ┌────────────────────┐
+  │ User enters        │
+  │ credentials        │
+  └──────┬─────────────┘
+         │
+         ▼
+  ┌────────────────────────────────┐
+  │ POST /api/auth/login            │
+  │ {username, password}            │
+  └──────┬─────────────────────────┘
+         │
+         ▼
+  ┌────────────────────────────────┐
+  │ Backend validates              │
+  │ credentials                    │
+  └──────┬─────────┬────────────────┘
+         │         │
+    ✓ Valid    ✗ Invalid
+         │         │
+         ▼         ▼
+      ┌─────┐  ┌──────────────┐
+      │ Gen │  │ Return 401   │
+      │ JWT │  │ + Error msg  │
+      └──┬──┘  └──────┬───────┘
+         │            │
+         ▼            ▼
+      ┌───────────┐ ┌──────────────┐
+      │ Store JWT │ │ Display error│
+      │ + Refresh │ │ "Invalid     │
+      │ in Redis  │ │  credentials"│
+      └──┬────────┘ └────────┬─────┘
+         │                  │
+         ▼                  ▼
+      ┌───────────────┐ ┌──────────┐
+      │ Redirect to   │ │ User can │
+      │ /dashboard    │ │ retry    │
+      └───────────────┘ └──────────┘
+```
+
+---
+
+### FLOW: Spuštění Aplikace
+
+```
+┌────────────────────┐
+│ User clicks        │
+│ START button       │
+└────────┬───────────┘
+         │
+         ▼
+┌─────────────────────────────┐
+│ POST /api/apps/{id}/start   │
+│ + JWT token                 │
+└────────┬────────────────────┘
+         │
+         ▼
+┌───────────────────────────────┐
+│ Backend:                      │
+│ 1. Check user permission     │
+│ 2. Check if app exists       │
+└────────┬──────────────┬───────┘
+         │              │
+    ✓ OK         ✗ Error (403/404)
+         │              │
+         ▼              ▼
+┌─────────────────────┐  ┌──────────────┐
+│ Check max instances │  │ Return error │
+│ running            │  │ status       │
+└────────┬────┬──────┘  └──────┬───────┘
+         │    │                │
+    ✓ OK │  ✗ Max reached    │
+         │    │                │
+         ▼    ▼                ▼
+      ┌────────────────┐  ┌──────────────┐
+      │ Docker create  │  │ Return 409   │
+      │ + start        │  │ "Max         │
+      │ container      │  │  instances"  │
+      └────┬───────────┘  └──────┬───────┘
+           │                    │
+           ▼                    ▼
+    ┌─────────────┐  ┌─────────────────┐
+    │ Assign port │  │ User sees error │
+    │ 4000-5000   │  │ message in UI   │
+    └────┬────────┘  └─────────────────┘
+         │
+         ▼
+    ┌──────────────────┐
+    │ Register in      │
+    │ containers DB    │
+    └────┬─────────────┘
+         │
+         ▼
+    ┌──────────────────┐
+    │ Update app       │
+    │ status to        │
+    │ "running"        │
+    └────┬─────────────┘
+         │
+         ▼
+    ┌──────────────────────┐
+    │ Broadcast via        │
+    │ WebSocket:           │
+    │ "app:status"         │
+    └────┬─────────────────┘
+         │
+         ▼
+    ┌──────────────────────┐
+    │ Frontend updates     │
+    │ app status           │
+    │ (real-time)          │
+    └──────────────────────┘
+```
+
+---
+
+### FLOW: GitHub Webhook Deployment
+
+```
+┌─────────────────────────┐
+│ Developer pushes code   │
+│ git push origin main    │
+└────────┬────────────────┘
+         │
+         ▼
+┌──────────────────────────┐
+│ GitHub sends webhook     │
+│ POST {domain}/webhooks   │
+│ /github                  │
+└────────┬─────────────────┘
+         │
+         ▼
+┌────────────────────────────┐
+│ Backend receives webhook   │
+│ Validate secret            │
+└────────┬────────┬──────────┘
+         │        │
+    ✓ OK │  ✗ Invalid
+         │        │
+         ▼        ▼
+┌──────────────┐ ┌─────────┐
+│ Extract:     │ │ Return  │
+│ • commit ID  │ │ 401     │
+│ • message    │ │         │
+│ • branch     │ └─────────┘
+│ • author     │
+└────┬─────────┘
+     │
+     ▼
+┌────────────────────────┐
+│ Find app by            │
+│ GitHub repo URL        │
+└────────┬────┬──────────┘
+     ✓ OK │  ✗ Not found
+         │    │
+         ▼    ▼
+    ┌─────────┐  ┌──────┐
+    │ Create  │  │ Log  │
+    │ Deploy  │  │ warn │
+    │ record  │  │      │
+    └────┬────┘  └──────┘
+         │
+         ▼
+    ┌──────────────────┐
+    │ Queue deployment │
+    │ job              │
+    └────┬─────────────┘
+         │
+         ▼
+    ┌────────────────────┐
+    │ Broadcast          │
+    │ "deployment:start" │
+    │ via WebSocket      │
+    └────┬───────────────┘
+         │
+         ▼
+    ┌────────────────────────┐
+    │ Worker: Clone GitHub   │
+    │ repo                   │
+    └────┬───────────────────┘
+         │
+         ▼
+    ┌────────────────────────┐
+    │ Build Docker image     │
+    │ docker build ...       │
+    └────┬───────────────────┘
+         │
+         ▼
+    ┌────────────────────────┐
+    │ Push to registry       │
+    │ (optional)             │
+    └────┬───────────────────┘
+         │
+         ▼
+    ┌────────────────────────┐
+    │ Stop old container     │
+    │ (if running)           │
+    └────┬───────────────────┘
+         │
+         ▼
+    ┌────────────────────────┐
+    │ Start new container    │
+    │ from new image         │
+    └────┬───────────────────┘
+         │
+         ▼
+    ┌────────────────────────┐
+    │ Health check           │
+    │ (wait for ready)       │
+    └────┬────────┬──────────┘
+    ✓ OK │  ✗ Failed
+         │   │
+         ▼   ▼
+    ┌────────────┐ ┌──────────────┐
+    │ Update     │ │ Rollback to  │
+    │ deployment │ │ old image    │
+    │ success    │ │              │
+    └────┬───────┘ └──────┬───────┘
+         │               │
+         ▼               ▼
+    ┌──────────────────────┐
+    │ Broadcast            │
+    │ "deployment:success" │
+    │ or "deployment:fail" │
+    └──────────────────────┘
+```
+
+---
+
+### DATOVÝ FLOW: Container Metrics Collection
+
+```
+┌────────────────────────────┐
+│ Prometheus scraper         │
+│ (every 5 seconds)          │
+└────────┬───────────────────┘
+         │
+         ▼
+┌────────────────────────────┐
+│ Query Docker daemon        │
+│ container stats API        │
+└────────┬───────────────────┘
+         │
+         ▼
+┌────────────────────────────┐
+│ Parse metrics:             │
+│ • CPU usage                │
+│ • Memory                   │
+│ • Network I/O              │
+│ • Disk I/O                 │
+└────────┬───────────────────┘
+         │
+         ▼
+┌────────────────────────────┐
+│ Store in Prometheus        │
+│ time-series DB             │
+└────────┬───────────────────┘
+         │
+         ├─────────┬───────────┬───────────┐
+         │         │           │           │
+    ┌────▼──┐ ┌───▼────┐ ┌───▼───┐ ┌───▼──┐
+    │ Query │ │Push to │ │Store │ │Send  │
+    │by     │ │Grafana │ │in    │ │via   │
+    │Grafana│ │        │ │Redis │ │WS    │
+    └───┬───┘ └────────┘ │cache │ └──┬───┘
+        │                └──────┘    │
+        │                           │
+        ▼                           ▼
+    ┌─────────────────────┐  ┌────────────┐
+    │ Visualize on        │  │ Frontend   │
+    │ Grafana dashboard   │  │ receives   │
+    │                     │  │ real-time  │
+    │                     │  │ metrics    │
+    └─────────────────────┘  └────────────┘
+```
+
+---
+
+### DATOVÝ FLOW: Logging Pipeline
+
+```
+┌─────────────────────────────┐
+│ Application container       │
+│ logs output (stdout/stderr) │
+└────────┬────────────────────┘
+         │
+         ▼
+┌─────────────────────────────┐
+│ Docker collects logs        │
+│ /var/lib/docker/containers/ │
+│ {id}/...log                 │
+└────────┬────────────────────┘
+         │
+         ▼
+┌─────────────────────────────┐
+│ Logstash agent              │
+│ (running on host)           │
+└────────┬────────────────────┘
+         │
+         ▼
+┌─────────────────────────────┐
+│ Parse & enrich logs         │
+│ • Add timestamp             │
+│ • Add app_id                │
+│ • Add container_id          │
+│ • Detect log level          │
+└────────┬────────────────────┘
+         │
+         ├─────────┬──────────┬──────────┐
+         │         │          │          │
+    ┌────▼──┐ ┌───▼───┐ ┌───▼───┐ ┌───▼──┐
+    │Send to │ │Store │ │Store │ │Send  │
+    │Elastic │ │in    │ │in    │ │via   │
+    │search  │ │SQLite│ │Redis │ │API   │
+    └────────┘ │local │ │cache │ └──────┘
+               │log  │ └──────┘
+               └────────┘
+                       │
+         ┌─────────────┼─────────────┐
+         │             │             │
+         ▼             ▼             ▼
+    ┌────────┐   ┌────────┐   ┌──────────┐
+    │Kibana  │   │SQLite  │   │WebSocket │
+    │visual- │   │query   │   │broadcast │
+    │ize     │   │        │   │to UI     │
+    └────────┘   └────────┘   └──────────┘
+```
+
+---
+
+## ⚙️ KONFIGURACE & DEPLOYMENT
+
+### KONFIGURACE: .env (Root)
+
+```env
+# ENVIRONMENT
+NODE_ENV=development
+VERSION=1.0.0
+
+# LONGIN CORE
+LONGIN_WEB_UI_PORT=3000
+LONGIN_CORE_API_PORT=3001
+LONGIN_CORE_WEBSOCKET_PORT=3002
+
+# DATABASE
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=longin_db
+POSTGRES_USER=longin_user
+POSTGRES_PASSWORD=SecurePassword123!
+DATABASE_URL=postgresql://longin_user:SecurePassword123!@postgres:5432/longin_db
+
+# CACHE
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_PASSWORD=RedisPassword123!
+REDIS_DB=0
+
+# JWT
+JWT_SECRET=YourJWTSecretKeyMinimum32Characters!
+JWT_REFRESH_SECRET=YourRefreshSecretKeyMinimum32Characters!
+JWT_EXPIRY=3600
+JWT_REFRESH_EXPIRY=604800
+
+# DOCKER
+DOCKER_SOCKET=/var/run/docker.sock
+DOCKER_REGISTRY_URL=registry.hub.docker.com
+DOCKER_REGISTRY_USERNAME=yourregistry
+DOCKER_REGISTRY_PASSWORD=registrypassword
+
+# GITHUB
+GITHUB_WEBHOOK_SECRET=GithubWebhookSecretToken123!
+GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxx
+
+# MONITORING
+PROMETHEUS_PORT=9090
+GRAFANA_PORT=3003
+GRAFANA_ADMIN_PASSWORD=GrafanaPassword123!
+
+# LOGGING
+ELASTICSEARCH_HOST=elasticsearch
+ELASTICSEARCH_PORT=9200
+KIBANA_PORT=5601
+LOGSTASH_PORT=5044
+
+# EMAIL (Optional for notifications)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SMTP_FROM=noreply@longin.local
+
+# SECURITY
+CORS_ORIGIN=http://localhost:3000,http://localhost:3001
+SESSION_SECRET=SessionSecretKeyMinimum32Characters!
+BCRYPT_ROUNDS=10
+
+# DEPLOYMENT
+AUTO_UPDATE_CHECK_INTERVAL=3600
+MAX_LOG_RETENTION_DAYS=30
+METRICS_RETENTION_DAYS=30
+```
+
+### KONFIGURACE: docker-compose.yml (Root)
+
+```yaml
+version: '3.9'
+
+services:
+  # ════════════════════════════════════════════════════════════
+  # LONGIN CORE
+  # ════════════════════════════════════════════════════════════
+  
+  longin-core:
+    build:
+      context: ./services/longin-core
+      dockerfile: Dockerfile
+    container_name: longin-core
+    ports:
+      - "3001:3001"
+      - "3002:3002"  # WebSocket
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - LONGIN_CORE_API_PORT=3001
+      - LONGIN_CORE_WEBSOCKET_PORT=3002
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - DOCKER_SOCKET=/var/run/docker.sock
+      - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./services/longin-core/src:/app/src:ro
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - longin-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ════════════════════════════════════════════════════════════
+  # FRONTEND (React)
+  # ════════════════════════════════════════════════════════════
+  
+  longin-ui:
+    build:
+      context: ./services/longin-ui
+      dockerfile: Dockerfile
+    container_name: longin-ui
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001/api
+      - REACT_APP_WS_URL=ws://localhost:3002
+      - REACT_APP_ENV=${NODE_ENV}
+    depends_on:
+      - longin-core
+    networks:
+      - longin-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ════════════════════════════════════════════════════════════
+  # DATABASE
+  # ════════════════════════════════════════════════════════════
+  
+  postgres:
+    image: postgres:16-alpine
+    container_name: longin-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./services/database/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./services/database/pgvector-init.sql:/docker-entrypoint-initdb.d/pgvector-init.sql
+    networks:
+      - longin-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ════════════════════════════════════════════════════════════
+  # CACHE
+  # ════════════════════════════════════════════════════════════
+  
+  redis:
+    image: redis:7-alpine
+    container_name: longin-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD} --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - longin-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ════════════════════════════════════════════════════════════
+  # MONITORING - PROMETHEUS
+  # ════════════════════════════════════════════════════════════
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: longin-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./services/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    networks:
+      - longin-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ════════════════════════════════════════════════════════════
+  # MONITORING - GRAFANA
+  # ════════════════════════════════════════════════════════════
+  
+  grafana:
+    image: grafana/grafana:latest
+    container_name: longin-grafana
+    ports:
+      - "3003:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./services/monitoring/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    networks:
+      - longin-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ════════════════════════════════════════════════════════════
+  # LOGGING - ELASTICSEARCH
+  # ════════════════════════════════════════════════════════════
+  
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: longin-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - longin-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ════════════════════════════════════════════════════════════
+  # LOGGING - LOGSTASH
+  # ════════════════════════════════════════════════════════════
+  
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    container_name: longin-logstash
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./services/logging/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    environment:
+      - "LS_JAVA_OPTS=-Xmx256m -Xms256m"
+    depends_on:
+      - elasticsearch
+    networks:
+      - longin-network
+    restart: unless-stopped
+
+  # ════════════════════════════════════════════════════════════
+  # LOGGING - KIBANA
+  # ════════════════════════════════════════════════════════════
+  
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: longin-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - longin-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5601/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ════════════════════════════════════════════════════════════
+  # REVERSE PROXY - TRAEFIK
+  # ════════════════════════════════════════════════════════════
+  
+  traefik:
+    image: traefik:v3.0
+    container_name: longin-traefik
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./services/traefik/traefik.yml:/traefik.yml:ro
+      - ./services/traefik/dynamic.yml:/dynamic.yml:ro
+    networks:
+      - longin-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+
+networks:
+  longin-network:
+    driver: bridge
+```
+
+---
+
+## 📋 IMPLEMENTAČNÍ PLÁN
+
+**Tento plán je strukturován pro postupné vývoje. Každá fáze vychází na sobě.**
+
+### FÁZE 1: FOUNDATION (2-3 týdny)
+
+**Cíl:** Vytvořit základní infrastrukturu a databázi.
+
+#### Task 1.1: Setup Project Structure
+- [ ] Vytvořit Git repo
+- [ ] Setup Node.js monorepo (workspaces)
+- [ ] Vytvorit adresářovou strukturu
+- [ ] Setup TypeScript
+- [ ] Setup linting (ESLint, Prettier)
+
+#### Task 1.2: Database Setup
+- [ ] Docker container PostgreSQL
+- [ ] Vytvořit všechny tabulky (DB schéma)
+- [ ] Vytvořit PgVector extension
+- [ ] Backup/restore skripty
+
+#### Task 1.3: Cache Setup
+- [ ] Docker container Redis
+- [ ] Konfigurace persistence
+- [ ] Redis client wrapper
+
+---
+
+### FÁZE 2: AUTHENTICATION & CORE API (2-3 týdny)
+
+**Cíl:** Implementovat autentizaci a základní API.
+
+#### Task 2.1: User Authentication
+- [ ] Registration endpoint
+- [ ] Login endpoint
+- [ ] JWT token management
+- [ ] Password hashing (bcrypt)
+
+#### Task 2.2: Longin Core API (Basic)
+- [ ] Express server setup
+- [ ] API router
+- [ ] Auth middleware
+- [ ] Error handling
+- [ ] Request validation
+
+#### Task 2.3: Frontend - Auth Pages
+- [ ] Login page
+- [ ] Register page
+- [ ] Auth flow (Frontend)
+
+---
+
+### FÁZE 3: APP MANAGEMENT (2-3 týdny)
+
+**Cíl:** Implementovat správu aplikací.
+
+#### Task 3.1: Docker Integration
+- [ ] Docker SDK wrapper
+- [ ] Container lifecycle management
+- [ ] Image pulling
+- [ ] Container status tracking
+
+#### Task 3.2: Application CRUD
+- [ ] POST /api/apps (create app)
+- [ ] GET /api/apps (list apps)
+- [ ] GET /api/apps/:id (get app detail)
+- [ ] UPDATE /api/apps/:id (update config)
+- [ ] DELETE /api/apps/:id (delete app)
+
+#### Task 3.3: App Control Endpoints
+- [ ] POST /api/apps/:id/start
+- [ ] POST /api/apps/:id/stop
+- [ ] POST /api/apps/:id/restart
+
+---
+
+### FÁZE 4: MONITORING & METRICS (2 týdny)
+
+**Cíl:** Implementovat monitoring a sbírání metrik.
+
+#### Task 4.1: Prometheus Setup
+- [ ] Prometheus container
+- [ ] Scrape config
+- [ ] Metrics exporter
+
+#### Task 4.2: Metrics Collection
+- [ ] Docker stats collector
+- [ ] Store metrics v database
+- [ ] GET /api/apps/:id/metrics endpoint
+
+#### Task 4.3: Grafana Dashboards
+- [ ] Grafana container
+- [ ] Vytvorit dashboards
+- [ ] System overview
+- [ ] Per-app metrics
+
+---
+
+### FÁZE 5: LOGGING (1-2 týdny)
+
+**Cíl:** Implementovat centralizované logování.
+
+#### Task 5.1: ELK Stack Setup
+- [ ] Elasticsearch
+- [ ] Logstash
+- [ ] Kibana
+
+#### Task 5.2: Log Collection
+- [ ] Log shipper agent
+- [ ] Parse application logs
+- [ ] Store in Elasticsearch
+
+#### Task 5.3: Logs API
+- [ ] GET /api/apps/:id/logs endpoint
+- [ ] Log filtering & search
+
+---
+
+### FÁZE 6: WEBSOCKET & REAL-TIME (1-2 týdny)
+
+**Cíl:** Implementovat real-time aktualizace.
+
+#### Task 6.1: WebSocket Server
+- [ ] Socket.io setup
+- [ ] Authentication
+- [ ] Event broadcasting
+
+#### Task 6.2: Real-time Events
+- [ ] app:status event
+- [ ] container:metrics event
+- [ ] app:log event
+- [ ] deployment:status event
+
+#### Task 6.3: Frontend WebSocket Integration
+- [ ] Socket.io client
+- [ ] Event listeners
+- [ ] Real-time UI updates
+
+---
+
+### FÁZE 7: GITHUB INTEGRATION (2 týdny)
+
+**Cíl:** Implementovat deployment přes GitHub webhooks.
+
+#### Task 7.1: Webhook Handling
+- [ ] POST /api/webhooks/github endpoint
+- [ ] Webhook validation (signature)
+- [ ] Payload parsing
+
+#### Task 7.2: Automated Deployment
+- [ ] Clone GitHub repo
+- [ ] Dockerfile detection
+- [ ] Docker build
+- [ ] Container deployment
+
+#### Task 7.3: Webhook UI
+- [ ] Webhook configuration page
+- [ ] Webhook logs/history
+- [ ] Manual trigger button
+
+---
+
+### FÁZE 8: DOCKER SWARM SETUP (2-3 týdny)
+
+**Cíl:** Implementovat multi-machine orchestraci.
+
+#### Task 8.1: Docker Swarm Initialization
+- [ ] Initialize swarm (manager)
+- [ ] Add worker nodes
+- [ ] Network configuration
+
+#### Task 8.2: Service Deployment in Swarm
+- [ ] Modify container creation pro Swarm
+- [ ] Service constraints
+- [ ] Load balancing
+
+#### Task 8.3: Multi-machine Networking
+- [ ] Overlay network setup
+- [ ] Cross-machine communication
+- [ ] Port mapping
+
+---
+
+### FÁZE 9: REVERSE PROXY & ROUTING (1-2 týdny)
+
+**Cíl:** Implementovat Traefik pro automatický routing.
+
+#### Task 9.1: Traefik Setup
+- [ ] Traefik container
+- [ ] Configuration
+- [ ] Dashboard
+
+#### Task 9.2: Dynamic Routing
+- [ ] Auto-discovery
+- [ ] Custom URL assignment
+- [ ] SSL/TLS (Let's Encrypt optional)
+
+#### Task 9.3: Load Balancing
+- [ ] Request distribution
+- [ ] Health checks
+
+---
+
+### FÁZE 10: ADMIN PANEL (2 týdny)
+
+**Cíl:** Implementovat admin dashboard.
+
+#### Task 10.1: System Status Page
+- [ ] System metrics visualization
+- [ ] Service health status
+- [ ] Alerts & warnings
+
+#### Task 10.2: User Management
+- [ ] User CRUD (admin)
+- [ ] Role management
+- [ ] Permission system
+
+#### Task 10.3: Deployment Management
+- [ ] Deployment history
+- [ ] Rollback capability
+- [ ] Logs review
+
+---
+
+### FÁZE 11: DESKTOP CLIENT (2 týdny)
+
+**Cíl:** Vytvořit desktop klient pro spouštění aplikací.
+
+#### Task 11.1: Client App Structure
+- [ ] Electron setup (Windows)
+- [ ] Auto-update mechanism
+- [ ] Settings storage
+
+#### Task 11.2: Launch Application
+- [ ] Server connection
+- [ ] App selection
+- [ ] Launch & monitoring
+- [ ] Error handling
+
+#### Task 11.3: System Tray
+- [ ] Tray icon
+- [ ] App status notification
+- [ ] Quick launch menu
+
+---
+
+### FÁZE 12: TESTING & OPTIMIZATION (2-3 týdny)
+
+**Cíl:** Testing, optimization, security hardening.
+
+#### Task 12.1: Unit & Integration Tests
+- [ ] Backend tests
+- [ ] Frontend tests
+- [ ] API tests
+
+#### Task 12.2: Performance Optimization
+- [ ] Database query optimization
+- [ ] Caching strategy
+- [ ] Frontend bundle optimization
+
+#### Task 12.3: Security Audit
+- [ ] SQL injection prevention
+- [ ] XSS protection
+- [ ] CSRF tokens
+- [ ] API rate limiting
+- [ ] Dependency scanning
+
+---
+
+### FÁZE 13: DEPLOYMENT & PRODUCTION (1-2 týdny)
+
+**Cíl:** Produkční deployment a monitoring.
+
+#### Task 13.1: Production Docker Setup
+- [ ] Build optimized images
+- [ ] Docker registry setup
+- [ ] Compose production override
+
+#### Task 13.2: Monitoring & Alerting
+- [ ] Alert rules
+- [ ] Notification channels
+- [ ] Uptime monitoring
+
+#### Task 13.3: Backup & Disaster Recovery
+- [ ] Database backup automation
+- [ ] Backup retention policy
+- [ ] Restore procedures
+
+---
+
+## 📊 ADRESÁŘOVÁ STRUKTURA
+
+```
+longin-hosting-server/
+├── services/
+│   ├── longin-core/              # Main API server
+│   │   ├── src/
+│   │   │   ├── config/
+│   │   │   │   ├── database.ts
+│   │   │   │   ├── redis.ts
+│   │   │   │   └── docker.ts
+│   │   │   ├── middleware/
+│   │   │   │   ├── auth.ts
+│   │   │   │   ├── validation.ts
+│   │   │   │   └── errorHandler.ts
+│   │   │   ├── routes/
+│   │   │   │   ├── auth.ts
+│   │   │   │   ├── apps.ts
+│   │   │   │   ├── system.ts
+│   │   │   │   └── webhooks.ts
+│   │   │   ├── services/
+│   │   │   │   ├── docker.service.ts
+│   │   │   │   ├── auth.service.ts
+│   │   │   │   ├── app.service.ts
+│   │   │   │   ├── monitoring.service.ts
+│   │   │   │   └── deployment.service.ts
+│   │   │   ├── websocket/
+│   │   │   │   ├── server.ts
+│   │   │   │   └── events.ts
+│   │   │   ├── utils/
+│   │   │   │   ├── validators.ts
+│   │   │   │   ├── jwt.ts
+│   │   │   │   └── helpers.ts
+│   │   │   └── app.ts
+│   │   ├── Dockerfile
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   │
+│   ├── longin-ui/                # React frontend
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   │   ├── Auth/
+│   │   │   │   │   ├── Login.tsx
+│   │   │   │   │   └── Register.tsx
+│   │   │   │   ├── Dashboard/
+│   │   │   │   │   ├── Dashboard.tsx
+│   │   │   │   │   ├── AppBrowser.tsx
+│   │   │   │   │   └── AppDetail.tsx
+│   │   │   │   ├── Admin/
+│   │   │   │   │   ├── AdminPanel.tsx
+│   │   │   │   │   ├── SystemStatus.tsx
+│   │   │   │   │   └── UserManagement.tsx
+│   │   │   │   ├── Common/
+│   │   │   │   │   ├── Header.tsx
+│   │   │   │   │   ├── Sidebar.tsx
+│   │   │   │   │   └── AppCard.tsx
+│   │   │   ├── pages/
+│   │   │   ├── styles/
+│   │   │   ├── hooks/
+│   │   │   ├── context/
+│   │   │   └── App.tsx
+│   │   ├── Dockerfile
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   │
+│   ├── database/
+│   │   ├── init-db.sql           # Table creation
+│   │   ├── pgvector-init.sql     # PgVector extension
+│   │   └── migrations/           # Schema migrations
+│   │
+│   └── monitoring/
+│       ├── prometheus.yml
+│       └── grafana/
+│           └── provisioning/
+│
+├── docker-compose.yml            # Main composition
+├── .env                          # Environment variables
+├── .env.example                  # Example config
+├── .github/
+│   └── workflows/
+│       ├── build.yml
+│       └── deploy.yml
+└── docs/
+    ├── API.md
+    ├── ARCHITECTURE.md
+    └── DEPLOYMENT.md
+```
+
+---
+
+## 🎯 NEXT STEPS
+
+Toto je **Phase 1 dokumentace PRD**. Další dokumenty:
+
+1. **📖 Detailed PRD Document** (tento dokument - kompletní)
+2. **📊 Architecture Diagrams** (SystemC, sekvenční, datové toky)
+3. **🎨 UI/UX Mockups** (Figma-style detaily všech stránek)
+4. **💻 AI Agent Prompts** (5-7 promptů pro implementaci)
+5. **📋 Configuration Files** (Kompletní .env, docker-compose.yml, atd.)
+
+Chcete aby jsem vytvořil **následující dokument** nebo konkrétní **part z tohoto plánu**?
+
+---
+
+**Created:** [translate:Březen 2025]  
+**Status:** DRAFT - Ready for Phase 2 Implementation

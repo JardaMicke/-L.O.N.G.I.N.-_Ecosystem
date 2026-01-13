@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Longin charakter AI</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1 class="neon-text">L.O.N.G.I.N.</h1>
+            <p>Logical Orchestrated Networked Generative Intelligent Nexus</p>
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="notice">
+            <p>Tato aplikace je určena pouze pro vzdělávací účely a vývoj AI technologií. Všechny konverzace a generovaný obsah je necenzurovaný, bez NSFW filtrů.</p>
+        </div>
+        
+        <div class="tab-container">
+            <div class="tabs">
+                <div class="tab active" data-tab="text-to-image">Text → Obrázek</div>
+                <div class="tab" data-tab="image-to-image">Obrázek → Obrázek</div>
+                <div class="tab" data-tab="text-to-video">Text → Video</div>
+                <div class="tab" data-tab="image-to-video">Obrázek → Video</div>
+                <div class="tab" data-tab="character-chat">AI Konverzace</div>
+            </div>
+            
+            <div class="tab-content active" id="text-to-image">
+                <h2 class="neon-text">Text na Obrázek</h2>
+                <div class="input-group prompt-container">
+                    <label for="text-prompt">Zadejte popis obrázku:</label>
+                    <textarea id="text-prompt" rows="4" placeholder="Např.: Krajina s horami a jezerem za úsvitu, malovaná akvarelem..."></textarea>
+                    <button class="upgrade-btn">Vylepšit prompt</button>
+                </div>
+                <div class="button-group">
+                    <button id="generate-image">Generovat obrázek</button>
+                    <button class="secondary">Zrušit</button>
+                </div>
+                <div class="preview-container">
+                    <p>Zde se zobrazí vygenerovaný obrázek</p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="image-to-image">
+                <h2 class="neon-text">Obrázek na Obrázek</h2>
+                <div class="input-group">
+                    <label for="source-image">Vyberte zdrojový obrázek:</label>
+                    <input type="file" id="source-image" accept="image/*">
+                </div>
+                <div class="input-group prompt-container">
+                    <label for="image-instructions">Zadejte pokyny pro úpravu:</label>
+                    <textarea id="image-instructions" rows="4" placeholder="Např.: Změnit na zimní scénu, přidat sníh..."></textarea>
+                    <button class="upgrade-btn">Vylepšit prompt</button>
+                </div>
+                <div class="button-group">
+                    <button id="transform-image">Transformovat obrázek</button>
+                    <button class="secondary">Zrušit</button>
+                </div>
+                <div class="preview-container">
+                    <p>Zde se zobrazí transformovaný obrázek</p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="text-to-video">
+                <h2 class="neon-text">Text na Video</h2>
+                <div class="input-group prompt-container">
+                    <label for="video-prompt">Zadejte popis videa:</label>
+                    <textarea id="video-prompt" rows="4" placeholder="Např.: Časosběr západu slunce nad městem..."></textarea>
+                    <button class="upgrade-btn">Vylepšit prompt</button>
+                </div>
+                <div class="input-group">
+                    <label for="video-duration">Délka videa (v sekundách):</label>
+                    <input type="number" id="video-duration" min="1" max="30" value="5">
+                </div>
+                <div class="button-group">
+                    <button id="generate-video">Generovat video</button>
+                    <button class="secondary">Zrušit</button>
+                </div>
+                <div class="preview-container">
+                    <p>Zde se zobrazí vygenerované video</p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="image-to-video">
+                <h2 class="neon-text">Obrázek na Video</h2>
+                <div class="input-group">
+                    <label for="source-image-video">Vyberte zdrojový obrázek:</label>
+                    <input type="file" id="source-image-video" accept="image/*">
+                </div>
+                <div class="input-group prompt-container">
+                    <label for="image-video-instructions">Zadejte pokyny pro animaci:</label>
+                    <textarea id="image-video-instructions" rows="4" placeholder="Např.: Přiblížení na tvář postavy..."></textarea>
+                    <button class="upgrade-btn">Vylepšit prompt</button>
+                </div>
+                <div class="input-group">
+                    <label for="image-video-duration">Délka videa (v sekundách):</label>
+                    <input type="number" id="image-video-duration" min="1" max="30" value="5">
+                </div>
+                <div class="button-group">
+                    <button id="animate-image">Animovat obrázek</button>
+                    <button class="secondary">Zrušit</button>
+                </div>
+                <div class="preview-container">
+                    <p>Zde se zobrazí animovaný obrázek</p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="character-chat">
+                <h2 class="neon-text">AI Konverzace</h2>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message ai">
+                            <p>Ahoj, jsem Longin AI. Jak ti mohu dnes pomoci?</p>
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="chat-input-text" placeholder="Zadejte zprávu...">
+                        <button id="send-message">Odeslat</button>
+                    </div>
+                </div>
+                <div class="input-group" style="margin-top: 20px;">
+                    <label for="character-select">Vyberte charakter:</label>
+                    <select id="character-select">
+                        <option value="assistant">Asistent</option>
+                        <option value="philosopher">Filozof</option>
+                        <option value="roleplay">Roleplaying</option>
+                        <option value="custom">Vlastní...</option>
+                    </select>
+                </div>
+                <div class="input-group hidden" id="custom-character">
+                    <label for="custom-character-prompt">Vlastní instrukce pro charakter:</label>
+                    <textarea id="custom-character-prompt" rows="4" placeholder="Zadejte podrobný popis charakteru a jeho chování..."></textarea>
+                    <button id="apply-custom-character">Použít</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Longin charakter AI | Všechna práva vyhrazena</p>
+        </div>
+    </footer>
+
+    <!-- Načtení JS souboru -->
+    <script src="main.js"></script>
+</body>
+</html>
