@@ -149,3 +149,63 @@ services:
     volumes:
       - ./services/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - longin-network
+
+  longin-grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./services/monitoring/grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3003:3000"
+    networks:
+      - longin-network
+    depends_on:
+      - longin-prometheus
+
+  longin-elasticsearch:
+    image: elasticsearch:7.17.10
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - longin-network
+
+  longin-logstash:
+    image: logstash:7.17.10
+    volumes:
+      - ./services/logging/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+    networks:
+      - longin-network
+    depends_on:
+      - longin-elasticsearch
+
+  longin-kibana:
+    image: kibana:7.17.10
+    ports:
+      - "5601:5601"
+    networks:
+      - longin-network
+    depends_on:
+      - longin-elasticsearch
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  elasticsearch_data:
+
+networks:
+  longin-network:
+    driver: bridge

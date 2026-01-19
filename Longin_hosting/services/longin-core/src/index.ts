@@ -55,4 +55,17 @@ AppDataSource.initialize()
       // Broadcast to UI via WebSocket
       socketServer.io.emit('agent_activity', msg);
     });
-    console.log('[Longin Core] Event Bus init
+    console.log('[Longin Core] Event Bus initialized');
+
+    // Start Metrics Service
+    const metricsService = new MetricsService();
+    metricsService.startMonitoring();
+    console.log('[Longin Core] Metrics Service started');
+ 
+    httpServer.listen(port, () => {
+      console.log(`[Longin Core] Server running on port ${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error('[Longin Core] Error during database initialization', error);
+  });
