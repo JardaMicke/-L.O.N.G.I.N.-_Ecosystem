@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>L.O.N.G.I.N. Performance Hub</title>
+    <style>
+        body { font-family: sans-serif; }
+        #output { border: 1px solid #ccc; padding: 10px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>L.O.N.G.I.N. Performance Hub</h1>
+    <h2>Connected Agents</h2>
+    <ul id="agent-list"></ul>
+    <h2>Send Command</h2>
+    <input type="text" id="command-input" placeholder="Enter command" />
+    <button id="send-button">Send</button>
+    <h2>Output</h2>
+    <pre id="output"></pre>
+
+    <script>
+        const agentList = document.getElementById('agent-list');
+        const commandInput = document.getElementById('command-input');
+        const sendButton = document.getElementById('send-button');
+        const output = document.getElementById('output');
+
+        const socket = new WebSocket(`ws://127.0.0.1:8000/ws/ui-${Date.now()}`);
+
+        socket.onopen = () => {
+            console.log("Connected to Orchestrator");
+            updateAgentList();
+        };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.message) {
+                console.log(data.message);
+            }
+            if (data.stdout) {
+                output.textContent += data.stdout;
+            }
+            if (data.stderr) {
+                output.textContent += data.stderr;
+            }
+        };
+
+        sendButton.onclick = () => {
+            const command = commandInput.value;
+            const message = { command: "run", payload: command };
+            console.log("Sending message:", message);
+            socket.send(JSON.stringify(message));
+            commandInput.value = '';
+        };
+
+        async function updateAgentList() {
+            const response = await fetch('/status');
+            const data = await response.json();
+            agentList.innerHTML = '';
+            data.connected_agents.forEach(agent => {
+                const li = document.createElement('li');
+                li.textContent = agent;
+                agentList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>

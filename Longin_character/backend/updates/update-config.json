@@ -1,0 +1,8 @@
+{
+  "lastUpdateCheck": null,
+  "ignoredVersion": null,
+  "autoCheck": true,
+  "autoDownload": false,
+  "checkInterval": 3600000,
+  "updateChannel": "stable"
+}

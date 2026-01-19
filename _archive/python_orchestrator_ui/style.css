@@ -1,0 +1,28 @@
+
+body {
+    font-family: sans-serif;
+    margin: 2em;
+}
+
+#dashboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2em;
+}
+
+#agent-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#agent-list li {
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    margin-bottom: 0.5em;
+}
+
+#component-manager {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
