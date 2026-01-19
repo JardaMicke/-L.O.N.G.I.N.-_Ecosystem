@@ -38,4 +38,8 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["web
+      "resources": ["webrtc-bridge.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
