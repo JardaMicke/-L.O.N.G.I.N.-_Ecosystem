@@ -1,0 +1,218 @@
+version: '3.8'
+
+# =========================================================
+# L.O.N.G.I.N. ECOSYSTEM - UNIFIED DOCKER COMPOSE
+# =========================================================
+# Tento soubor orchestruje všechny služby ekosystému
+# Použití: docker-compose -f docker-compose.ecosystem.yml up -d
+# =========================================================
+
+services:
+  # ========== SHARED DATA LAYER ==========
+  
+  postgres:
+    image: postgres:15-alpine
+    container_name: longin-postgres
+    environment:
+      POSTGRES_USER: ${DATABASE_USER:-longin}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-longin_secure_password}
+      POSTGRES_DB: ${DATABASE_NAME:-longin_db}
+    ports:
+      - "${DATABASE_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./Longin_hosting/services/database/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql
+    networks:
+      - longin-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-longin}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: longin-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - longin-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========== COMMAND CENTER (LONGIN CORE + UI) ==========
+
+  longin-core:
+    build:
+      context: ./Longin_hosting
+      dockerfile: services/longin-core/Dockerfile
+    container_name: longin-core
+    ports:
+      - "${LONGIN_CORE_API_PORT:-3001}:3001"
+      - "${LONGIN_CORE_WEBSOCKET_PORT:-3002}:3002"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=${DATABASE_USER:-longin}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-longin_secure_password}
+      - DATABASE_NAME=${DATABASE_NAME:-longin_db}
+      - REDIS_URL=redis://redis:6379
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - ./Longin_hosting/services/longin-core/src:/app/services/longin-core/src
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - longin-network
+
+  longin-ui:
+    build:
+      context: ./Longin_hosting
+      dockerfile: services/longin-ui/Dockerfile
+    container_name: longin-ui
+    ports:
+      - "${LONGIN_UI_PORT:-3000}:3000"
+    environment:
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:3001/api}
+      - REACT_APP_SOCKET_URL=${REACT_APP_SOCKET_URL:-http://localhost:3001}
+    volumes:
+      - ./Longin_hosting/services/longin-ui/src:/app/services/longin-ui/src
+    depends_on:
+      - longin-core
+    networks:
+      - longin-network
+
+  # ========== AGENT MODULES ==========
+
+  longin-character:
+    build:
+      context: ./Longin_character
+      dockerfile: docker/Dockerfile
+    container_name: longin-character
+    ports:
+      - "${LONGIN_CHARACTER_BACKEND_PORT:-3011}:3011"
+    environment:
+      - NODE_ENV=development
+      - CORE_API_URL=http://longin-core:3001
+      - REDIS_URL=redis://redis:6379
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    volumes:
+      - ./Longin_character/backend:/app/backend
+    depends_on:
+      - longin-core
+      - redis
+    networks:
+      - longin-network
+
+  longin-bridge:
+    build:
+      context: ./Longin_bridge
+      dockerfile: Dockerfile
+    container_name: longin-bridge
+    ports:
+      - "${LONGIN_BRIDGE_PORT:-5001}:5001"
+    environment:
+      - FLASK_ENV=development
+      - CORE_API_URL=http://longin-core:3001
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./Longin_bridge/src:/app/src
+    depends_on:
+      - longin-core
+      - redis
+    networks:
+      - longin-network
+
+  # ========== GAME ENGINE (Optional) ==========
+
+  longin-game-engine:
+    build:
+      context: ./Longin_gameEngine/game-engine-2d
+      dockerfile: Dockerfile
+    container_name: longin-game-engine
+    ports:
+      - "${LONGIN_GAME_SERVER_PORT:-3020}:3020"
+      - "${LONGIN_GAME_WEBSOCKET_PORT:-3021}:3021"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://${DATABASE_USER:-longin}:${DATABASE_PASSWORD:-longin_secure_password}@postgres:5432/${DATABASE_NAME:-longin_db}
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - longin-network
+    profiles:
+      - game  # Spustí se pouze s: docker-compose --profile game up
+
+  # ========== MONITORING (Optional) ==========
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: longin-prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./Longin_hosting/services/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - longin-network
+    profiles:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: longin-grafana
+    ports:
+      - "${GRAFANA_PORT:-3004}:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - longin-network
+    profiles:
+      - monitoring
+
+  # ========== AI PROVIDERS (Optional) ==========
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: longin-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - longin-network
+    profiles:
+      - ai
+
+# ========== VOLUMES ==========
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  ollama_data:
+
+# ========== NETWORKS ==========
+
+networks:
+  longin-network:
+    driver: bridge
